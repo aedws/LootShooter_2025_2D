@@ -69,13 +69,16 @@ public class Projectile : MonoBehaviour
 
     void HandleCollision(Collider2D other)
     {
-        // 여기에 적 피격 처리 등을 추가할 수 있습니다
+        // 적 피격 처리
+        var enemy = other.GetComponent<Enemy>();
+        if (enemy != null)
+        {
+            enemy.TakeDamage(damage);
+            Debug.Log($"[Projectile] 적 {enemy.enemyName}에게 {damage} 데미지를 입혔습니다!");
+            return;
+        }
         
-        // 예시: 적 컴포넌트가 있다면 데미지 적용
-        // var enemy = other.GetComponent<Enemy>();
-        // if (enemy != null)
-        // {
-        //     enemy.TakeDamage(damage);
-        // }
+        // 기타 충돌 처리 (벽, 장애물 등)
+        Debug.Log($"[Projectile] {other.name}과 충돌했습니다.");
     }
 } 

@@ -41,6 +41,7 @@ public class PlayerController : MonoBehaviour
     private Animator animator;
     private SpriteRenderer spriteRenderer;
     private PlayerInventory playerInventory;
+    private Health health;
     private Vector3 originalWeaponHolderPos;
     private float currentWeaponAngle = 0f; // 현재 무기 각도
     private float targetWeaponAngle = 0f; // 목표 무기 각도
@@ -60,6 +61,7 @@ public class PlayerController : MonoBehaviour
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         playerInventory = GetComponent<PlayerInventory>();
+        health = GetComponent<Health>();
     }
 
     void Start()
@@ -74,6 +76,17 @@ public class PlayerController : MonoBehaviour
         {
             Debug.LogWarning("[PlayerController] PlayerInventory 또는 WeaponHolder가 할당되지 않았습니다!");
         }
+        
+        // Health 이벤트 연결
+        if (health != null)
+        {
+            health.OnDeath += OnPlayerDeath;
+            health.OnDamaged += OnPlayerDamaged;
+        }
+        
+        // 플레이어 태그 확인/설정
+        if (!gameObject.CompareTag("Player"))
+            gameObject.tag = "Player";
         
         // Inspector 파라미터를 그대로 사용
     }
@@ -349,8 +362,34 @@ public class PlayerController : MonoBehaviour
             // 현재 Animator Controller에 있는 파라미터들에 맞게 업데이트
             animator.SetBool("isRunning", Mathf.Abs(moveInput) > 0.1f && isGrounded);
             animator.SetBool("isJumping", isJumping || !isGrounded);
-            animator.SetBool("isDead", false); // 나중에 체력 시스템 연동 시 사용
+            
+            // 체력 시스템과 연동된 죽음 상태
+            bool isDead = health != null && !health.IsAlive();
+            animator.SetBool("isDead", isDead);
         }
+    }
+    
+    void OnPlayerDamaged(int damage)
+    {
+        Debug.Log($"[PlayerController] 플레이어가 {damage} 데미지를 받았습니다!");
+        
+        // 피격 시 화면 흔들림이나 이펙트 추가 가능
+        // CameraShake.Instance?.Shake(0.1f, 0.5f);
+    }
+    
+    void OnPlayerDeath()
+    {
+        Debug.Log("[PlayerController] 플레이어가 죽었습니다!");
+        
+        // 플레이어 조작 비활성화
+        this.enabled = false;
+        
+        // 물리 정지
+        if (rb != null)
+            rb.linearVelocity = Vector2.zero;
+        
+        // 게임 오버 처리 (나중에 GameManager에서 처리)
+        // GameManager.Instance?.GameOver();
     }
 
     void TryPickupItem()
