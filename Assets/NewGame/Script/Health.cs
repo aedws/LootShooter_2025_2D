@@ -27,19 +27,29 @@ public class Health : MonoBehaviour
     
     public void TakeDamage(int damage)
     {
+        Debug.Log($"[Health DEBUG] {gameObject.name}.TakeDamage({damage}) 호출됨");
+        
         // 무적 시간 체크
         if (Time.time - lastDamageTime < invincibilityTime)
+        {
+            Debug.Log($"[Health DEBUG] ❌ 무적 시간 중 (남은 시간: {invincibilityTime - (Time.time - lastDamageTime):F2}초)");
             return;
+        }
             
         if (isInvincible)
+        {
+            Debug.Log($"[Health DEBUG] ❌ 무적 상태");
             return;
+        }
+        
+        int previousHealth = currentHealth;
             
         // 데미지 적용
         currentHealth -= damage;
         currentHealth = Mathf.Max(0, currentHealth);
         lastDamageTime = Time.time;
         
-        Debug.Log($"[Health] {gameObject.name}이(가) {damage} 데미지를 받았습니다. 현재 체력: {currentHealth}/{maxHealth}");
+        Debug.Log($"[Health DEBUG] ✅ 데미지 적용: {previousHealth} → {currentHealth} (데미지: {damage})");
         
         // 이벤트 호출
         OnDamaged?.Invoke(damage);
@@ -48,6 +58,7 @@ public class Health : MonoBehaviour
         // 죽음 체크
         if (currentHealth <= 0)
         {
+            Debug.Log($"[Health DEBUG] 💀 체력이 0이 되었습니다. 죽음 처리");
             Die();
         }
     }

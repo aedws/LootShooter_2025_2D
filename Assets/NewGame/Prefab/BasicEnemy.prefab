@@ -31,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 3.388034, y: -0.79536283, z: -8.398019}
-  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -104,8 +104,8 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_LinearDamping: 3
+  m_AngularDamping: 10
   m_GravityScale: 1
   m_Material: {fileID: 0}
   m_IncludeLayers:
@@ -178,7 +178,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 100
   currentHealth: 0
-  invincibilityTime: 0.5
+  invincibilityTime: 0
   isInvincible: 0
 --- !u!114 &4089382159293167928
 MonoBehaviour:
@@ -194,10 +194,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyName: Basic Enemy
   damage: 10
-  moveSpeed: 2
-  detectionRange: 10
+  moveSpeed: 3.5
+  detectionRange: 25
   attackRange: 1.5
-  attackCooldown: 1
+  attackCooldown: 0.8
+  acceleration: 8
+  maxSpeed: 4
+  separationDistance: 2
   expValue: 10
   dropItems: []
   dropChance: 0.3

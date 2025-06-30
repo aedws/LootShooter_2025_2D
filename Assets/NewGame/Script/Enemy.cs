@@ -5,12 +5,15 @@ public class Enemy : MonoBehaviour
     [Header("기본 설정")]
     public string enemyName = "Basic Enemy";
     public int damage = 10;
-    public float moveSpeed = 2f;
+    public float moveSpeed = 3.5f;
     
     [Header("추적 설정")]
-    public float detectionRange = 10f;
+    public float detectionRange = 25f;
     public float attackRange = 1.5f;
-    public float attackCooldown = 1f;
+    public float attackCooldown = 0.8f;
+    public float acceleration = 8f; // 가속도
+    public float maxSpeed = 4f; // 최대 속도
+    public float separationDistance = 2f; // 다른 몬스터와의 최소 거리
     
     [Header("경험치/보상")]
     public int expValue = 10;
@@ -53,11 +56,39 @@ public class Enemy : MonoBehaviour
         {
             health.OnDeath += OnDeath;
             health.OnDamaged += OnDamaged;
+            // Debug.Log($"[Enemy DEBUG] Health 이벤트 연결 완료: {enemyName}");
+        }
+        else
+        {
+            Debug.LogError($"[Enemy DEBUG] ❌ Health 컴포넌트가 없습니다: {enemyName}");
         }
         
         // 기본 레이어 설정
-        gameObject.layer = LayerMask.NameToLayer("Enemy");
+        int enemyLayer = LayerMask.NameToLayer("Enemy");
+        gameObject.layer = enemyLayer;
+        
+        // 물리 설정 (몬스터끼리 밀어내기)
+        if (rb != null)
+        {
+            rb.linearDamping = 3f; // 공기 저항 증가로 더 안정적인 움직임
+            rb.angularDamping = 10f; // 회전 저항 증가
+        }
+        
+        // 콜라이더 설정 확인
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null)
+        {
+            // 콜라이더가 일반 콜라이더인지 확인 (트리거가 아닌)
+            if (col.isTrigger)
+            {
+                Debug.LogWarning($"[Enemy] {enemyName}의 콜라이더가 Trigger로 설정되어 있습니다. 물리적 분리를 위해 일반 콜라이더로 설정하는 것을 권장합니다.");
+            }
+        }
+        
+        // Debug.Log($"[Enemy DEBUG] {enemyName} 초기화 완료");
     }
+    
+    // Layer Collision Matrix로 몬스터끼리 충돌 방지하므로 분리 코드 불필요
     
     void Update()
     {
@@ -75,9 +106,14 @@ public class Enemy : MonoBehaviour
             }
             else
             {
-                // 플레이어 추적
+                // 플레이어 추적 - 더 적극적으로
                 MoveTowardsPlayer();
             }
+        }
+        else
+        {
+            // 탐지 범위 밖이면 정지
+            rb.linearVelocity = Vector2.zero;
         }
         
         // 애니메이션 업데이트
@@ -87,7 +123,29 @@ public class Enemy : MonoBehaviour
     void MoveTowardsPlayer()
     {
         Vector2 direction = (player.position - transform.position).normalized;
-        rb.linearVelocity = direction * moveSpeed;
+        
+        // 플레이어가 움직이고 있으면 약간 앞쪽을 예측해서 이동
+        Rigidbody2D playerRb = player.GetComponent<Rigidbody2D>();
+        if (playerRb != null && playerRb.linearVelocity.magnitude > 0.5f)
+        {
+            // 플레이어의 이동 방향을 고려한 예측 위치
+            Vector3 predictedPosition = player.position + (Vector3)playerRb.linearVelocity * 0.5f;
+            direction = (predictedPosition - transform.position).normalized;
+        }
+        
+        // Layer Collision Matrix로 몬스터끼리 충돌하지 않으므로 회피 불필요
+        
+        // 가속도를 사용한 부드러운 이동
+        Vector2 targetVelocity = direction * moveSpeed;
+        Vector2 velocityChange = targetVelocity - rb.linearVelocity;
+        velocityChange = Vector2.ClampMagnitude(velocityChange, acceleration * Time.deltaTime);
+        rb.linearVelocity += velocityChange;
+        
+        // 최대 속도 제한
+        if (rb.linearVelocity.magnitude > maxSpeed)
+        {
+            rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
+        }
         
         // 스프라이트 방향 조정
         if (direction.x > 0 && !facingRight)
@@ -95,6 +153,8 @@ public class Enemy : MonoBehaviour
         else if (direction.x < 0 && facingRight)
             Flip();
     }
+    
+    // Layer Collision Matrix 사용으로 회피 시스템 불필요
     
     void TryAttack()
     {
@@ -104,8 +164,8 @@ public class Enemy : MonoBehaviour
             lastAttackTime = Time.time;
         }
         
-        // 공격 중일 때는 이동 멈춤
-        rb.linearVelocity = Vector2.zero;
+        // 공격 중일 때는 이동 속도 줄이기 (완전 정지하지 않음)
+        rb.linearVelocity *= 0.3f;
     }
     
     void Attack()
@@ -129,16 +189,24 @@ public class Enemy : MonoBehaviour
     
     void OnDamaged(int damage)
     {
+        Debug.Log($"[Enemy DEBUG] {enemyName} 피격! 데미지: {damage}");
+        
         // 피격 이펙트
         if (animator != null)
             animator.SetTrigger("Hit");
             
-        // 피격 시 잠시 밀려나기
+        // 시각적 피격 피드백 - 색깔 변화
+        StartCoroutine(HitFlash());
+        
+        // 넉백 제거 - 몬스터가 너무 쉽게 밀려나지 않도록 함
+        // (필요시 매우 약한 넉백을 적용할 수 있음)
+        /*
         if (player != null && rb != null)
         {
             Vector2 knockbackDirection = (transform.position - player.position).normalized;
-            rb.AddForce(knockbackDirection * 3f, ForceMode2D.Impulse);
+            rb.AddForce(knockbackDirection * 0.5f, ForceMode2D.Impulse);
         }
+        */
     }
     
     void OnDeath()
@@ -147,10 +215,6 @@ public class Enemy : MonoBehaviour
         rb.linearVelocity = Vector2.zero;
         
         Debug.Log($"[Enemy] {enemyName}이(가) 죽었습니다!");
-        
-        // 죽음 애니메이션
-        if (animator != null)
-            animator.SetBool("Dead", true);
         
         // 경험치 지급 (나중에 GameManager에서 처리)
         // GameManager.Instance?.AddExperience(expValue);
@@ -163,8 +227,8 @@ public class Enemy : MonoBehaviour
         if (col != null)
             col.enabled = false;
         
-        // 일정 시간 후 제거
-        Destroy(gameObject, 2f);
+        // 즉시 제거 (애니메이션 없이)
+        Destroy(gameObject);
     }
     
     void DropItems()
@@ -201,9 +265,28 @@ public class Enemy : MonoBehaviour
     // 외부에서 데미지를 받는 함수 (투사체 등에서 호출)
     public void TakeDamage(int damage)
     {
+        Debug.Log($"[Enemy DEBUG] {enemyName}.TakeDamage({damage}) 호출됨");
+        
         if (health != null && !isDead)
         {
+            Debug.Log($"[Enemy DEBUG] Health 컴포넌트 존재, 죽지 않음. 현재 체력: {health.currentHealth}");
             health.TakeDamage(damage);
+        }
+        else
+        {
+            Debug.Log($"[Enemy DEBUG] ❌ Health가 null이거나 이미 죽음. Health: {health != null}, isDead: {isDead}");
+        }
+    }
+    
+    // 시각적 피격 효과
+    System.Collections.IEnumerator HitFlash()
+    {
+        if (spriteRenderer != null)
+        {
+            Color originalColor = spriteRenderer.color;
+            spriteRenderer.color = Color.red; // 빨간색으로 변경
+            yield return new WaitForSeconds(0.1f);
+            spriteRenderer.color = originalColor; // 원래 색으로 복구
         }
     }
     
