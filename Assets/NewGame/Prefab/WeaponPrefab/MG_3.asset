@@ -34,6 +34,7 @@ MonoBehaviour:
   maxWarmupFireRate: 0.05
   singleFireOnly: 0
   aimingRange: 20
+  movementSpeedMultiplier: 0.65
   recoilForce: 1
   recoilDirection: {x: 0, y: 1}
   recoilDuration: 0.1

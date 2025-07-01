@@ -99,6 +99,9 @@ public class PlayerInventory : MonoBehaviour
             currentWeaponObj.transform.localRotation = Quaternion.identity;
             currentWeaponObj.transform.localScale = prefabScale; // 프리팹 크기 유지
         }
+        
+        // 🏃‍♂️ 플레이어 이동속도 업데이트
+        UpdatePlayerMovementSpeed(weaponData);
     }
 
     public WeaponData GetEquippedWeapon()
@@ -175,5 +178,21 @@ public class PlayerInventory : MonoBehaviour
     {
         if (inventoryManager != null)
             inventoryManager.CloseInventory();
+    }
+    
+    // 🏃‍♂️ 플레이어 이동속도 업데이트 메서드
+    void UpdatePlayerMovementSpeed(WeaponData weaponData)
+    {
+        if (playerController == null)
+            playerController = GetComponent<PlayerController>();
+        
+        if (playerController != null)
+        {
+            playerController.UpdateMovementSpeed(weaponData);
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ [PlayerInventory] PlayerController를 찾을 수 없어 이동속도를 업데이트할 수 없습니다!");
+        }
     }
 } 

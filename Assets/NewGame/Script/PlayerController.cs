@@ -5,7 +5,8 @@ using System.Collections.Generic;
 public class PlayerController : MonoBehaviour
 {
     [Header("이동/점프")]
-    public float moveSpeed = 5f;
+    public float baseMoveSpeed = 5f; // 기본 이동속도 (무기 없을 때)
+    [SerializeField] private float currentMoveSpeed = 5f; // 현재 적용 중인 이동속도 (무기 영향 포함)
     public float jumpForce = 13f; // 기본 점프력 - 밸런스 조정
     public float jumpBoost = 2.0f; // 점프 시 X축 속도 배수 (더 빠르게)
     public float maxJumpTime = 0.15f; // 점프 최대 지속 시간(초) - 미묘한 차이용
@@ -95,6 +96,9 @@ public class PlayerController : MonoBehaviour
         // 플레이어 태그 확인/설정
         if (!gameObject.CompareTag("Player"))
             gameObject.tag = "Player";
+        
+        // 이동속도 초기화
+        currentMoveSpeed = baseMoveSpeed;
         
         // Inspector 파라미터를 그대로 사용
     }
@@ -207,7 +211,7 @@ public class PlayerController : MonoBehaviour
         if (!isDashing)
         {
             float moveInput = Input.GetAxisRaw("Horizontal");
-            rb.linearVelocity = new Vector2(moveInput * moveSpeed, rb.linearVelocity.y);
+            rb.linearVelocity = new Vector2(moveInput * currentMoveSpeed, rb.linearVelocity.y);
             
             // 스프라이트 플립
             if (moveInput > 0 && !facingRight)
@@ -220,7 +224,7 @@ public class PlayerController : MonoBehaviour
     void Jump()
     {
         float moveInput = Input.GetAxisRaw("Horizontal");
-        float jumpX = moveInput * moveSpeed * jumpBoost;
+        float jumpX = moveInput * currentMoveSpeed * jumpBoost;
         lastJumpX = jumpX;
         rb.linearVelocity = new Vector2(jumpX, jumpForce);
         // isJumping은 Update()에서 관리
@@ -651,6 +655,68 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // 🏃‍♂️ 무기에 따른 이동속도 업데이트 시스템
+    public void UpdateMovementSpeed(WeaponData weaponData)
+    {
+        if (weaponData != null)
+        {
+            float previousSpeed = currentMoveSpeed;
+            currentMoveSpeed = baseMoveSpeed * weaponData.movementSpeedMultiplier;
+            
+            Debug.Log($"🏃‍♂️ [PlayerController] 이동속도 업데이트: {weaponData.weaponName} 장착");
+            Debug.Log($"   기본속도: {baseMoveSpeed} → 현재속도: {currentMoveSpeed:F2} (배수: {weaponData.movementSpeedMultiplier:F2})");
+            
+            // 무기 타입별 메시지 표시
+            string speedEffect = GetSpeedEffectMessage(weaponData.movementSpeedMultiplier);
+            Debug.Log($"   {GetWeaponTypeKorean(weaponData.weaponType)} 무기 효과: {speedEffect}");
+        }
+        else
+        {
+            // 무기가 없을 때는 기본 속도로 복원
+            currentMoveSpeed = baseMoveSpeed;
+            Debug.Log($"🏃‍♂️ [PlayerController] 무기 해제로 인한 이동속도 복원: {currentMoveSpeed}");
+        }
+    }
+    
+    // 무기 타입별 한국어 이름 반환
+    string GetWeaponTypeKorean(WeaponType weaponType)
+    {
+        switch (weaponType)
+        {
+            case WeaponType.HG: return "권총";
+            case WeaponType.SMG: return "기관단총";
+            case WeaponType.AR: return "돌격소총";
+            case WeaponType.SG: return "산탄총";
+            case WeaponType.MG: return "기관총";
+            case WeaponType.SR: return "저격총";
+            default: return "알 수 없는 무기";
+        }
+    }
+    
+    // 속도 효과 메시지 반환
+    string GetSpeedEffectMessage(float multiplier)
+    {
+        if (multiplier >= 1.1f) return "🟢 매우 빠름";
+        else if (multiplier >= 1.0f) return "🟢 빠름";
+        else if (multiplier >= 0.9f) return "🟡 약간 빠름";
+        else if (multiplier >= 0.8f) return "🟡 보통";
+        else if (multiplier >= 0.7f) return "🟠 약간 느림";
+        else if (multiplier >= 0.6f) return "🟠 느림";
+        else return "🔴 매우 느림";
+    }
+    
+    // 현재 이동속도 반환 (외부에서 확인용)
+    public float GetCurrentMoveSpeed()
+    {
+        return currentMoveSpeed;
+    }
+    
+    // 기본 이동속도 반환 (외부에서 확인용)
+    public float GetBaseMoveSpeed()
+    {
+        return baseMoveSpeed;
+    }
+    
     void OnDrawGizmosSelected()
     {
         // 픽업 범위 시각화

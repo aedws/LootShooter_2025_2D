@@ -129,6 +129,9 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
             inventoryManager.RemoveWeapon(weaponData, false); // 새로고침 없이 제거만
         }
         
+        // 🏃‍♂️ 플레이어 이동속도 업데이트
+        UpdatePlayerMovementSpeed();
+        
         UpdateVisuals();
         
         Debug.Log($"✅ [WeaponSlot] 무기 장착 완료: {(weaponData != null ? weaponData.weaponName : "None")}");
@@ -147,6 +150,9 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
         // 플레이어 인벤토리에서 장착 무기 해제
         if (playerInventory != null)
             playerInventory.SetEquippedWeapon(null);
+        
+        // 🏃‍♂️ 플레이어 이동속도 복원 (무기 없음)
+        UpdatePlayerMovementSpeed();
         
         // 인벤토리에 무기 다시 추가 및 UI 업데이트
         ReturnWeaponToInventory(oldWeapon);
@@ -490,5 +496,28 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
         }
         
         Debug.Log("🎯 [WeaponSlot] UI 컴포넌트 자동 설정 완료!");
+    }
+    
+    // 🏃‍♂️ 플레이어 이동속도 업데이트 메서드
+    void UpdatePlayerMovementSpeed()
+    {
+        // PlayerController 찾기 (자동 연결)
+        if (playerInventory == null) return;
+        
+        PlayerController playerController = playerInventory.GetComponent<PlayerController>();
+        if (playerController == null)
+        {
+            // 혹시 PlayerController가 다른 오브젝트에 있다면 찾기
+            playerController = FindAnyObjectByType<PlayerController>();
+        }
+        
+        if (playerController != null)
+        {
+            playerController.UpdateMovementSpeed(weaponData);
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ [WeaponSlot] PlayerController를 찾을 수 없어 이동속도를 업데이트할 수 없습니다!");
+        }
     }
 }

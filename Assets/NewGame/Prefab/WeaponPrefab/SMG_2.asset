@@ -20,6 +20,10 @@ MonoBehaviour:
   projectilePrefab: {fileID: 7743249404533171330, guid: c3e51900e9c29304cbda351dec9db181, type: 3}
   weaponPrefab: {fileID: 7052198616648138758, guid: 74c22081e1113d8439824b2c03607b9d, type: 3}
   projectileSpeed: 10
+  maxAmmo: 30
+  currentAmmo: 30
+  reloadTime: 2
+  infiniteAmmo: 0
   baseSpread: 0
   maxSpread: 5
   spreadIncreaseRate: 1
@@ -30,3 +34,16 @@ MonoBehaviour:
   maxWarmupFireRate: 0
   singleFireOnly: 0
   aimingRange: 15
+  movementSpeedMultiplier: 1
+  recoilForce: 1
+  recoilDirection: {x: 0, y: 1}
+  recoilDuration: 0.1
+  recoilRecoverySpeed: 5
+  criticalChance: 0
+  criticalMultiplier: 2
+  pierceCount: 0
+  pierceDamageReduction: 0.1
+  hasTracerRounds: 0
+  hasMuzzleFlash: 1
+  hasExplosiveKills: 0
+  explosionRadius: 2

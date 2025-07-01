@@ -86,6 +86,11 @@ public class WeaponData : ScriptableObject
     [Tooltip("조준 모드에서 조준선이 표시되는 거리")]
     public float aimingRange = 15f;
     
+    [Header("이동속도 영향 - Movement Speed Effect")]
+    [Tooltip("무기가 플레이어 이동속도에 미치는 영향 (1.0 = 기본속도, 0.8 = 20% 감소, 1.2 = 20% 증가)")]
+    [Range(0.3f, 1.5f)]
+    public float movementSpeedMultiplier = 1.0f;
+    
     [Header("반동 설정 - Recoil Settings")]
     [Tooltip("발사시 카메라/무기에 가해지는 반동 강도 (0 = 반동 없음)")]
     public float recoilForce = 1f;
