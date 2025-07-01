@@ -289,6 +289,9 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 inventoryManager.EquipWeapon(draggedWeaponData);
                 itemMoved = true;
                 Debug.Log($"✅ [InventorySlot] 무기 장착 성공: {draggedWeaponData.weaponName}");
+                
+                // 🔧 무기 장착 후 인벤토리 새로고침
+                inventoryManager.RefreshInventory();
             }
         }
         else

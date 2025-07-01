@@ -123,10 +123,10 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
         if (playerInventory != null)
             playerInventory.SetEquippedWeapon(weaponData);
         
-        // 인벤토리에서 장착된 무기 제거
+        // 🔧 인벤토리에서 장착된 무기 제거 (RefreshInventory 호출 안함)
         if (weaponData != null && inventoryManager != null)
         {
-            inventoryManager.RemoveWeapon(weaponData);
+            inventoryManager.RemoveWeapon(weaponData, false); // 새로고침 없이 제거만
         }
         
         UpdateVisuals();

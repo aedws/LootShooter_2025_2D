@@ -311,12 +311,21 @@ public class InventoryManager : MonoBehaviour
     
     public void RemoveWeapon(WeaponData weapon)
     {
+        RemoveWeapon(weapon, true);
+    }
+    
+    public void RemoveWeapon(WeaponData weapon, bool shouldRefresh)
+    {
         if (weapon != null && weapons.Contains(weapon))
         {
             weapons.Remove(weapon);
-            RefreshInventory();
             
-            Debug.Log($"[InventoryManager] 무기 제거: {weapon.weaponName}");
+            if (shouldRefresh)
+            {
+                RefreshInventory();
+            }
+            
+            Debug.Log($"[InventoryManager] 무기 제거: {weapon.weaponName} (새로고침: {shouldRefresh})");
         }
     }
     
