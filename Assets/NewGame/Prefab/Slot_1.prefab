@@ -93,7 +93,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &677071201028799562
 RectTransform:
   m_ObjectHideFlags: 0
@@ -142,8 +142,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
+  m_Sprite: {fileID: -1010605625, guid: d71a3dc7aa20fad4f9a99fc76a9254ba, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -164,5 +164,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5f918456c8215449aa1365dc0c33014, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  slotInstructions: "\u2022 \uC88C\uD074\uB9AD: \uC2AC\uB86F \uC120\uD0DD\n\u2022
+    \uC6B0\uD074\uB9AD: \uBB34\uAE30 \uC989\uC2DC \uC7A5\uCC29\n\u2022 \uB4DC\uB798\uADF8:
+    WeaponSlot\uC73C\uB85C \uB4DC\uB798\uADF8\uD558\uC5EC \uC7A5\uCC29\n\u2022 \uB9C8\uC6B0\uC2A4
+    \uD638\uBC84: 0.5\uCD08 \uD6C4 \uD234\uD301 \uD45C\uC2DC\n\u2022 \uBB34\uAE30
+    \uD0C0\uC785\uBCC4\uB85C \uD14C\uB450\uB9AC \uC0C9\uC0C1 \uBCC0\uACBD"
   iconImage: {fileID: 7710006522204880618}
-  weaponData: {fileID: 0}
+  backgroundImage: {fileID: 0}
+  borderImage: {fileID: 0}
+  ammoText: {fileID: 0}
+  rarityGlow: {fileID: 0}
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  hoverColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  selectedColor: {r: 0, g: 1, b: 0, a: 1}
+  emptyColor: {r: 1, g: 1, b: 1, a: 0.3}
+  arColor: {r: 1, g: 0, b: 0, a: 1}
+  hgColor: {r: 0, g: 0, b: 1, a: 1}
+  mgColor: {r: 1, g: 0, b: 1, a: 1}
+  sgColor: {r: 1, g: 0.5, b: 0, a: 1}
+  smgColor: {r: 0, g: 1, b: 1, a: 1}
+  srColor: {r: 0, g: 1, b: 0, a: 1}
