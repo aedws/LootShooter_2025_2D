@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93ef8ad5183c09843a7c8be4e7f2bfee, type: 3}
+  m_Name: HG_3
+  m_EditorClassIdentifier: 
+  weaponName: HG_2
+  icon: {fileID: 21300000, guid: 026a7797b18e5bc46a744144c03bb773, type: 3}
+  fireRate: 2
+  damage: 10
+  projectilePrefab: {fileID: 7743249404533171330, guid: c3e51900e9c29304cbda351dec9db181, type: 3}
+  weaponPrefab: {fileID: 7052198616648138758, guid: 6783a302db30f5048bee918ad4b10c27, type: 3}

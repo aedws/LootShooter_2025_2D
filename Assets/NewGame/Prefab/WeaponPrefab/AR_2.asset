@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93ef8ad5183c09843a7c8be4e7f2bfee, type: 3}
+  m_Name: AR_2
+  m_EditorClassIdentifier: 
+  weaponName: AR_2
+  icon: {fileID: 21300000, guid: 101c3ff3832799d40b8703adbfb34c35, type: 3}
+  fireRate: 0.3
+  damage: 10
+  projectilePrefab: {fileID: 7743249404533171330, guid: c3e51900e9c29304cbda351dec9db181, type: 3}
+  weaponPrefab: {fileID: 7052198616648138758, guid: 9e5efc4c4931899469140d5475c91050, type: 3}
