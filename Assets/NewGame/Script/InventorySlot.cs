@@ -6,7 +6,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 {
     [Header("📋 슬롯 사용법")]
     [TextArea(3, 5)]
-    public string slotInstructions = "• 좌클릭: 슬롯 선택\n• 우클릭: 무기 즉시 장착\n• 드래그: WeaponSlot으로 드래그하여 장착\n• 마우스 호버: 0.5초 후 툴팁 표시\n• 무기 타입별로 테두리 색상 변경";
+    public string slotInstructions = "• 좌클릭: 슬롯 선택\n• 우클릭: 무기 즉시 장착\n• 드래그: 아이템만 드래그되어 WeaponSlot으로 이동\n• 마우스 호버: 0.5초 후 툴팁 표시\n• 무기 타입별로 테두리 색상 변경";
 
     [Header("🖼️ Slot Components")]
     [Tooltip("무기 아이콘을 표시할 Image 컴포넌트")]
@@ -37,6 +37,9 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     [Tooltip("빈 슬롯 색상")]
     public Color emptyColor = new Color(1f, 1f, 1f, 0.3f);
     
+    [Tooltip("드래그 중 빈 슬롯 색상 (더 어둡게)")]
+    public Color draggingEmptyColor = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+    
     [Header("🔫 Weapon Type Colors")]
     [Tooltip("돌격소총(AR) 테두리 색상")]
     public Color arColor = Color.red;
@@ -56,6 +59,10 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     [Tooltip("저격총(SR) 테두리 색상")]
     public Color srColor = Color.green;
     
+    // 🌍 전역 드래그 상태 (WeaponSlot에서 접근 가능)
+    public static WeaponData CurrentlyDraggedWeapon { get; private set; } = null;
+    public static InventorySlot CurrentlyDraggingSlot { get; private set; } = null;
+    
     // Public properties
     public WeaponData weaponData { get; private set; }
     public int slotIndex { get; set; }
@@ -63,12 +70,14 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     
     // Private variables
     private Canvas canvas;
-    private CanvasGroup canvasGroup;
-    private RectTransform rectTransform;
-    private Vector2 originalPosition;
     private bool isDragging = false;
     private bool isSelected = false;
     private bool isHovered = false;
+    
+    // 🎮 게임식 드래그앤드롭을 위한 변수들
+    private GameObject draggedItemImage; // 드래그되는 아이템 이미지
+    private WeaponData draggedWeaponData; // 드래그 중인 무기 데이터
+    private bool isTemporarilyEmpty = false; // 드래그 중 일시적으로 빈 상태
     
     // Tooltip variables
     private float tooltipTimer = 0f;
@@ -78,11 +87,6 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     void Awake()
     {
         canvas = GetComponentInParent<Canvas>();
-        canvasGroup = GetComponent<CanvasGroup>();
-        rectTransform = GetComponent<RectTransform>();
-        
-        if (canvasGroup == null)
-            canvasGroup = gameObject.AddComponent<CanvasGroup>();
         
         // 기본 색상 설정
         if (backgroundImage != null)
@@ -92,7 +96,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     void Update()
     {
         // 툴팁 타이머 처리
-        if (isHovered && !isDragging && weaponData != null)
+        if (isHovered && !isDragging && weaponData != null && !isTemporarilyEmpty)
         {
             tooltipTimer += Time.deltaTime;
             if (tooltipTimer >= TOOLTIP_DELAY && !showingTooltip)
@@ -116,6 +120,13 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     
     void UpdateVisuals()
     {
+        // 드래그 중 일시적으로 빈 상태라면 빈 슬롯으로 표시
+        if (isTemporarilyEmpty)
+        {
+            ShowEmptySlot(true);
+            return;
+        }
+        
         if (weaponData != null)
         {
             // 아이콘 설정
@@ -151,29 +162,41 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
         else
         {
-            // 빈 슬롯 상태
-            if (iconImage != null)
-            {
-                iconImage.sprite = null;
-                iconImage.enabled = false;
-            }
-            
-            if (ammoText != null)
-                ammoText.enabled = false;
-            
-            if (borderImage != null)
-                borderImage.enabled = false;
-            
-            if (rarityGlow != null)
-                rarityGlow.SetActive(false);
+            ShowEmptySlot(false);
         }
         
         UpdateSlotColor();
     }
     
+    void ShowEmptySlot(bool isDraggingEmpty)
+    {
+        // 빈 슬롯 상태
+        if (iconImage != null)
+        {
+            iconImage.sprite = null;
+            iconImage.enabled = false;
+        }
+        
+        if (ammoText != null)
+            ammoText.enabled = false;
+        
+        if (borderImage != null)
+            borderImage.enabled = false;
+        
+        if (rarityGlow != null)
+            rarityGlow.SetActive(false);
+        
+        // 배경 색상 설정
+        if (backgroundImage != null)
+        {
+            backgroundImage.color = isDraggingEmpty ? draggingEmptyColor : emptyColor;
+        }
+    }
+    
     void UpdateSlotColor()
     {
         if (backgroundImage == null) return;
+        if (isTemporarilyEmpty) return; // 드래그 중에는 색상 변경 안함
         
         Color targetColor = normalColor;
         
@@ -207,49 +230,156 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
     }
 
-    // 드래그 앤 드롭 핸들러들
+    // 🎮 진짜 게임식 드래그 앤 드롭 시스템
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (weaponData == null) return;
         
         isDragging = true;
-        originalPosition = rectTransform.anchoredPosition;
-        canvasGroup.alpha = 0.6f;
-        canvasGroup.blocksRaycasts = false;
+        draggedWeaponData = weaponData;
+        
+        // 🌍 전역 드래그 상태 설정
+        CurrentlyDraggedWeapon = draggedWeaponData;
+        CurrentlyDraggingSlot = this;
+        
+        // 드래그할 아이템 이미지 생성
+        CreateDraggedItemImage();
+        
+        // 원래 슬롯을 일시적으로 빈 상태로 표시
+        isTemporarilyEmpty = true;
+        UpdateVisuals();
         
         HideTooltip();
+        
+        Debug.Log($"🎮 [InventorySlot] 드래그 시작: {draggedWeaponData.weaponName}");
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (weaponData == null || !isDragging) return;
+        if (!isDragging || draggedItemImage == null) return;
         
-        rectTransform.anchoredPosition += eventData.delta / canvas.scaleFactor;
+        // 드래그된 아이템 이미지만 마우스를 따라다님
+        Vector2 localPoint;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            canvas.transform as RectTransform,
+            eventData.position,
+            eventData.pressEventCamera,
+            out localPoint);
+        
+        draggedItemImage.transform.position = canvas.transform.TransformPoint(localPoint);
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (weaponData == null) return;
+        if (!isDragging) return;
         
         isDragging = false;
-        canvasGroup.alpha = 1f;
-        canvasGroup.blocksRaycasts = true;
+        bool itemMoved = false;
+        
+        // 드롭 대상 찾기
+        GameObject dropTarget = eventData.pointerCurrentRaycast.gameObject;
         
         // WeaponSlot에 드롭했는지 확인
-        WeaponSlot weaponSlot = eventData.pointerCurrentRaycast.gameObject?.GetComponent<WeaponSlot>();
+        WeaponSlot weaponSlot = dropTarget?.GetComponent<WeaponSlot>();
         if (weaponSlot != null)
         {
-            // 무기 장착
+            // 무기 장착 성공
             if (inventoryManager != null)
             {
-                inventoryManager.EquipWeapon(weaponData);
+                inventoryManager.EquipWeapon(draggedWeaponData);
+                itemMoved = true;
+                Debug.Log($"✅ [InventorySlot] 무기 장착 성공: {draggedWeaponData.weaponName}");
             }
         }
         else
         {
-            // 원래 위치로 복원
-            rectTransform.anchoredPosition = originalPosition;
+            // 다른 InventorySlot에 드롭했는지 확인
+            InventorySlot targetSlot = dropTarget?.GetComponent<InventorySlot>();
+            if (targetSlot != null && targetSlot != this)
+            {
+                // 슬롯 간 아이템 교환
+                SwapItems(targetSlot);
+                itemMoved = true;
+                Debug.Log($"🔄 [InventorySlot] 슬롯 교환: {draggedWeaponData.weaponName}");
+            }
         }
+        
+        // 🌍 전역 드래그 상태 초기화
+        CurrentlyDraggedWeapon = null;
+        CurrentlyDraggingSlot = null;
+        
+        // 드래그된 아이템 이미지 제거
+        if (draggedItemImage != null)
+        {
+            Destroy(draggedItemImage);
+            draggedItemImage = null;
+        }
+        
+        // 아이템이 이동했다면 원래 슬롯에서 무기 제거
+        if (itemMoved)
+        {
+            weaponData = null; // 🔥 원래 슬롯에서 무기 제거
+            isTemporarilyEmpty = false;
+            UpdateVisuals();
+            Debug.Log($"🎯 [InventorySlot] 무기 이동 완료, 원래 슬롯 클리어: {draggedWeaponData.weaponName}");
+        }
+        else
+        {
+            // 아이템이 이동하지 않았다면 원래 슬롯으로 복원
+            isTemporarilyEmpty = false;
+            UpdateVisuals();
+            Debug.Log($"🔙 [InventorySlot] 드래그 취소, 원래 위치로 복원: {draggedWeaponData.weaponName}");
+        }
+        
+        draggedWeaponData = null;
+    }
+    
+    void CreateDraggedItemImage()
+    {
+        if (draggedWeaponData == null || canvas == null) return;
+        
+        // 드래그될 아이템 이미지 오브젝트 생성
+        draggedItemImage = new GameObject("DraggedItem");
+        draggedItemImage.transform.SetParent(canvas.transform, false);
+        
+        // RectTransform 설정
+        RectTransform rect = draggedItemImage.AddComponent<RectTransform>();
+        rect.sizeDelta = new Vector2(70, 70); // 슬롯과 같은 크기
+        
+        // Image 컴포넌트 추가
+        Image dragImage = draggedItemImage.AddComponent<Image>();
+        dragImage.sprite = draggedWeaponData.icon;
+        dragImage.color = new Color(1f, 1f, 1f, 0.8f); // 약간 투명하게
+        dragImage.raycastTarget = false; // 레이캐스트 차단 안함
+        
+        // Canvas Group 추가 (드래그 중 우선순위)
+        CanvasGroup dragCanvasGroup = draggedItemImage.AddComponent<CanvasGroup>();
+        dragCanvasGroup.blocksRaycasts = false;
+        
+        // 가장 위에 표시되도록 설정
+        draggedItemImage.transform.SetAsLastSibling();
+        
+        Debug.Log($"🖼️ [InventorySlot] 드래그 아이템 이미지 생성: {draggedWeaponData.weaponName}");
+    }
+    
+    void SwapItems(InventorySlot targetSlot)
+    {
+        if (targetSlot == null || inventoryManager == null) return;
+        
+        WeaponData myWeapon = draggedWeaponData;
+        WeaponData targetWeapon = targetSlot.weaponData;
+        
+        // 아이템 교환
+        weaponData = targetWeapon;
+        targetSlot.weaponData = myWeapon;
+        
+        // 두 슬롯 모두 업데이트
+        isTemporarilyEmpty = false;
+        UpdateVisuals();
+        targetSlot.UpdateVisuals();
+        
+        // 인벤토리 매니저에 변경사항 알림
+        inventoryManager.RefreshInventory();
     }
     
     // 마우스 호버 이벤트들
@@ -271,7 +401,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     // 클릭 이벤트
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (weaponData == null) return;
+        if (weaponData == null || isTemporarilyEmpty) return;
         
         if (eventData.button == PointerEventData.InputButton.Left)
         {
@@ -310,7 +440,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     
     void ShowTooltip()
     {
-        if (inventoryManager != null && weaponData != null)
+        if (inventoryManager != null && weaponData != null && !isTemporarilyEmpty)
         {
             Vector3 tooltipPosition = transform.position + new Vector3(100, 0, 0); // 슬롯 오른쪽에 표시
             inventoryManager.ShowTooltip(weaponData, tooltipPosition);

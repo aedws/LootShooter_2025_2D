@@ -8,7 +8,7 @@ public class InventoryDebugger : MonoBehaviour
     
     [Header("🔍 인벤토리 문제 진단")]
     [TextArea(6, 8)]
-    public string debugInfo = "I키를 눌러보세요!\n진단 결과가 여기에 표시됩니다.\n\n- F6: 슬롯 활성화 (비활성화된 슬롯 수정)\n- F7: 슬롯 시스템 진단 및 수정\n- F8: 패널 연결 수정\n- F9: 강제 인벤토리 열기\n- F10: 시스템 상태 확인\n- F11: 자동 수정 시도\n- F12: 레거시 충돌 해결";
+    public string debugInfo = "I키를 눌러보세요!\n진단 결과가 여기에 표시됩니다.\n\n- F6: 슬롯 활성화 (비활성화된 슬롯 수정)\n- F7: 슬롯 시스템 진단 및 수정\n- F8: 패널 연결 수정\n- F9: 강제 인벤토리 열기\n- F10: 시스템 상태 확인\n- F11: 자동 수정 시도\n- F12: 레거시 충돌 해결\n\n🆕 WeaponSlot 전용:\n- Ctrl+F6: WeaponSlot UI 자동 생성\n- Ctrl+F7: WeaponSlot 진단 및 수정";
     
     [Header("🎯 진단 결과")]
     public bool hasInventoryManager = false;
@@ -96,7 +96,18 @@ public class InventoryDebugger : MonoBehaviour
         
         if (Input.GetKeyDown(KeyCode.F12))
         {
-            ResolveLegacyConflicts();
+            FixLegacyConflicts();
+        }
+        
+        // 🆕 WeaponSlot 전용 단축키들
+        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.F6))
+        {
+            FixWeaponSlotUI();
+        }
+        
+        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.F7))
+        {
+            DiagnoseWeaponSlot();
         }
     }
     
@@ -431,7 +442,7 @@ public class InventoryDebugger : MonoBehaviour
     }
     
     [ContextMenu("Resolve Legacy Conflicts")]
-    public void ResolveLegacyConflicts()
+    public void FixLegacyConflicts()
     {
         Debug.Log("🔧 [InventoryDebugger] 레거시 시스템 충돌 해결을 시작합니다...");
         
@@ -1112,5 +1123,101 @@ public class InventoryDebugger : MonoBehaviour
         
         GUILayout.Label("F6:슬롯활성화 F7:슬롯진단 F8:패널수정 F9:강제열기 F10:진단 F11:수정 F12:충돌해결");
         GUILayout.EndArea();
+    }
+
+    // 🆕 WeaponSlot 전용 메서드들
+    [ContextMenu("Fix WeaponSlot UI")]
+    void FixWeaponSlotUI()
+    {
+        Debug.Log("🔧 [InventoryDebugger] WeaponSlot UI 자동 수정 시작...");
+        
+        // WeaponSlot 찾기
+        WeaponSlot[] weaponSlots = FindObjectsByType<WeaponSlot>(FindObjectsSortMode.None);
+        
+        if (weaponSlots.Length == 0)
+        {
+            Debug.LogError("❌ WeaponSlot을 찾을 수 없습니다!");
+            return;
+        }
+        
+        Debug.Log($"🎯 {weaponSlots.Length}개의 WeaponSlot 발견됨");
+        
+        foreach (WeaponSlot weaponSlot in weaponSlots)
+        {
+            Debug.Log($"🔧 WeaponSlot '{weaponSlot.name}' 수정 중...");
+            
+            // 리플렉션을 사용해서 SetupUIComponents 호출
+            var method = weaponSlot.GetType().GetMethod("SetupUIComponents", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            
+            if (method != null)
+            {
+                method.Invoke(weaponSlot, null);
+                Debug.Log($"✅ WeaponSlot '{weaponSlot.name}' UI 컴포넌트 설정 완료");
+            }
+            else
+            {
+                Debug.LogWarning($"⚠️ WeaponSlot '{weaponSlot.name}'에서 SetupUIComponents 메서드를 찾을 수 없습니다");
+            }
+        }
+        
+        Debug.Log("🎉 WeaponSlot UI 자동 수정 완료!");
+    }
+    
+    [ContextMenu("Diagnose WeaponSlot")]
+    void DiagnoseWeaponSlot()
+    {
+        Debug.Log("🧪 [InventoryDebugger] WeaponSlot 진단 시작...");
+        
+        WeaponSlot[] weaponSlots = FindObjectsByType<WeaponSlot>(FindObjectsSortMode.None);
+        
+        if (weaponSlots.Length == 0)
+        {
+            Debug.LogError("❌ WeaponSlot이 없습니다! 씬에 WeaponSlot을 추가해야 합니다.");
+            return;
+        }
+        
+        Debug.Log($"📊 총 {weaponSlots.Length}개의 WeaponSlot 발견됨");
+        
+        foreach (WeaponSlot weaponSlot in weaponSlots)
+        {
+            Debug.Log($"\n🔍 WeaponSlot '{weaponSlot.name}' 진단:");
+            Debug.Log($"   - GameObject 활성화: {weaponSlot.gameObject.activeSelf}");
+            Debug.Log($"   - Component 활성화: {weaponSlot.enabled}");
+            
+            // 리플렉션으로 private 필드들 확인
+            var iconField = weaponSlot.GetType().GetField("icon", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+            var backgroundField = weaponSlot.GetType().GetField("backgroundImage", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+            var nameField = weaponSlot.GetType().GetField("weaponNameText", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+            var ammoField = weaponSlot.GetType().GetField("ammoText", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+            
+            var icon = iconField?.GetValue(weaponSlot) as UnityEngine.UI.Image;
+            var background = backgroundField?.GetValue(weaponSlot) as UnityEngine.UI.Image;
+            var nameText = nameField?.GetValue(weaponSlot) as UnityEngine.UI.Text;
+            var ammoText = ammoField?.GetValue(weaponSlot) as UnityEngine.UI.Text;
+            
+            Debug.Log($"   - Icon Image: {(icon != null ? "✅ 연결됨" : "❌ 없음")}");
+            Debug.Log($"   - Background Image: {(background != null ? "✅ 연결됨" : "❌ 없음")}");
+            Debug.Log($"   - Name Text: {(nameText != null ? "✅ 연결됨" : "❌ 없음")}");
+            Debug.Log($"   - Ammo Text: {(ammoText != null ? "✅ 연결됨" : "❌ 없음")}");
+            
+            // 자식 오브젝트 확인
+            Debug.Log($"   - 자식 오브젝트 개수: {weaponSlot.transform.childCount}");
+            for (int i = 0; i < weaponSlot.transform.childCount; i++)
+            {
+                Transform child = weaponSlot.transform.GetChild(i);
+                Debug.Log($"     └── {child.name} (활성화: {child.gameObject.activeSelf})");
+            }
+            
+            // RectTransform 정보
+            RectTransform rect = weaponSlot.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                Debug.Log($"   - 위치: {rect.anchoredPosition}");
+                Debug.Log($"   - 크기: {rect.sizeDelta}");
+            }
+        }
+        
+        Debug.Log("🧪 WeaponSlot 진단 완료");
     }
 } 
