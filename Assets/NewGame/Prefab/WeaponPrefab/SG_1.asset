@@ -14,7 +14,35 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: SG_1
   icon: {fileID: 21300000, guid: 21362401e3338714da339a239baabc2a, type: 3}
-  fireRate: 5
+  weaponType: 3
+  fireRate: 1
   damage: 10
   projectilePrefab: {fileID: 7743249404533171330, guid: c3e51900e9c29304cbda351dec9db181, type: 3}
   weaponPrefab: {fileID: 7052198616648138758, guid: 470759890db2f924c8abbfe7b7b06e63, type: 3}
+  projectileSpeed: 10
+  maxAmmo: 30
+  currentAmmo: 30
+  reloadTime: 2
+  infiniteAmmo: 0
+  baseSpread: 0
+  maxSpread: 5
+  spreadIncreaseRate: 1
+  spreadDecreaseRate: 2
+  pelletsPerShot: 6
+  shotgunSpreadAngle: 30
+  warmupTime: 1
+  maxWarmupFireRate: 0
+  singleFireOnly: 0
+  aimingRange: 15
+  recoilForce: 1
+  recoilDirection: {x: 0, y: 1}
+  recoilDuration: 0.1
+  recoilRecoverySpeed: 5
+  criticalChance: 0
+  criticalMultiplier: 2
+  pierceCount: 0
+  pierceDamageReduction: 0.1
+  hasTracerRounds: 0
+  hasMuzzleFlash: 1
+  hasExplosiveKills: 0
+  explosionRadius: 2

@@ -14,7 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: SMG_1
   icon: {fileID: 21300000, guid: 2d29e6e184f71134489359599b1a1d62, type: 3}
+  weaponType: 4
   fireRate: 1
   damage: 10
   projectilePrefab: {fileID: 7743249404533171330, guid: c3e51900e9c29304cbda351dec9db181, type: 3}
   weaponPrefab: {fileID: 7052198616648138758, guid: c5d0f9a12b07a8441978653557ec2a68, type: 3}
+  projectileSpeed: 10
+  baseSpread: 0
+  maxSpread: 5
+  spreadIncreaseRate: 1
+  spreadDecreaseRate: 2
+  pelletsPerShot: 6
+  shotgunSpreadAngle: 30
+  warmupTime: 1
+  maxWarmupFireRate: 0
+  singleFireOnly: 0
+  aimingRange: 15

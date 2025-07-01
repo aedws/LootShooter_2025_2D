@@ -14,7 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: AR_3
   icon: {fileID: 21300000, guid: 2a1daa10bb35d99489b52cc82608eb71, type: 3}
+  weaponType: 0
   fireRate: 0.5
   damage: 10
   projectilePrefab: {fileID: 7743249404533171330, guid: c3e51900e9c29304cbda351dec9db181, type: 3}
   weaponPrefab: {fileID: 7052198616648138758, guid: c23eda423c496c345a353d79eefd4234, type: 3}
+  projectileSpeed: 10
+  baseSpread: 0
+  maxSpread: 5
+  spreadIncreaseRate: 1
+  spreadDecreaseRate: 2
+  pelletsPerShot: 0
+  shotgunSpreadAngle: 0
+  warmupTime: 0
+  maxWarmupFireRate: 0
+  singleFireOnly: 0
+  aimingRange: 15

@@ -14,7 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: SR_2
   icon: {fileID: 21300000, guid: 3eb676946e7b62e47bab79363a58aa9f, type: 3}
+  weaponType: 5
   fireRate: 5
   damage: 10
   projectilePrefab: {fileID: 7743249404533171330, guid: c3e51900e9c29304cbda351dec9db181, type: 3}
   weaponPrefab: {fileID: 7052198616648138758, guid: 3600684631666da4b95f28c4108b97bb, type: 3}
+  projectileSpeed: 10
+  baseSpread: 0
+  maxSpread: 5
+  spreadIncreaseRate: 1
+  spreadDecreaseRate: 2
+  pelletsPerShot: 6
+  shotgunSpreadAngle: 30
+  warmupTime: 1
+  maxWarmupFireRate: 0
+  singleFireOnly: 0
+  aimingRange: 30

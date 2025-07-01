@@ -36,6 +36,11 @@ public class PlayerController : MonoBehaviour
     public float upAimAngle = 45f; // 위쪽 조준 각도
     public float downAimAngle = -45f; // 아래쪽 조준 각도
     public float aimRotationSpeed = 5f; // 회전 속도
+    
+    [Header("무기 반동")]
+    public float recoilMultiplier = 1f; // 반동 강도 배수
+    public float maxRecoilForce = 5f; // 최대 반동 힘
+    public bool enablePlayerRecoil = true; // 플레이어 반동 활성화
 
     private Rigidbody2D rb;
     private Animator animator;
@@ -54,6 +59,9 @@ public class PlayerController : MonoBehaviour
     private float jumpTimer;
     private float lastJumpX;
     private bool facingRight = true;
+    
+    // 무기 반동 관련
+    private Weapon currentSubscribedWeapon = null; // 현재 이벤트 구독 중인 무기
 
     void Awake()
     {
@@ -100,6 +108,9 @@ public class PlayerController : MonoBehaviour
                 Destroy(afterImage);
         }
         afterImages.Clear();
+        
+        // 무기 이벤트 구독 해제
+        UnsubscribeFromWeaponEvents();
     }
 
     void Update()
@@ -182,9 +193,13 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E))
             TryPickupItem();
 
+        // 무기 반동 이벤트 구독 관리
+        UpdateWeaponEventSubscription();
+        
         // 무기 발사 (연속 발사 지원)
-        if (Input.GetKey(KeyCode.Z)) // Z키를 누르고 있는 동안
-            TryFireWeapon();
+        bool isFireButtonPressed = Input.GetKey(KeyCode.Z); // Z키를 누르고 있는 동안
+        if (isFireButtonPressed)
+            TryFireWeapon(isFireButtonPressed);
     }
 
     void Move()
@@ -410,7 +425,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void TryFireWeapon()
+    void TryFireWeapon(bool isFireButtonPressed)
     {
         if (playerInventory == null)
             return;
@@ -426,10 +441,12 @@ public class PlayerController : MonoBehaviour
         Vector2 fireDirection = GetFireDirection();
         Vector3 firePosition = GetFirePosition();
 
-        // Debug.Log($"[TryFireWeapon] 무기 발사: {currentWeapon.weaponName}, 방향: {fireDirection}");
+        // Debug.Log($"🔫 [FIRE] 무기 발사: {currentWeapon.GetWeaponData().weaponName}");
+        // Debug.Log($"🔫 [FIRE] 발사방향: {fireDirection}, 현재각도: {currentWeaponAngle}도, 바라보는방향: {(facingRight ? "오른쪽" : "왼쪽")}");
+        // Debug.Log($"🔫 [FIRE] 발사위치: {firePosition}");
         
         // 무기 발사
-        currentWeapon.TryFire(fireDirection, firePosition);
+        currentWeapon.TryFire(fireDirection, firePosition, isFireButtonPressed);
     }
 
     void HandleWeaponAiming()
@@ -475,6 +492,18 @@ public class PlayerController : MonoBehaviour
         return rotatedDirection.normalized;
     }
 
+    // SniperAimingSystem에서 사용할 현재 무기 각도 getter
+    public float GetCurrentWeaponAngle()
+    {
+        return currentWeaponAngle;
+    }
+
+    // SniperAimingSystem에서 사용할 플레이어 방향 getter
+    public bool IsFacingRight()
+    {
+        return facingRight;
+    }
+
     Vector3 GetFirePosition()
     {
         // 현재 무기의 FirePoint 찾기
@@ -517,11 +546,23 @@ public class PlayerController : MonoBehaviour
             // Debug.Log($"[UpdateWeaponDirection] WeaponHolder 위치 업데이트: {newPos}, facingRight: {facingRight}");
         }
 
-        // WeaponHolder 회전 적용 (총기 끝에서 회전하도록)
+        // WeaponHolder 회전 적용 (무기 조준각도 + 반동 각도)
         if (playerInventory?.weaponHolder != null)
         {
-            float weaponRotationAngle = facingRight ? currentWeaponAngle : -currentWeaponAngle;
-            playerInventory.weaponHolder.transform.rotation = Quaternion.AngleAxis(weaponRotationAngle, Vector3.forward);
+            float baseAngle = facingRight ? currentWeaponAngle : -currentWeaponAngle;
+            
+            // 현재 무기의 반동 각도 가져오기
+            float recoilAngle = 0f;
+            Weapon currentWeapon = playerInventory.GetCurrentWeapon();
+            if (currentWeapon != null)
+            {
+                recoilAngle = currentWeapon.GetCurrentRecoilAngle();
+                // 왼쪽을 바라볼 때는 반동 각도도 반전
+                if (!facingRight) recoilAngle = -recoilAngle;
+            }
+            
+            float finalAngle = baseAngle + recoilAngle;
+            playerInventory.weaponHolder.transform.rotation = Quaternion.AngleAxis(finalAngle, Vector3.forward);
         }
 
         // 현재 무기 스프라이트 플립
@@ -550,6 +591,63 @@ public class PlayerController : MonoBehaviour
                 }
                 // Debug.Log($"[UpdateWeaponDirection] FirePoint 위치 업데이트: {firePoint.localPosition}");
             }
+        }
+    }
+
+    void UpdateWeaponEventSubscription()
+    {
+        // 현재 장착된 무기 가져오기
+        Weapon currentWeapon = playerInventory?.GetCurrentWeapon();
+        
+        // 무기가 바뀌었거나 새로 장착되었으면 이벤트 구독 업데이트
+        if (currentWeapon != currentSubscribedWeapon)
+        {
+            // 이전 무기 이벤트 구독 해제
+            UnsubscribeFromWeaponEvents();
+            
+            // 새 무기 이벤트 구독
+            if (currentWeapon != null)
+            {
+                currentWeapon.OnRecoil += OnWeaponRecoil;
+                currentSubscribedWeapon = currentWeapon;
+                // Debug.Log($"[PlayerController] 무기 반동 이벤트 구독: {currentWeapon.GetWeaponData()?.weaponName}");
+            }
+        }
+    }
+    
+    void UnsubscribeFromWeaponEvents()
+    {
+        if (currentSubscribedWeapon != null)
+        {
+            currentSubscribedWeapon.OnRecoil -= OnWeaponRecoil;
+            currentSubscribedWeapon = null;
+            // Debug.Log("[PlayerController] 무기 반동 이벤트 구독 해제");
+        }
+    }
+    
+    void OnWeaponRecoil(Vector3 recoilInfo)
+    {
+        if (!enablePlayerRecoil || rb == null) return;
+        
+        // recoilInfo.y에 반동 각도 정보가 들어있음
+        float recoilAngle = recoilInfo.y;
+        
+        // 발사 방향의 반대로 플레이어를 약간 밀어냄 (각도 기반)
+        Vector2 fireDirection = GetFireDirection();
+        Vector2 recoilDirection = -fireDirection; // 발사 방향의 반대
+        
+        // 반동 강도 계산 (각도를 Force로 변환)
+        float recoilForce = recoilAngle * 0.1f * recoilMultiplier; // 각도를 적당한 Force로 변환
+        recoilForce = Mathf.Min(recoilForce, maxRecoilForce); // 최대 반동 제한
+        
+        // 수평 반동만 적용 (점프에 영향 주지 않음)
+        Vector2 horizontalRecoil = new Vector2(recoilDirection.x, 0) * recoilForce;
+        
+        // 대시 중이 아닐 때만 반동 적용
+        if (!isDashing)
+        {
+            rb.AddForce(horizontalRecoil, ForceMode2D.Impulse);
+            // Debug.Log($"🔥 [RECOIL] 플레이어 반동 적용: {horizontalRecoil}, 반동각도: {recoilAngle}도");
         }
     }
 
