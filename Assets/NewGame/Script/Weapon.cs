@@ -25,11 +25,13 @@ public class Weapon : MonoBehaviour
 
     void Update()
     {
-        // 쿨다운 감소
-        if (fireCooldown > 0f)
-            fireCooldown -= Time.deltaTime;
-        
         // Debug.Log($"[Weapon][Update] {weaponName} scale: {transform.localScale}");
+        
+        // 연사 타이머 업데이트
+        if (fireCooldown > 0f)
+        {
+            fireCooldown -= Time.deltaTime;
+        }
     }
 
     public void TryFire(Vector2 direction, Vector3 weaponPosition)
@@ -64,7 +66,7 @@ public class Weapon : MonoBehaviour
             spawnPosition = firePoint.position;
             // 디버그 로그 활성화
             var parentSprite = GetComponentInParent<SpriteRenderer>();
-            Debug.Log($"[Weapon.Fire] weapon={weaponName}, flipX={(parentSprite != null ? parentSprite.flipX.ToString() : "null")}, FirePoint.localPosition={firePoint.localPosition}, FirePoint.position={firePoint.position}");
+            // Debug.Log($"[Weapon.Fire] weapon={weaponName}, flipX={(parentSprite != null ? parentSprite.flipX.ToString() : "null")}, FirePoint.localPosition={firePoint.localPosition}, FirePoint.position={firePoint.position}");
         }
         else
         {
@@ -75,12 +77,12 @@ public class Weapon : MonoBehaviour
                 spawnPosition = weaponPosition + new Vector3(offsetX, offsetY, 0f);
             else // 왼쪽
                 spawnPosition = weaponPosition + new Vector3(-offsetX, offsetY, 0f);
-            Debug.Log($"[Weapon.Fire] weapon={weaponName}, FirePoint 없음, spawnPosition={spawnPosition}");
+            // Debug.Log($"[Weapon.Fire] weapon={weaponName}, FirePoint 없음, spawnPosition={spawnPosition}");
         }
         
         // 투사체 생성
         GameObject proj = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
-        Debug.Log($"[Weapon.Fire] weapon={weaponName}, Projectile 생성 위치={spawnPosition}");
+        // Debug.Log($"[Weapon.Fire] weapon={weaponName}, Projectile 생성 위치={spawnPosition}");
         
         // 투사체 컴포넌트 찾기 및 초기화
         Projectile projectile = proj.GetComponent<Projectile>();

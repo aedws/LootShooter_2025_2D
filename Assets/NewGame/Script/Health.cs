@@ -15,9 +15,11 @@ public class Health : MonoBehaviour
     public event Action<int, int> OnHealthChanged; // (current, max)
     public event Action OnDeath;
     public event Action<int> OnDamaged; // damage amount
+    public event Action<int> OnHealed; // heal amount
     
     [Header("디버그")]
     public bool isInvincible = false;
+    private bool isDead = false;
     
     void Start()
     {
@@ -27,49 +29,55 @@ public class Health : MonoBehaviour
     
     public void TakeDamage(int damage)
     {
-        Debug.Log($"[Health DEBUG] {gameObject.name}.TakeDamage({damage}) 호출됨");
+        // Debug.Log($"[Health DEBUG] {gameObject.name}.TakeDamage({damage}) 호출됨");
+        
+        // 이미 죽었으면 데미지 무시
+        if (isDead) return;
+        
+        // Debug.Log($"[Health DEBUG] ❌ 무적 시간 중 (남은 시간: {invincibilityTime - (Time.time - lastDamageTime):F2}초)");
+        
+        // 무적 상태면 데미지 무시
+        if (isInvincible)
+        {
+            // Debug.Log($"[Health DEBUG] ❌ 무적 상태");
+            return;
+        }
         
         // 무적 시간 체크
         if (Time.time - lastDamageTime < invincibilityTime)
         {
-            Debug.Log($"[Health DEBUG] ❌ 무적 시간 중 (남은 시간: {invincibilityTime - (Time.time - lastDamageTime):F2}초)");
-            return;
-        }
-            
-        if (isInvincible)
-        {
-            Debug.Log($"[Health DEBUG] ❌ 무적 상태");
             return;
         }
         
-        int previousHealth = currentHealth;
-            
-        // 데미지 적용
-        currentHealth -= damage;
-        currentHealth = Mathf.Max(0, currentHealth);
         lastDamageTime = Time.time;
         
-        Debug.Log($"[Health DEBUG] ✅ 데미지 적용: {previousHealth} → {currentHealth} (데미지: {damage})");
+        int previousHealth = currentHealth;
+        currentHealth -= damage;
+        currentHealth = Mathf.Max(0, currentHealth);
         
-        // 이벤트 호출
+        // Debug.Log($"[Health DEBUG] ✅ 데미지 적용: {previousHealth} → {currentHealth} (데미지: {damage})");
+        
+        // 이벤트 발생
         OnDamaged?.Invoke(damage);
-        OnHealthChanged?.Invoke(currentHealth, maxHealth);
         
-        // 죽음 체크
-        if (currentHealth <= 0)
+        // 체력이 0이 되면 죽음 처리
+        if (currentHealth <= 0 && !isDead)
         {
-            Debug.Log($"[Health DEBUG] 💀 체력이 0이 되었습니다. 죽음 처리");
+            // Debug.Log($"[Health DEBUG] 💀 체력이 0이 되었습니다. 죽음 처리");
             Die();
         }
     }
     
     public void Heal(int amount)
     {
+        if (isDead) return;
+        
         currentHealth += amount;
         currentHealth = Mathf.Min(maxHealth, currentHealth);
         
-        OnHealthChanged?.Invoke(currentHealth, maxHealth);
-        Debug.Log($"[Health] {gameObject.name}이(가) {amount} 회복했습니다. 현재 체력: {currentHealth}/{maxHealth}");
+        // Debug.Log($"[Health] {gameObject.name}이(가) {amount} 회복했습니다. 현재 체력: {currentHealth}/{maxHealth}");
+        
+        OnHealed?.Invoke(amount);
     }
     
     public void SetMaxHealth(int newMaxHealth)
@@ -96,7 +104,10 @@ public class Health : MonoBehaviour
     
     void Die()
     {
-        Debug.Log($"[Health] {gameObject.name}이(가) 죽었습니다.");
+        if (isDead) return;
+        
+        isDead = true;
+        // Debug.Log($"[Health] {gameObject.name}이(가) 죽었습니다.");
         OnDeath?.Invoke();
     }
 } 

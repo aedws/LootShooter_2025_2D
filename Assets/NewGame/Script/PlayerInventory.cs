@@ -18,7 +18,8 @@ public class PlayerInventory : MonoBehaviour
 
     public void AddWeapon(WeaponData weapon)
     {
-        Debug.Log($"[AddWeapon] 무기 추가: {(weapon != null ? weapon.weaponName : "null")}, 현재 개수: {weapons.Count}, inventoryUI null? {inventoryUI == null}");
+        // Debug.Log($"[AddWeapon] 무기 추가: {(weapon != null ? weapon.weaponName : "null")}, 현재 개수: {weapons.Count}, inventoryUI null? {inventoryUI == null}");
+        
         if (!weapons.Contains(weapon))
         {
             weapons.Add(weapon);
@@ -29,7 +30,8 @@ public class PlayerInventory : MonoBehaviour
 
     public void RemoveWeapon(WeaponData weapon)
     {
-        Debug.Log($"[RemoveWeapon] 무기 제거: {(weapon != null ? weapon.weaponName : "null")}, 현재 개수: {weapons.Count}, inventoryUI null? {inventoryUI == null}");
+        // Debug.Log($"[RemoveWeapon] 무기 제거: {(weapon != null ? weapon.weaponName : "null")}, 현재 개수: {weapons.Count}, inventoryUI null? {inventoryUI == null}");
+        
         if (weapons.Contains(weapon))
         {
             weapons.Remove(weapon);
@@ -92,4 +94,6 @@ public class PlayerInventory : MonoBehaviour
     {
         return currentWeaponObj != null ? currentWeaponObj.GetComponent<Weapon>() : null;
     }
+
+
 } 

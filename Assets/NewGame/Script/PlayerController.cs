@@ -74,7 +74,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[PlayerController] PlayerInventory 또는 WeaponHolder가 할당되지 않았습니다!");
+            // Debug.LogWarning("[PlayerController] PlayerInventory 또는 WeaponHolder가 할당되지 않았습니다!");
         }
         
         // Health 이벤트 연결
@@ -371,7 +371,7 @@ public class PlayerController : MonoBehaviour
     
     void OnPlayerDamaged(int damage)
     {
-        Debug.Log($"[PlayerController] 플레이어가 {damage} 데미지를 받았습니다!");
+        // Debug.Log($"[PlayerController] 플레이어가 {damage} 데미지를 받았습니다!");
         
         // 피격 시 화면 흔들림이나 이펙트 추가 가능
         // CameraShake.Instance?.Shake(0.1f, 0.5f);
@@ -379,7 +379,7 @@ public class PlayerController : MonoBehaviour
     
     void OnPlayerDeath()
     {
-        Debug.Log("[PlayerController] 플레이어가 죽었습니다!");
+        // Debug.Log("[PlayerController] 플레이어가 죽었습니다!");
         
         // 플레이어 조작 비활성화
         this.enabled = false;
@@ -403,7 +403,7 @@ public class PlayerController : MonoBehaviour
             
             if (pickup != null)
             {
-                Debug.Log($"[TryPickupItem] {item.name} 픽업!");
+                // Debug.Log($"[TryPickupItem] {item.name} 픽업!");
                 pickup.OnPickup(gameObject);
                 break; // 하나씩만 픽업
             }
@@ -418,7 +418,7 @@ public class PlayerController : MonoBehaviour
         Weapon currentWeapon = playerInventory.GetCurrentWeapon();
         if (currentWeapon == null)
         {
-            Debug.Log("[TryFireWeapon] 장착된 무기가 없습니다.");
+            // Debug.Log("[TryFireWeapon] 장착된 무기가 없습니다.");
             return;
         }
 

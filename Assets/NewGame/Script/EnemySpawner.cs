@@ -51,10 +51,11 @@ public class EnemySpawner : MonoBehaviour
     
     void StartWave()
     {
-        if (isSpawning) return;
+        isSpawning = true;
+        currentWave++;
         
         int enemiesToSpawn = Mathf.RoundToInt(enemiesPerWave * Mathf.Pow(waveMultiplier, currentWave - 1));
-        Debug.Log($"[EnemySpawner] Wave {currentWave} 시작! 적 {enemiesToSpawn}마리 스폰 예정");
+        // Debug.Log($"[EnemySpawner] Wave {currentWave} 시작! 적 {enemiesToSpawn}마리 스폰 예정");
         
         spawnCoroutine = StartCoroutine(SpawnWave(enemiesToSpawn));
     }
@@ -117,7 +118,7 @@ public class EnemySpawner : MonoBehaviour
     {
         if (enemyPrefabs.Length == 0)
         {
-            Debug.LogWarning("[EnemySpawner] 적 프리팹이 설정되지 않았습니다!");
+            // Debug.LogWarning("[EnemySpawner] 적 프리팹이 설정되지 않았습니다!");
             return;
         }
         
@@ -142,7 +143,7 @@ public class EnemySpawner : MonoBehaviour
         if (useWaveSystem)
             enemiesRemaining--;
         
-        Debug.Log($"[EnemySpawner] 적 스폰: {enemy.name} at {spawnPosition}");
+        // Debug.Log($"[EnemySpawner] 적 스폰: {enemy.name} at {spawnPosition}");
     }
     
     Vector3 GetSpawnPosition()

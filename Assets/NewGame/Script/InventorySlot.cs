@@ -22,19 +22,19 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
     }
 
-    public void SetWeapon(WeaponData newWeaponData)
+        public void SetWeapon(WeaponData newWeaponData)
     {
-        Debug.Log($"[SetWeapon] 슬롯에 무기 할당: {(newWeaponData != null ? newWeaponData.weaponName : "null")}");
+        // Debug.Log($"[SetWeapon] 슬롯에 무기 할당: {(newWeaponData != null ? newWeaponData.weaponName : "null")}");
         weaponData = newWeaponData;
         if (iconImage != null && weaponData != null)
             iconImage.sprite = weaponData.icon;
         else if (iconImage != null)
             iconImage.sprite = null;
     }
-
+    
     public void ClearSlot()
     {
-        Debug.Log($"[ClearSlot] 슬롯 비움");
+        // Debug.Log($"[ClearSlot] 슬롯 비움");
         weaponData = null;
         if (iconImage != null)
             iconImage.sprite = null;

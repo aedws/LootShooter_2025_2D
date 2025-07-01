@@ -60,7 +60,7 @@ public class Enemy : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"[Enemy DEBUG] ❌ Health 컴포넌트가 없습니다: {enemyName}");
+            // Debug.LogError($"[Enemy DEBUG] ❌ Health 컴포넌트가 없습니다: {enemyName}");
         }
         
         // 기본 레이어 설정
@@ -74,15 +74,11 @@ public class Enemy : MonoBehaviour
             rb.angularDamping = 10f; // 회전 저항 증가
         }
         
-        // 콜라이더 설정 확인
+        // Physics 설정 확인
         Collider2D col = GetComponent<Collider2D>();
-        if (col != null)
+        if (col != null && col.isTrigger)
         {
-            // 콜라이더가 일반 콜라이더인지 확인 (트리거가 아닌)
-            if (col.isTrigger)
-            {
-                Debug.LogWarning($"[Enemy] {enemyName}의 콜라이더가 Trigger로 설정되어 있습니다. 물리적 분리를 위해 일반 콜라이더로 설정하는 것을 권장합니다.");
-            }
+            // Debug.LogWarning($"[Enemy] {enemyName}의 콜라이더가 Trigger로 설정되어 있습니다. 물리적 분리를 위해 일반 콜라이더로 설정하는 것을 권장합니다.");
         }
         
         // Debug.Log($"[Enemy DEBUG] {enemyName} 초기화 완료");
@@ -170,7 +166,7 @@ public class Enemy : MonoBehaviour
     
     void Attack()
     {
-        Debug.Log($"[Enemy] {enemyName}이(가) 플레이어를 공격했습니다!");
+        // Debug.Log($"[Enemy] {enemyName}이(가) 플레이어를 공격했습니다!");
         
         // 플레이어에게 데미지 주기
         if (player != null)
@@ -189,7 +185,7 @@ public class Enemy : MonoBehaviour
     
     void OnDamaged(int damage)
     {
-        Debug.Log($"[Enemy DEBUG] {enemyName} 피격! 데미지: {damage}");
+        // Debug.Log($"[Enemy DEBUG] {enemyName} 피격! 데미지: {damage}");
         
         // 피격 이펙트
         if (animator != null)
@@ -214,7 +210,7 @@ public class Enemy : MonoBehaviour
         isDead = true;
         rb.linearVelocity = Vector2.zero;
         
-        Debug.Log($"[Enemy] {enemyName}이(가) 죽었습니다!");
+        // Debug.Log($"[Enemy] {enemyName}이(가) 죽었습니다!");
         
         // 경험치 지급 (나중에 GameManager에서 처리)
         // GameManager.Instance?.AddExperience(expValue);
@@ -265,16 +261,16 @@ public class Enemy : MonoBehaviour
     // 외부에서 데미지를 받는 함수 (투사체 등에서 호출)
     public void TakeDamage(int damage)
     {
-        Debug.Log($"[Enemy DEBUG] {enemyName}.TakeDamage({damage}) 호출됨");
+        // Debug.Log($"[Enemy DEBUG] {enemyName}.TakeDamage({damage}) 호출됨");
         
         if (health != null && !isDead)
         {
-            Debug.Log($"[Enemy DEBUG] Health 컴포넌트 존재, 죽지 않음. 현재 체력: {health.currentHealth}");
+            // Debug.Log($"[Enemy DEBUG] Health 컴포넌트 존재, 죽지 않음. 현재 체력: {health.currentHealth}");
             health.TakeDamage(damage);
         }
         else
         {
-            Debug.Log($"[Enemy DEBUG] ❌ Health가 null이거나 이미 죽음. Health: {health != null}, isDead: {isDead}");
+            // Debug.Log($"[Enemy DEBUG] ❌ Health가 null이거나 이미 죽음. Health: {health != null}, isDead: {isDead}");
         }
     }
     

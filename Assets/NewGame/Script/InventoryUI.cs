@@ -30,25 +30,28 @@ public class InventoryUI : MonoBehaviour
     // 무기 리스트를 받아 슬롯에 반영
     public void RefreshInventory(List<WeaponData> weapons)
     {
-        Debug.Log($"[RefreshInventory] weapons.Count={weapons.Count}, slots.Count={slots.Count}, weaponSlot null? {weaponSlot == null}");
+        // Debug.Log($"[RefreshInventory] weapons.Count={weapons.Count}, slots.Count={slots.Count}, weaponSlot null? {weaponSlot == null}");
         // 장착 슬롯에 있는 무기는 인벤토리에서 제외
         List<WeaponData> inventoryWeapons = new List<WeaponData>(weapons);
         if (weaponSlot != null && weaponSlot.weaponData != null)
         {
             inventoryWeapons.Remove(weaponSlot.weaponData);
         }
+        
         for (int i = 0; i < slots.Count; i++)
         {
             if (i < inventoryWeapons.Count)
             {
-                Debug.Log($"[RefreshInventory] 슬롯 {i}에 무기 할당: {inventoryWeapons[i].weaponName}");
+                // Debug.Log($"[RefreshInventory] 슬롯 {i}에 무기 할당: {inventoryWeapons[i].weaponName}");
                 slots[i].SetWeapon(inventoryWeapons[i]);
             }
             else
             {
-                Debug.Log($"[RefreshInventory] 슬롯 {i} 비움");
+                // Debug.Log($"[RefreshInventory] 슬롯 {i} 비움");
                 slots[i].ClearSlot();
             }
         }
+        
+
     }
 } 
