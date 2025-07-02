@@ -36,7 +36,7 @@ public class InventoryUI : MonoBehaviour
         // 새로운 시스템이 있으면 이 UI는 비활성화
         if (inventoryManager != null)
         {
-            Debug.Log("[InventoryUI] 새로운 InventoryManager가 발견되었습니다. 레거시 UI는 비활성화됩니다.");
+            // Debug.Log("[InventoryUI] 새로운 InventoryManager가 발견되었습니다. 레거시 UI는 비활성화됩니다.");
             this.enabled = false;
         }
     }

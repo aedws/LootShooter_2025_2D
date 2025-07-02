@@ -663,18 +663,18 @@ public class PlayerController : MonoBehaviour
             float previousSpeed = currentMoveSpeed;
             currentMoveSpeed = baseMoveSpeed * weaponData.movementSpeedMultiplier;
             
-            Debug.Log($"🏃‍♂️ [PlayerController] 이동속도 업데이트: {weaponData.weaponName} 장착");
-            Debug.Log($"   기본속도: {baseMoveSpeed} → 현재속도: {currentMoveSpeed:F2} (배수: {weaponData.movementSpeedMultiplier:F2})");
+            // Debug.Log($"🏃‍♂️ [PlayerController] 이동속도 업데이트: {weaponData.weaponName} 장착");
+            // Debug.Log($"   기본속도: {baseMoveSpeed} → 현재속도: {currentMoveSpeed:F2} (배수: {weaponData.movementSpeedMultiplier:F2})");
             
             // 무기 타입별 메시지 표시
             string speedEffect = GetSpeedEffectMessage(weaponData.movementSpeedMultiplier);
-            Debug.Log($"   {GetWeaponTypeKorean(weaponData.weaponType)} 무기 효과: {speedEffect}");
+            // Debug.Log($"   {GetWeaponTypeKorean(weaponData.weaponType)} 무기 효과: {speedEffect}");
         }
         else
         {
             // 무기가 없을 때는 기본 속도로 복원
             currentMoveSpeed = baseMoveSpeed;
-            Debug.Log($"🏃‍♂️ [PlayerController] 무기 해제로 인한 이동속도 복원: {currentMoveSpeed}");
+            // Debug.Log($"🏃‍♂️ [PlayerController] 무기 해제로 인한 이동속도 복원: {currentMoveSpeed}");
         }
     }
     

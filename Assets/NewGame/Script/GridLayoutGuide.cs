@@ -70,16 +70,16 @@ public class GridLayoutGuide : MonoBehaviour
         if (gridLayoutGroup == null)
         {
             gridLayoutGroup = gameObject.AddComponent<GridLayoutGroup>();
-            Debug.Log("✅ Grid Layout Group 컴포넌트가 추가되었습니다!");
+            // Debug.Log("✅ Grid Layout Group 컴포넌트가 추가되었습니다!");
         }
 
         // 설정 적용
         ApplyGridSettings();
         
-        Debug.Log($"🎯 Grid Layout Group 설정 완료!\n" +
-                  $"Cell Size: {cellSize}\n" +
-                  $"Spacing: {spacing}\n" +
-                  $"Columns: {columnsPerRow}");
+        // Debug.Log($"🎯 Grid Layout Group 설정 완료!\n" +
+        //           $"Cell Size: {cellSize}\n" +
+        //           $"Spacing: {spacing}\n" +
+        //           $"Columns: {columnsPerRow}");
     }
 
     void ApplyGridSettings()
@@ -102,7 +102,7 @@ public class GridLayoutGuide : MonoBehaviour
         GameObject canvas = GameObject.Find("Canvas");
         if (canvas == null)
         {
-            Debug.LogError("❌ Canvas를 찾을 수 없습니다! Canvas를 먼저 만들어주세요.");
+            // Debug.LogError("❌ Canvas를 찾을 수 없습니다! Canvas를 먼저 만들어주세요.");
             return;
         }
 
@@ -144,8 +144,8 @@ public class GridLayoutGuide : MonoBehaviour
         sizeFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
         sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-        Debug.Log("🎉 인벤토리 UI 구조가 생성되었습니다!\n" +
-                  "Canvas → InventoryPanel → SlotParent (Grid Layout Group)");
+        // Debug.Log("🎉 인벤토리 UI 구조가 생성되었습니다!\n" +
+        //           "Canvas → InventoryPanel → SlotParent (Grid Layout Group)");
     }
 
     [ContextMenu("Test Add Dummy Slots")]
@@ -167,7 +167,7 @@ public class GridLayoutGuide : MonoBehaviour
             outline.effectDistance = new Vector2(2, 2);
         }
         
-        Debug.Log($"🎮 테스트용 슬롯 20개가 추가되었습니다!");
+        // Debug.Log($"🎮 테스트용 슬롯 20개가 추가되었습니다!");
     }
 
     // 실시간 Grid 설정 변경 (Inspector에서 값 변경 시 적용)

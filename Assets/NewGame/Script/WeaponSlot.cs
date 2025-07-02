@@ -53,7 +53,7 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
 
     void Start()
     {
-        Debug.Log($"🔧 [WeaponSlot] Start() 호출됨 - {gameObject.name}");
+        // Debug.Log($"🔧 [WeaponSlot] Start() 호출됨 - {gameObject.name}");
         
         // 자동 연결
         if (playerInventory == null)
@@ -74,14 +74,14 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
         UpdateVisuals();
         
         // 마우스 이벤트 인터페이스 확인
-        Debug.Log($"🔧 [WeaponSlot] IPointerClickHandler 구현: {this is IPointerClickHandler}");
-        Debug.Log($"🔧 [WeaponSlot] raycastTarget: {(backgroundImage != null ? backgroundImage.raycastTarget.ToString() : "backgroundImage null")}");
+        // Debug.Log($"🔧 [WeaponSlot] IPointerClickHandler 구현: {this is IPointerClickHandler}");
+        // Debug.Log($"🔧 [WeaponSlot] raycastTarget: {(backgroundImage != null ? backgroundImage.raycastTarget.ToString() : "backgroundImage null")}");
     }
 
     // 🆕 게임 시작 시 UI 레이어 충돌 자동 해결
     System.Collections.IEnumerator AutoFixUILayerConflictsOnStart()
     {
-        Debug.Log($"🚀 [WeaponSlot] 게임 시작 시 UI 레이어 충돌 자동 해결 시작... - {gameObject.name}");
+        // Debug.Log($"🚀 [WeaponSlot] 게임 시작 시 UI 레이어 충돌 자동 해결 시작... - {gameObject.name}");
         
         // EventSystem과 UI가 완전히 초기화될 때까지 잠시 대기
         yield return new WaitForSeconds(0.5f);
@@ -89,13 +89,13 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
         // WeaponSlot 위치를 기준으로 자동 해결
         AutoFixUILayerConflicts();
         
-        Debug.Log($"✅ [WeaponSlot] 게임 시작 시 UI 레이어 충돌 자동 해결 완료! - {gameObject.name}");
+        // Debug.Log($"✅ [WeaponSlot] 게임 시작 시 UI 레이어 충돌 자동 해결 완료! - {gameObject.name}");
     }
     
     // 🆕 마우스 위치에 의존하지 않는 자동 UI 충돌 해결
     void AutoFixUILayerConflicts()
     {
-        Debug.Log($"🔧 [WeaponSlot] UI 레이어 충돌 자동 해결 (마우스 위치 무관) - {gameObject.name}");
+        // Debug.Log($"🔧 [WeaponSlot] UI 레이어 충돌 자동 해결 (마우스 위치 무관) - {gameObject.name}");
         
         // WeaponSlot의 중심 위치를 스크린 좌표로 변환
         RectTransform rectTransform = GetComponent<RectTransform>();
@@ -104,13 +104,13 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
         Vector3 worldPosition = rectTransform.position;
         Vector2 screenPosition = RectTransformUtility.WorldToScreenPoint(null, worldPosition);
         
-        Debug.Log($"📍 WeaponSlot 스크린 위치: {screenPosition}");
+        // Debug.Log($"📍 WeaponSlot 스크린 위치: {screenPosition}");
         
         // 해당 위치에서 레이캐스트 수행
         EventSystem eventSystem = EventSystem.current;
         if (eventSystem == null) 
         {
-            Debug.LogWarning("⚠️ EventSystem이 없어서 자동 해결을 건너뜁니다.");
+            // Debug.LogWarning("⚠️ EventSystem이 없어서 자동 해결을 건너뜁니다.");
             return;
         }
         
@@ -120,7 +120,7 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
         var raycastResults = new System.Collections.Generic.List<RaycastResult>();
         eventSystem.RaycastAll(pointerData, raycastResults);
         
-        Debug.Log($"🎯 WeaponSlot 위치에서 감지된 UI 요소 수: {raycastResults.Count}");
+        // Debug.Log($"🎯 WeaponSlot 위치에서 감지된 UI 요소 수: {raycastResults.Count}");
         
         bool weaponSlotFound = false;
         int weaponSlotIndex = -1;
@@ -128,37 +128,37 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
         // WeaponSlot의 위치 찾기
         for (int i = 0; i < raycastResults.Count; i++)
         {
-            Debug.Log($"  {i}: {raycastResults[i].gameObject.name}");
+            // Debug.Log($"  {i}: {raycastResults[i].gameObject.name}");
             
             if (raycastResults[i].gameObject == gameObject)
             {
                 weaponSlotFound = true;
                 weaponSlotIndex = i;
-                Debug.Log($"    ⭐ WeaponSlot 발견! (인덱스: {i})");
+                // Debug.Log($"    ⭐ WeaponSlot 발견! (인덱스: {i})");
             }
         }
         
         if (!weaponSlotFound)
         {
-            Debug.LogWarning($"⚠️ WeaponSlot이 해당 위치에서 감지되지 않습니다! - {gameObject.name}");
+            // Debug.LogWarning($"⚠️ WeaponSlot이 해당 위치에서 감지되지 않습니다! - {gameObject.name}");
             return;
         }
         
         if (weaponSlotIndex == 0)
         {
-            Debug.Log($"✅ WeaponSlot이 이미 최상위에 있습니다! - {gameObject.name}");
+            // Debug.Log($"✅ WeaponSlot이 이미 최상위에 있습니다! - {gameObject.name}");
             return;
         }
         
         // WeaponSlot을 덮고 있는 UI 요소들 자동 처리
-        Debug.Log($"🔧 WeaponSlot을 덮고 있는 {weaponSlotIndex}개의 UI 요소를 자동 처리합니다...");
+        // Debug.Log($"🔧 WeaponSlot을 덮고 있는 {weaponSlotIndex}개의 UI 요소를 자동 처리합니다...");
         
         int fixedCount = 0;
         
         for (int i = 0; i < weaponSlotIndex; i++)
         {
             var blockingUI = raycastResults[i].gameObject;
-            Debug.Log($"  {i + 1}. {blockingUI.name} 자동 처리 중...");
+            // Debug.Log($"  {i + 1}. {blockingUI.name} 자동 처리 중...");
             
             // 자동 해결: 특정 UI 요소들의 raycastTarget 비활성화
             if (blockingUI.name.Contains("InventoryPanel") || 
@@ -170,7 +170,7 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
                 {
                     img.raycastTarget = false;
                     fixedCount++;
-                    Debug.Log($"    ✅ {blockingUI.name}의 raycastTarget을 false로 설정");
+                    // Debug.Log($"    ✅ {blockingUI.name}의 raycastTarget을 false로 설정");
                 }
             }
             // 투명한 UI 요소 자동 처리
@@ -181,19 +181,19 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
                 {
                     img.raycastTarget = false;
                     fixedCount++;
-                    Debug.Log($"    ✅ 투명한 UI {blockingUI.name}의 raycastTarget을 false로 설정");
+                    // Debug.Log($"    ✅ 투명한 UI {blockingUI.name}의 raycastTarget을 false로 설정");
                 }
             }
         }
         
         if (fixedCount > 0)
         {
-            Debug.Log($"✅ {fixedCount}개의 UI 요소를 자동으로 수정했습니다! WeaponSlot 우클릭이 이제 작동해야 합니다! - {gameObject.name}");
+            Debug.Log($"✅ {fixedCount}개의 UI 요소를 자동으로 수정했습니다! WeaponSlot 우클릭이 이제 작동해야 합니다!");
         }
-        else
-        {
-            Debug.LogWarning($"⚠️ 자동으로 수정할 수 있는 UI 요소가 없습니다. 수동 확인이 필요할 수 있습니다. - {gameObject.name}");
-        }
+        // else
+        // {
+        //     Debug.LogWarning($"⚠️ 자동으로 수정할 수 있는 UI 요소가 없습니다. 수동 확인이 필요할 수 있습니다. - {gameObject.name}");
+        // }
     }
 
     void Update()
@@ -230,7 +230,7 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
     // 🆕 EventSystem 등록 강제
     void ForceEventSystemRegistration()
     {
-        Debug.Log($"🔧 [WeaponSlot] EventSystem 등록 강제 시작 - {gameObject.name}");
+        // Debug.Log($"🔧 [WeaponSlot] EventSystem 등록 강제 시작 - {gameObject.name}");
         
         // EventSystem 확인
         EventSystem eventSystem = EventSystem.current;
@@ -301,7 +301,7 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
     // 마우스 이벤트 핸들러들
     public void OnPointerEnter(PointerEventData eventData)
     {
-        Debug.Log("🖱️ [WeaponSlot] OnPointerEnter 호출됨"); // 디버그 로그 추가
+        // Debug.Log("🖱️ [WeaponSlot] OnPointerEnter 호출됨");
         isHovered = true;
         UpdateVisuals();
         
@@ -315,7 +315,7 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
     
     public void OnPointerExit(PointerEventData eventData)
     {
-        Debug.Log("🖱️ [WeaponSlot] OnPointerExit 호출됨"); // 디버그 로그 추가
+        // Debug.Log("🖱️ [WeaponSlot] OnPointerExit 호출됨");
         isHovered = false;
         UpdateVisuals();
         
@@ -328,21 +328,21 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
     
     public void OnPointerClick(PointerEventData eventData)
     {
-        Debug.Log($"🖱️ [WeaponSlot] OnPointerClick 호출됨 - 버튼: {eventData.button}"); // 디버그 로그 추가
+        // Debug.Log($"🖱️ [WeaponSlot] OnPointerClick 호출됨 - 버튼: {eventData.button}");
         
         if (eventData.button == PointerEventData.InputButton.Right && weaponData != null)
         {
-            Debug.Log($"✅ [WeaponSlot] 우클릭으로 무기 해제: {weaponData.weaponName}"); // 디버그 로그 추가
+            // Debug.Log($"✅ [WeaponSlot] 우클릭으로 무기 해제: {weaponData.weaponName}");
             // 우클릭으로 무기 해제
             UnequipWeapon();
         }
         else if (eventData.button == PointerEventData.InputButton.Right && weaponData == null)
         {
-            Debug.Log("⚠️ [WeaponSlot] 우클릭했지만 무기가 없음"); // 디버그 로그 추가
+            // Debug.Log("⚠️ [WeaponSlot] 우클릭했지만 무기가 없음");
         }
         else if (eventData.button == PointerEventData.InputButton.Left)
         {
-            Debug.Log("🖱️ [WeaponSlot] 좌클릭 감지됨"); // 디버그 로그 추가
+            // Debug.Log("🖱️ [WeaponSlot] 좌클릭 감지됨");
         }
     }
 
@@ -618,44 +618,44 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
     [ContextMenu("Diagnose Drag Drop Issues")]
     public void DiagnoseDragDropIssues()
     {
-        Debug.Log("🔍 [WeaponSlot] 드래그앤드롭 문제 진단 시작...");
+        // Debug.Log("🔍 [WeaponSlot] 드래그앤드롭 문제 진단 시작...");
         
         // 1. Image 컴포넌트 raycastTarget 확인
         if (backgroundImage != null)
         {
-            Debug.Log($"📋 backgroundImage.raycastTarget: {backgroundImage.raycastTarget}");
+            // Debug.Log($"📋 backgroundImage.raycastTarget: {backgroundImage.raycastTarget}");
             if (!backgroundImage.raycastTarget)
             {
-                Debug.LogWarning("⚠️ backgroundImage.raycastTarget이 false입니다! 드래그앤드롭이 작동하지 않을 수 있습니다.");
+                // Debug.LogWarning("⚠️ backgroundImage.raycastTarget이 false입니다! 드래그앤드롭이 작동하지 않을 수 있습니다.");
                 backgroundImage.raycastTarget = true;
-                Debug.Log("🔧 backgroundImage.raycastTarget을 true로 수정했습니다.");
+                // Debug.Log("🔧 backgroundImage.raycastTarget을 true로 수정했습니다.");
             }
         }
         else
         {
-            Debug.LogError("❌ backgroundImage가 null입니다!");
+            // Debug.LogError("❌ backgroundImage가 null입니다!");
         }
         
         // 2. Canvas 및 GraphicRaycaster 확인
         Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas == null)
         {
-            Debug.LogError("❌ Canvas를 찾을 수 없습니다!");
+            // Debug.LogError("❌ Canvas를 찾을 수 없습니다!");
         }
         else
         {
-            Debug.Log($"✅ Canvas 찾음: {canvas.name}");
+            // Debug.Log($"✅ Canvas 찾음: {canvas.name}");
             
             UnityEngine.UI.GraphicRaycaster raycaster = canvas.GetComponent<UnityEngine.UI.GraphicRaycaster>();
             if (raycaster == null)
             {
-                Debug.LogError("❌ GraphicRaycaster가 없습니다!");
+                // Debug.LogError("❌ GraphicRaycaster가 없습니다!");
                 raycaster = canvas.gameObject.AddComponent<UnityEngine.UI.GraphicRaycaster>();
-                Debug.Log("🔧 GraphicRaycaster를 추가했습니다.");
+                // Debug.Log("🔧 GraphicRaycaster를 추가했습니다.");
             }
             else
             {
-                Debug.Log("✅ GraphicRaycaster 확인 완료");
+                // Debug.Log("✅ GraphicRaycaster 확인 완료");
             }
         }
         
@@ -663,26 +663,26 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
         IDropHandler dropHandler = GetComponent<IDropHandler>();
         if (dropHandler == null)
         {
-            Debug.LogError("❌ IDropHandler 인터페이스가 구현되지 않았습니다!");
+            // Debug.LogError("❌ IDropHandler 인터페이스가 구현되지 않았습니다!");
         }
         else
         {
-            Debug.Log("✅ IDropHandler 인터페이스 구현 확인");
+            // Debug.Log("✅ IDropHandler 인터페이스 구현 확인");
         }
         
         // 4. GameObject 활성화 상태 확인
-        Debug.Log($"📋 GameObject 활성화: {gameObject.activeInHierarchy}");
-        Debug.Log($"📋 Component 활성화: {enabled}");
+        // Debug.Log($"📋 GameObject 활성화: {gameObject.activeInHierarchy}");
+        // Debug.Log($"📋 Component 활성화: {enabled}");
         
         // 5. 레이어 및 위치 확인
-        Debug.Log($"📋 Layer: {gameObject.layer}");
-        Debug.Log($"📋 Position: {transform.position}");
-        Debug.Log($"📋 Local Position: {transform.localPosition}");
+        // Debug.Log($"📋 Layer: {gameObject.layer}");
+        // Debug.Log($"📋 Position: {transform.position}");
+        // Debug.Log($"📋 Local Position: {transform.localPosition}");
         
         // 6. 드래그 상태 확인
-        Debug.Log($"📋 InventorySlot.CurrentlyDraggedWeapon: {(InventorySlot.CurrentlyDraggedWeapon != null ? InventorySlot.CurrentlyDraggedWeapon.weaponName : "null")}");
+        // Debug.Log($"📋 InventorySlot.CurrentlyDraggedWeapon: {(InventorySlot.CurrentlyDraggedWeapon != null ? InventorySlot.CurrentlyDraggedWeapon.weaponName : "null")}");
         
-        Debug.Log("🔍 [WeaponSlot] 드래그앤드롭 문제 진단 완료!");
+        // Debug.Log("🔍 [WeaponSlot] 드래그앤드롭 문제 진단 완료!");
     }
     
     // 🆕 마우스 이벤트 진단 도구 (새로 추가)

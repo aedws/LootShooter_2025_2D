@@ -96,7 +96,7 @@ public static class WeaponMovementHelper
             return profile.recommendedMultiplier;
         }
         
-        Debug.LogWarning($"⚠️ [WeaponMovementHelper] 알 수 없는 무기 타입: {weaponType}, 기본값 1.0 반환");
+        // Debug.LogWarning($"⚠️ [WeaponMovementHelper] 알 수 없는 무기 타입: {weaponType}, 기본값 1.0 반환");
         return 1.0f;
     }
     
@@ -125,7 +125,7 @@ public static class WeaponMovementHelper
     {
         if (weaponSlotManager == null)
         {
-            Debug.LogWarning("⚠️ [WeaponMovementHelper] WeaponSlotManager가 null입니다. 기본값 1.0 반환");
+            // Debug.LogWarning("⚠️ [WeaponMovementHelper] WeaponSlotManager가 null입니다. 기본값 1.0 반환");
             return 1.0f;
         }
         
@@ -250,7 +250,7 @@ public static class WeaponMovementHelper
     {
         if (weaponData == null)
         {
-            Debug.LogError("❌ [WeaponMovementHelper] WeaponData가 null입니다!");
+            // Debug.LogError("❌ [WeaponMovementHelper] WeaponData가 null입니다!");
             return;
         }
         
@@ -259,7 +259,7 @@ public static class WeaponMovementHelper
             float recommendedSpeed = GetRecommendedSpeedMultiplier(weaponData.weaponType);
             weaponData.movementSpeedMultiplier = recommendedSpeed;
             
-            Debug.Log($"🎯 [WeaponMovementHelper] {weaponData.weaponName}의 이동속도를 {weaponData.weaponType} 타입 권장값 {recommendedSpeed:F2}로 설정했습니다.");
+            // Debug.Log($"🎯 [WeaponMovementHelper] {weaponData.weaponName}의 이동속도를 {weaponData.weaponType} 타입 권장값 {recommendedSpeed:F2}로 설정했습니다.");
         }
     }
     
@@ -270,15 +270,15 @@ public static class WeaponMovementHelper
     {
         if (weaponSlotManager == null)
         {
-            Debug.LogWarning("⚠️ [WeaponMovementHelper] WeaponSlotManager가 null입니다!");
+            // Debug.LogWarning("⚠️ [WeaponMovementHelper] WeaponSlotManager가 null입니다!");
             return;
         }
         
-        Debug.Log("🏃‍♂️ [WeaponMovementHelper] 다중 슬롯 속도 정보:");
-        Debug.Log($"현재 계산 모드: {CurrentCalculationMode}");
+        // Debug.Log("🏃‍♂️ [WeaponMovementHelper] 다중 슬롯 속도 정보:");
+        // Debug.Log($"현재 계산 모드: {CurrentCalculationMode}");
         
         List<WeaponData> equippedWeapons = weaponSlotManager.GetAllEquippedWeapons();
-        Debug.Log($"장착된 무기 수: {equippedWeapons.Count}");
+        // Debug.Log($"장착된 무기 수: {equippedWeapons.Count}");
         
         for (int i = 0; i < weaponSlotManager.GetSlotCount(); i++)
         {
@@ -288,11 +288,11 @@ public static class WeaponMovementHelper
             if (weapon != null)
             {
                 string effect = GetSpeedEffectMessage(weapon.movementSpeedMultiplier);
-                Debug.Log($"  슬롯 {i + 1} {status}: {weapon.weaponName} ({weapon.weaponType}) - {weapon.movementSpeedMultiplier:F2} {effect}");
+                // Debug.Log($"  슬롯 {i + 1} {status}: {weapon.weaponName} ({weapon.weaponType}) - {weapon.movementSpeedMultiplier:F2} {effect}");
             }
             else
             {
-                Debug.Log($"  슬롯 {i + 1} {status}: 비어있음");
+                // Debug.Log($"  슬롯 {i + 1} {status}: 비어있음");
             }
         }
         
@@ -302,7 +302,7 @@ public static class WeaponMovementHelper
             float speed = CalculateSpeedMultiplier(weaponSlotManager, mode);
             string effect = GetSpeedEffectMessage(speed);
             string current = mode == CurrentCalculationMode ? " ⭐" : "";
-            Debug.Log($"  {mode}: {speed:F2} {effect}{current}");
+            // Debug.Log($"  {mode}: {speed:F2} {effect}{current}");
         }
     }
     
@@ -312,7 +312,7 @@ public static class WeaponMovementHelper
     [System.Diagnostics.Conditional("UNITY_EDITOR")]
     public static void LogAllSpeedProfiles()
     {
-        Debug.Log("🏃‍♂️ [WeaponMovementHelper] 무기 타입별 이동속도 프로필:");
+        // Debug.Log("🏃‍♂️ [WeaponMovementHelper] 무기 타입별 이동속도 프로필:");
         
         foreach (var kvp in SpeedProfiles)
         {
@@ -322,16 +322,16 @@ public static class WeaponMovementHelper
             string korean = GetWeaponTypeKorean(weaponType);
             string emoji = GetWeaponTypeEmoji(weaponType);
             
-            Debug.Log($"  {emoji} {korean} ({weaponType}): {profile.recommendedMultiplier:F2} " +
-                     $"(범위: {profile.minMultiplier:F2}~{profile.maxMultiplier:F2}) - {profile.description}");
+            // Debug.Log($"  {emoji} {korean} ({weaponType}): {profile.recommendedMultiplier:F2} " +
+                     // $"(범위: {profile.minMultiplier:F2}~{profile.maxMultiplier:F2}) - {profile.description}");
         }
         
-        Debug.Log($"\n🔧 다중 슬롯 계산 모드:");
+        // Debug.Log($"\n🔧 다중 슬롯 계산 모드:");
         foreach (SpeedCalculationMode mode in System.Enum.GetValues(typeof(SpeedCalculationMode)))
         {
             string desc = GetCalculationModeDescription(mode);
             string current = mode == CurrentCalculationMode ? " ⭐" : "";
-            Debug.Log($"  • {mode}: {desc}{current}");
+            // Debug.Log($"  • {mode}: {desc}{current}");
         }
     }
     

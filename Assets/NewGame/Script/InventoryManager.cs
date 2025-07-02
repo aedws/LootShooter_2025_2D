@@ -370,7 +370,7 @@ public class InventoryManager : MonoBehaviour
         // 초기화가 완료되지 않았으면 새로고침 건너뛰기
         if (!isInitialized)
         {
-            Debug.LogWarning("⚠️ [InventoryManager] 아직 초기화가 완료되지 않아 새로고침을 건너뜁니다.");
+            // Debug.LogWarning("⚠️ [InventoryManager] 아직 초기화가 완료되지 않아 새로고침을 건너뜁니다.");
             return;
         }
         
@@ -529,7 +529,7 @@ public class InventoryManager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("⚠️ [InventoryManager] 모든 무기 슬롯이 가득참!");
+                // Debug.LogWarning("⚠️ [InventoryManager] 모든 무기 슬롯이 가득참!");
                 return;
             }
         }
@@ -549,7 +549,7 @@ public class InventoryManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("❌ [InventoryManager] WeaponSlotManager와 weaponSlot이 모두 없습니다!");
+            // Debug.LogError("❌ [InventoryManager] WeaponSlotManager와 weaponSlot이 모두 없습니다!");
         }
     }
     
@@ -589,7 +589,7 @@ public class InventoryManager : MonoBehaviour
     {
         if (weaponSlotManager == null)
         {
-            Debug.LogError("❌ [InventoryManager] WeaponSlotManager가 없습니다!");
+            // Debug.LogError("❌ [InventoryManager] WeaponSlotManager가 없습니다!");
             return false;
         }
         
@@ -615,7 +615,7 @@ public class InventoryManager : MonoBehaviour
     {
         if (weaponSlotManager == null)
         {
-            Debug.LogError("❌ [InventoryManager] WeaponSlotManager가 없습니다!");
+            // Debug.LogError("❌ [InventoryManager] WeaponSlotManager가 없습니다!");
             return;
         }
         

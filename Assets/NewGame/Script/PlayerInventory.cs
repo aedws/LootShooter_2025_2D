@@ -64,7 +64,7 @@ public class PlayerInventory : MonoBehaviour
     void OnWeaponSwitched(WeaponData newWeapon)
     {
         SetEquippedWeapon(newWeapon);
-        Debug.Log($"🔄 [PlayerInventory] 무기 교체됨: {(newWeapon != null ? newWeapon.weaponName : "없음")}");
+        // Debug.Log($"🔄 [PlayerInventory] 무기 교체됨: {(newWeapon != null ? newWeapon.weaponName : "없음")}");
     }
 
     public void AddWeapon(WeaponData weapon)
@@ -77,7 +77,7 @@ public class PlayerInventory : MonoBehaviour
             if (!inventoryManager.HasWeapon(weapon))
             {
                 inventoryManager.AddWeapon(weapon);
-                Debug.Log($"[PlayerInventory] 무기 추가: {weapon.weaponName}");
+                // Debug.Log($"[PlayerInventory] 무기 추가: {weapon.weaponName}");
             }
         }
         
@@ -111,7 +111,7 @@ public class PlayerInventory : MonoBehaviour
         if (inventoryManager != null)
         {
             inventoryManager.RemoveWeapon(weapon);
-            Debug.Log($"[PlayerInventory] 무기 제거: {weapon.weaponName}");
+            // Debug.Log($"[PlayerInventory] 무기 제거: {weapon.weaponName}");
         }
         
         // 레거시 호환성
@@ -140,11 +140,11 @@ public class PlayerInventory : MonoBehaviour
             currentWeaponObj.transform.localRotation = Quaternion.identity;
             currentWeaponObj.transform.localScale = prefabScale; // 프리팹 크기 유지
             
-            Debug.Log($"✅ [PlayerInventory] 무기 오브젝트 생성: {weaponData.weaponName}");
+            // Debug.Log($"✅ [PlayerInventory] 무기 오브젝트 생성: {weaponData.weaponName}");
         }
         else
         {
-            Debug.Log($"🔄 [PlayerInventory] 무기 해제됨");
+            // Debug.Log($"🔄 [PlayerInventory] 무기 해제됨");
         }
         
         // 🏃‍♂️ 플레이어 이동속도 업데이트
@@ -161,13 +161,13 @@ public class PlayerInventory : MonoBehaviour
     {
         if (weapon == null)
         {
-            Debug.LogWarning("⚠️ [PlayerInventory] 장착할 무기가 null입니다!");
+            // Debug.LogWarning("⚠️ [PlayerInventory] 장착할 무기가 null입니다!");
             return false;
         }
         
         if (weaponSlotManager == null)
         {
-            Debug.LogError("❌ [PlayerInventory] WeaponSlotManager가 없습니다!");
+            // Debug.LogError("❌ [PlayerInventory] WeaponSlotManager가 없습니다!");
             return false;
         }
         
@@ -177,7 +177,7 @@ public class PlayerInventory : MonoBehaviour
             slotIndex = weaponSlotManager.GetEmptySlotIndex();
             if (slotIndex == -1)
             {
-                Debug.LogWarning("⚠️ [PlayerInventory] 빈 슬롯이 없습니다!");
+                // Debug.LogWarning("⚠️ [PlayerInventory] 빈 슬롯이 없습니다!");
                 return false;
             }
         }
@@ -194,7 +194,7 @@ public class PlayerInventory : MonoBehaviour
                 inventoryManager.RefreshInventory(); // 수동으로 UI 새로고침
             }
             
-            Debug.Log($"✅ [PlayerInventory] 슬롯 {slotIndex + 1}에 무기 장착: {weapon.weaponName}");
+            // Debug.Log($"✅ [PlayerInventory] 슬롯 {slotIndex + 1}에 무기 장착: {weapon.weaponName}");
         }
         
         return success;
@@ -204,7 +204,7 @@ public class PlayerInventory : MonoBehaviour
     {
         if (weaponSlotManager == null)
         {
-            Debug.LogError("❌ [PlayerInventory] WeaponSlotManager가 없습니다!");
+            // Debug.LogError("❌ [PlayerInventory] WeaponSlotManager가 없습니다!");
             return;
         }
         
@@ -214,7 +214,7 @@ public class PlayerInventory : MonoBehaviour
             // 무기 해제 (자동으로 인벤토리에 반환됨)
             weaponSlotManager.UnequipWeaponFromSlot(slotIndex);
             
-            Debug.Log($"🔓 [PlayerInventory] 슬롯 {slotIndex + 1}에서 무기 해제: {weaponToUnequip.weaponName}");
+            // Debug.Log($"🔓 [PlayerInventory] 슬롯 {slotIndex + 1}에서 무기 해제: {weaponToUnequip.weaponName}");
         }
     }
 
@@ -341,7 +341,7 @@ public class PlayerInventory : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("⚠️ [PlayerInventory] PlayerController를 찾을 수 없어 이동속도를 업데이트할 수 없습니다!");
+            // Debug.LogWarning("⚠️ [PlayerInventory] PlayerController를 찾을 수 없어 이동속도를 업데이트할 수 없습니다!");
         }
     }
 } 

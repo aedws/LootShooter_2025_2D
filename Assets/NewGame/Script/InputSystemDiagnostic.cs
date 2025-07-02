@@ -31,7 +31,7 @@ public class InputSystemDiagnostic : MonoBehaviour
     
     void Start()
     {
-        Debug.Log("🔧 [InputSystemDiagnostic] 진단 도구 준비됨 - F9, F10, F11, F12 키 사용 가능");
+        // Debug.Log("🔧 [InputSystemDiagnostic] 진단 도구 준비됨 - F9, F10, F11, F12 키 사용 가능");
     }
     
     void Update()

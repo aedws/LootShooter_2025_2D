@@ -110,7 +110,7 @@ public class WeaponSlotManager : MonoBehaviour
         {
             if (weaponSlots[i] == null)
             {
-                Debug.LogError($"❌ [WeaponSlotManager] weaponSlots[{i}]이 연결되지 않았습니다!");
+                // Debug.LogError($"❌ [WeaponSlotManager] weaponSlots[{i}]이 연결되지 않았습니다!");
                 continue;
             }
             
@@ -142,7 +142,7 @@ public class WeaponSlotManager : MonoBehaviour
     {
         if (slotIndex < 0 || slotIndex >= weaponSlots.Length)
         {
-            Debug.LogWarning($"⚠️ [WeaponSlotManager] 잘못된 슬롯 인덱스: {slotIndex}");
+            // Debug.LogWarning($"⚠️ [WeaponSlotManager] 잘못된 슬롯 인덱스: {slotIndex}");
             return;
         }
         
@@ -296,13 +296,13 @@ public class WeaponSlotManager : MonoBehaviour
     {
         if (slotIndex < 0 || slotIndex >= weaponSlots.Length)
         {
-            Debug.LogWarning($"⚠️ [WeaponSlotManager] 잘못된 슬롯 인덱스: {slotIndex}");
+            // Debug.LogWarning($"⚠️ [WeaponSlotManager] 잘못된 슬롯 인덱스: {slotIndex}");
             return false;
         }
         
         if (weaponSlots[slotIndex] == null)
         {
-            Debug.LogError($"❌ [WeaponSlotManager] weaponSlots[{slotIndex}]이 null입니다!");
+            // Debug.LogError($"❌ [WeaponSlotManager] weaponSlots[{slotIndex}]이 null입니다!");
             return false;
         }
         
@@ -328,13 +328,13 @@ public class WeaponSlotManager : MonoBehaviour
     {
         if (slotIndex < 0 || slotIndex >= weaponSlots.Length)
         {
-            Debug.LogWarning($"⚠️ [WeaponSlotManager] 잘못된 슬롯 인덱스: {slotIndex}");
+            // Debug.LogWarning($"⚠️ [WeaponSlotManager] 잘못된 슬롯 인덱스: {slotIndex}");
             return false;
         }
         
         if (weaponSlots[slotIndex] == null)
         {
-            Debug.LogError($"❌ [WeaponSlotManager] weaponSlots[{slotIndex}]이 null입니다!");
+            // Debug.LogError($"❌ [WeaponSlotManager] weaponSlots[{slotIndex}]이 null입니다!");
             return false;
         }
         
@@ -414,8 +414,8 @@ public class WeaponSlotManager : MonoBehaviour
     [ContextMenu("Debug Slot Status")]
     public void DebugSlotStatus()
     {
-        Debug.Log("=== 무기 슬롯 상태 ===");
-        Debug.Log($"현재 활성 슬롯: {currentSlotIndex + 1}");
+        // Debug.Log("=== 무기 슬롯 상태 ===");
+        // Debug.Log($"현재 활성 슬롯: {currentSlotIndex + 1}");
         
         for (int i = 0; i < weaponSlots.Length; i++)
         {
@@ -423,11 +423,11 @@ public class WeaponSlotManager : MonoBehaviour
             {
                 string weaponName = weaponSlots[i].weaponData != null ? weaponSlots[i].weaponData.weaponName : "비어있음";
                 string status = i == currentSlotIndex ? "[활성]" : "[비활성]";
-                Debug.Log($"슬롯 {i + 1} {status}: {weaponName}");
+                // Debug.Log($"슬롯 {i + 1} {status}: {weaponName}");
             }
             else
             {
-                Debug.Log($"슬롯 {i + 1}: [NULL - 연결 필요]");
+                // Debug.Log($"슬롯 {i + 1}: [NULL - 연결 필요]");
             }
         }
     }
