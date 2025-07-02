@@ -1,12 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System.Collections;
 
-public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [Header("📋 슬롯 사용법")]
     [TextArea(3, 5)]
-    public string slotInstructions = "• 좌클릭: 슬롯 선택\n• 우클릭: 무기 즉시 장착\n• 드래그: 아이템만 드래그되어 WeaponSlot으로 이동\n• 마우스 호버: 0.5초 후 툴팁 표시\n• 무기 타입별로 테두리 색상 변경";
+    public string slotInstructions = "• 좌클릭: 슬롯 선택\n• 우클릭: 무기 즉시 장착\n• 드래그: WeaponSlot으로 무기 이동\n• 드롭: WeaponSlot에서 무기 반환 받기\n• 마우스 호버: 0.5초 후 툴팁 표시\n• 무기 타입별로 테두리 색상 변경";
 
     [Header("🖼️ Slot Components")]
     [Tooltip("무기 아이콘을 표시할 Image 컴포넌트")]
@@ -106,7 +107,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
     }
 
-    public void SetWeapon(WeaponData newWeaponData)
+        public void SetWeapon(WeaponData newWeaponData)
     {
         weaponData = newWeaponData;
         UpdateVisuals();
@@ -175,8 +176,8 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             iconImage.sprite = null;
             iconImage.enabled = false;
-        }
-        
+    }
+
         if (ammoText != null)
             ammoText.enabled = false;
         
@@ -250,8 +251,6 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         UpdateVisuals();
         
         HideTooltip();
-        
-        Debug.Log($"🎮 [InventorySlot] 드래그 시작: {draggedWeaponData.weaponName}");
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -283,16 +282,8 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         WeaponSlot weaponSlot = dropTarget?.GetComponent<WeaponSlot>();
         if (weaponSlot != null)
         {
-            // 무기 장착 성공
-            if (inventoryManager != null)
-            {
-                inventoryManager.EquipWeapon(draggedWeaponData);
-                itemMoved = true;
-                Debug.Log($"✅ [InventorySlot] 무기 장착 성공: {draggedWeaponData.weaponName}");
-                
-                // 🔧 무기 장착 후 인벤토리 새로고침
-                inventoryManager.RefreshInventory();
-            }
+            // WeaponSlot이 OnDrop에서 처리하도록 놔둠
+            itemMoved = true; // WeaponSlot 드롭은 성공으로 간주
         }
         else
         {
@@ -303,13 +294,11 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 // 슬롯 간 아이템 교환
                 SwapItems(targetSlot);
                 itemMoved = true;
-                Debug.Log($"🔄 [InventorySlot] 슬롯 교환: {draggedWeaponData.weaponName}");
             }
         }
         
-        // 🌍 전역 드래그 상태 초기화
-        CurrentlyDraggedWeapon = null;
-        CurrentlyDraggingSlot = null;
+        // 🆕 WeaponSlot 처리를 위해 약간 지연 후 전역 상태 초기화
+        StartCoroutine(ClearDragStateDelayed(itemMoved));
         
         // 드래그된 아이템 이미지 제거
         if (draggedItemImage != null)
@@ -318,23 +307,32 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             draggedItemImage = null;
         }
         
+        draggedWeaponData = null;
+    }
+    
+    // 🆕 지연된 드래그 상태 초기화
+    System.Collections.IEnumerator ClearDragStateDelayed(bool itemMoved)
+    {
+        // WeaponSlot의 OnDrop이 처리될 시간을 줌 (1프레임 대기)
+        yield return null;
+        
+        // 🌍 전역 드래그 상태 초기화
+        CurrentlyDraggedWeapon = null;
+        CurrentlyDraggingSlot = null;
+        
         // 아이템이 이동했다면 원래 슬롯에서 무기 제거
         if (itemMoved)
         {
             weaponData = null; // 🔥 원래 슬롯에서 무기 제거
             isTemporarilyEmpty = false;
             UpdateVisuals();
-            Debug.Log($"🎯 [InventorySlot] 무기 이동 완료, 원래 슬롯 클리어: {draggedWeaponData.weaponName}");
         }
         else
         {
             // 아이템이 이동하지 않았다면 원래 슬롯으로 복원
             isTemporarilyEmpty = false;
             UpdateVisuals();
-            Debug.Log($"🔙 [InventorySlot] 드래그 취소, 원래 위치로 복원: {draggedWeaponData.weaponName}");
         }
-        
-        draggedWeaponData = null;
     }
     
     void CreateDraggedItemImage()
@@ -361,8 +359,52 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         
         // 가장 위에 표시되도록 설정
         draggedItemImage.transform.SetAsLastSibling();
+    }
+    
+    public void OnDrop(PointerEventData eventData)
+    {
+        // WeaponSlot에서 드래그된 무기 확인
+        WeaponData weaponSlotDraggedWeapon = WeaponSlot.CurrentlyDraggedWeapon;
+        WeaponSlot weaponSlotSource = WeaponSlot.CurrentlyDraggedSlot;
         
-        Debug.Log($"🖼️ [InventorySlot] 드래그 아이템 이미지 생성: {draggedWeaponData.weaponName}");
+        if (weaponSlotDraggedWeapon != null && weaponSlotSource != null)
+        {
+            // 현재 슬롯에 무기가 있다면 WeaponSlot으로 이동
+            if (weaponData != null)
+            {
+                weaponSlotSource.SetWeaponData(weaponData);
+            }
+            else
+            {
+                // WeaponSlot을 비움
+                weaponSlotSource.SetWeaponData(null);
+            }
+            
+            // 현재 슬롯에 WeaponSlot의 무기 설정
+            weaponData = weaponSlotDraggedWeapon;
+            
+            // 두 슬롯 모두 시각적 업데이트
+            weaponSlotSource.ForceUpdateVisuals();
+            UpdateVisuals();
+            
+            // 인벤토리 새로고침
+            if (inventoryManager != null)
+            {
+                inventoryManager.RefreshInventory();
+            }
+            
+            return;
+        }
+        
+        // 다른 InventorySlot에서 드래그된 무기 확인 (기존 로직)
+        WeaponData inventoryDraggedWeapon = CurrentlyDraggedWeapon;
+        InventorySlot inventorySlotSource = CurrentlyDraggingSlot;
+        
+        if (inventoryDraggedWeapon != null && inventorySlotSource != null && inventorySlotSource != this)
+        {
+            SwapItems(inventorySlotSource);
+            return;
+        }
     }
     
     void SwapItems(InventorySlot targetSlot)

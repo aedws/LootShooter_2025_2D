@@ -435,6 +435,21 @@ public class InventoryDebugger : MonoBehaviour
             CreateBasicInventoryPanel();
         }
         
+        // WeaponSlotsPanel 자동 연결 (🆕 추가)
+        if (foundInventoryManager != null && foundInventoryManager.weaponSlotsPanel == null)
+        {
+            GameObject weaponSlotsPanel = GameObject.Find("WeaponSlotsPanel");
+            if (weaponSlotsPanel != null)
+            {
+                foundInventoryManager.weaponSlotsPanel = weaponSlotsPanel;
+                Debug.Log("✅ WeaponSlotsPanel이 자동으로 연결되었습니다!");
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ WeaponSlotsPanel을 찾을 수 없습니다. 필요시 수동으로 생성해주세요.");
+            }
+        }
+        
         // 재진단
         DiagnoseInventorySystem();
         
