@@ -136,6 +136,9 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 iconImage.sprite = weaponData.icon;
                 iconImage.color = Color.white;
                 iconImage.enabled = true;
+                
+                // 아이콘 크기를 슬롯 크기에 맞춰 조정
+                AdjustIconSize();
             }
             
             // 탄약 정보 표시
@@ -343,9 +346,12 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         draggedItemImage = new GameObject("DraggedItem");
         draggedItemImage.transform.SetParent(canvas.transform, false);
         
-        // RectTransform 설정
+        // RectTransform 설정 (슬롯 크기에 맞춰 동적 조정)
         RectTransform rect = draggedItemImage.AddComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(70, 70); // 슬롯과 같은 크기
+        
+        // 현재 슬롯 크기를 가져와서 드래그 이미지 크기 설정
+        Vector2 dragImageSize = GetCurrentSlotSize() * 0.8f; // 슬롯의 80% 크기
+        rect.sizeDelta = dragImageSize;
         
         // Image 컴포넌트 추가
         Image dragImage = draggedItemImage.AddComponent<Image>();
@@ -523,5 +529,47 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public bool HasWeapon()
     {
         return weaponData != null;
+    }
+    
+    // 🎨 아이콘 크기를 슬롯 크기에 맞춰 동적 조정
+    void AdjustIconSize()
+    {
+        if (iconImage == null || inventoryManager == null) return;
+        
+        RectTransform iconRect = iconImage.GetComponent<RectTransform>();
+        if (iconRect == null) return;
+        
+        // InventoryManager에서 슬롯 크기 가져오기
+        Vector2 slotSize = inventoryManager.slotSize;
+        
+        // 아이콘 크기는 슬롯 크기의 70%로 설정 (여백 확보)
+        Vector2 iconSize = slotSize * 0.7f;
+        
+        // 최소/최대 크기 제한
+        iconSize.x = Mathf.Clamp(iconSize.x, 20f, 150f);
+        iconSize.y = Mathf.Clamp(iconSize.y, 20f, 150f);
+        
+        iconRect.sizeDelta = iconSize;
+        
+        // 아이콘을 슬롯 중앙에 위치시키기
+        iconRect.anchorMin = new Vector2(0.5f, 0.5f);
+        iconRect.anchorMax = new Vector2(0.5f, 0.5f);
+        iconRect.anchoredPosition = Vector2.zero;
+    }
+    
+    // 현재 슬롯 크기 가져오기
+    Vector2 GetCurrentSlotSize()
+    {
+        if (inventoryManager != null)
+        {
+            // InventoryManager의 설정된 슬롯 크기 사용
+            return inventoryManager.slotSize;
+        }
+        else
+        {
+            // InventoryManager가 없으면 자체 RectTransform 크기 사용
+            RectTransform selfRect = GetComponent<RectTransform>();
+            return selfRect != null ? selfRect.sizeDelta : new Vector2(70f, 70f);
+        }
     }
 } 

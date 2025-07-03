@@ -30,7 +30,7 @@ public class InventoryManager : MonoBehaviour
 {
     [Header("📋 사용 방법")]
     [TextArea(3, 8)]
-    public string instructions = "1. inventoryPanel에 인벤토리 UI 패널 연결\n2. weaponSlotsPanel에 무기 슬롯 패널 연결 (자동 연결됨)\n3. slotParent에 슬롯들이 들어갈 부모 Transform 연결\n4. slotPrefab에 InventorySlot 컴포넌트가 있는 프리팹 연결\n5. weaponSlotManager에 WeaponSlotManager 연결 (3개 슬롯 지원)\n6. 게임 실행 후 I키로 인벤토리 열기\n7. F1-F5로 테스트 (InventoryTester 필요)\n\n💡 WeaponSlotsPanel은 인벤토리와 함께 열리고 닫힙니다!";
+    public string instructions = "🆕 동적 세로 인벤토리 시스템:\n1. inventoryPanel에 인벤토리 UI 패널 연결\n2. slotParent에 VerticalLayoutGroup이 있는 부모 Transform 연결\n3. slotPrefab에 InventorySlot 컴포넌트가 있는 프리팹 연결\n4. weaponSlotManager에 WeaponSlotManager 연결 (3개 슬롯 지원)\n5. slotSize로 가로/세로 크기 개별 조정 가능 (기본: 200x50)\n6. 무기 추가 시 자동으로 슬롯 생성 (1개씩 세로로)\n7. 무기 제거 시 불필요한 빈 슬롯 자동 정리\n8. I키로 인벤토리 열기/닫기\n\n💡 이제 격자가 아닌 리스트 형태로 동적 확장됩니다!";
     
     [Header("🔧 UI References")]
     [Tooltip("인벤토리 UI 전체 패널 (활성화/비활성화됨)")]
@@ -39,7 +39,7 @@ public class InventoryManager : MonoBehaviour
     [Tooltip("🆕 무기 슬롯 패널 (인벤토리와 함께 표시됨)")]
     public GameObject weaponSlotsPanel;
     
-    [Tooltip("슬롯들이 생성될 부모 Transform (GridLayoutGroup 권장)")]
+    [Tooltip("슬롯들이 생성될 부모 Transform (VerticalLayoutGroup 자동 생성됨)")]
     public Transform slotParent;
     
     [Tooltip("InventorySlot 컴포넌트가 있는 슬롯 프리팹")]
@@ -53,21 +53,16 @@ public class InventoryManager : MonoBehaviour
     public WeaponSlot weaponSlot;
     
     [Header("⚙️ Inventory Settings")]
-    [Tooltip("최대 슬롯 개수 (권장: 20-40개)")]
-    [Range(5, 50)]
-    public int maxSlots = 20;
-    
-    [Tooltip("한 줄에 표시할 슬롯 개수")]
-    [Range(3, 10)]
-    public int slotsPerRow = 5;
-    
-    [Tooltip("각 슬롯의 크기 (픽셀)")]
-    [Range(50f, 100f)]
-    public float slotSize = 70f;
+    [Tooltip("각 슬롯의 크기 (픽셀) - X: 가로, Y: 세로")]
+    public Vector2 slotSize = new Vector2(200f, 50f);
     
     [Tooltip("슬롯 간 간격 (픽셀)")]
     [Range(5f, 20f)]
     public float slotSpacing = 10f;
+    
+    [Tooltip("최소 빈 슬롯 개수 (항상 이만큼 여유분 유지)")]
+    [Range(1, 5)]
+    public int minEmptySlots = 2;
     
     [Header("🎛️ UI Components (선택사항)")]
     [Tooltip("정렬 방식 선택 드롭다운")]
@@ -201,37 +196,73 @@ public class InventoryManager : MonoBehaviour
         }
         inventorySlots.Clear();
         
-        // GridLayoutGroup 설정
+        // 기존 GridLayoutGroup 제거 (있다면)
         GridLayoutGroup gridLayout = slotParent.GetComponent<GridLayoutGroup>();
-        if (gridLayout == null)
-            gridLayout = slotParent.gameObject.AddComponent<GridLayoutGroup>();
-        
-        gridLayout.cellSize = new Vector2(slotSize, slotSize);
-        gridLayout.spacing = new Vector2(slotSpacing, slotSpacing);
-        gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        gridLayout.constraintCount = slotsPerRow;
-        
-        // 슬롯 생성
-        for (int i = 0; i < maxSlots; i++)
+        if (gridLayout != null)
         {
-            GameObject slotObj = Instantiate(slotPrefab, slotParent);
+            DestroyImmediate(gridLayout);
+        }
+        
+        // VerticalLayoutGroup 설정 (1개씩 세로로 배열)
+        VerticalLayoutGroup verticalLayout = slotParent.GetComponent<VerticalLayoutGroup>();
+        if (verticalLayout == null)
+            verticalLayout = slotParent.gameObject.AddComponent<VerticalLayoutGroup>();
+        
+        // 세로 레이아웃 설정
+        verticalLayout.spacing = slotSpacing;
+        verticalLayout.childAlignment = TextAnchor.UpperCenter;
+        verticalLayout.childControlHeight = false;
+        verticalLayout.childControlWidth = false;
+        verticalLayout.childForceExpandHeight = false;
+        verticalLayout.childForceExpandWidth = false;
+        
+        // ContentSizeFitter 추가 (동적 크기 조정)
+        ContentSizeFitter contentSizeFitter = slotParent.GetComponent<ContentSizeFitter>();
+        if (contentSizeFitter == null)
+            contentSizeFitter = slotParent.gameObject.AddComponent<ContentSizeFitter>();
+        
+        contentSizeFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        contentSizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        
+        // 초기 슬롯 생성 (동적으로 필요한 만큼만 생성)
+        CreateInitialSlots();
+    }
+    
+    void CreateInitialSlots()
+    {
+        // 초기에는 빈 슬롯 몇 개만 생성
+        int initialSlotCount = Mathf.Max(1, weapons.Count + minEmptySlots); // 현재 무기 + 최소 빈 슬롯
+        
+        for (int i = 0; i < initialSlotCount; i++)
+        {
+            CreateSingleSlot(i);
+        }
+    }
+    
+    void CreateSingleSlot(int slotIndex)
+    {
+        GameObject slotObj = Instantiate(slotPrefab, slotParent);
+        
+        // 슬롯 크기 설정 (가로/세로 개별 설정 가능)
+        RectTransform slotRect = slotObj.GetComponent<RectTransform>();
+        if (slotRect != null)
+        {
+            slotRect.sizeDelta = slotSize; // Vector2 직접 사용
+        }
+        
+        // 슬롯 활성화 보장
+        slotObj.SetActive(true);
+        
+        InventorySlot slot = slotObj.GetComponent<InventorySlot>();
+        
+        if (slot != null)
+        {
+            slot.slotIndex = slotIndex;
+            slot.inventoryManager = this;
+            inventorySlots.Add(slot);
             
-            // 🔧 슬롯 활성화 보장 (프리팹이 비활성화 상태여도 문제없음)
-            slotObj.SetActive(true);
-            
-            InventorySlot slot = slotObj.GetComponent<InventorySlot>();
-            
-            if (slot != null)
-            {
-                slot.slotIndex = i;
-                slot.inventoryManager = this;
-                inventorySlots.Add(slot);
-                
-                // 슬롯 컴포넌트도 활성화 보장
-                slot.enabled = true;
-            }
-            
-            // 로그 제거
+            // 슬롯 컴포넌트도 활성화 보장
+            slot.enabled = true;
         }
     }
     
@@ -334,6 +365,9 @@ public class InventoryManager : MonoBehaviour
         {
             weapons.Add(weapon);
             
+            // 동적으로 슬롯 생성 (필요한 경우)
+            EnsureEnoughSlots();
+            
             // 초기화가 완료된 경우에만 UI 새로고침
             if (isInitialized)
             {
@@ -341,6 +375,18 @@ public class InventoryManager : MonoBehaviour
             }
             
 
+        }
+    }
+    
+    void EnsureEnoughSlots()
+    {
+        // 필요한 슬롯 수 계산 (현재 무기 + 최소 빈 슬롯)
+        int requiredSlots = weapons.Count + minEmptySlots;
+        
+        // 현재 슬롯 수보다 더 많이 필요하면 슬롯 추가
+        while (inventorySlots.Count < requiredSlots)
+        {
+            CreateSingleSlot(inventorySlots.Count);
         }
     }
     
@@ -355,6 +401,9 @@ public class InventoryManager : MonoBehaviour
         {
             weapons.Remove(weapon);
             
+            // 빈 슬롯이 너무 많으면 제거
+            CleanupExcessSlots();
+            
             // 초기화가 완료되고 새로고침이 요청된 경우에만 UI 새로고침
             if (shouldRefresh && isInitialized)
             {
@@ -362,6 +411,34 @@ public class InventoryManager : MonoBehaviour
             }
             
 
+        }
+    }
+    
+    void CleanupExcessSlots()
+    {
+        // 필요한 슬롯 수 계산
+        int requiredSlots = weapons.Count + minEmptySlots;
+        int maxAllowedSlots = weapons.Count + (minEmptySlots * 2); // 최대 허용 슬롯 (여유분 2배)
+        
+        // 슬롯이 너무 많으면 뒤에서부터 제거
+        while (inventorySlots.Count > maxAllowedSlots && inventorySlots.Count > requiredSlots)
+        {
+            int lastIndex = inventorySlots.Count - 1;
+            InventorySlot lastSlot = inventorySlots[lastIndex];
+            
+            // 빈 슬롯만 제거
+            if (lastSlot != null && lastSlot.weaponData == null)
+            {
+                inventorySlots.RemoveAt(lastIndex);
+                if (lastSlot.gameObject != null)
+                {
+                    DestroyImmediate(lastSlot.gameObject);
+                }
+            }
+            else
+            {
+                break; // 무기가 있는 슬롯을 만나면 중단
+            }
         }
     }
     
@@ -716,7 +793,10 @@ public class InventoryManager : MonoBehaviour
     
     public bool IsFull()
     {
-        return weapons.Count >= maxSlots;
+        // 동적 인벤토리에서는 항상 확장 가능하므로 가득 차지 않음
+        // 대신 과도한 무기 수집을 방지하기 위한 합리적인 제한 설정
+        int maxReasonableWeapons = 50; // 합리적인 최대 무기 수
+        return weapons.Count >= maxReasonableWeapons;
     }
     
     void OnDestroy()

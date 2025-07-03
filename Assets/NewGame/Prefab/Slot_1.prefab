@@ -112,7 +112,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 355, y: -100}
-  m_SizeDelta: {x: 60, y: 60}
+  m_SizeDelta: {x: 120, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &403088070841519531
 CanvasRenderer:
@@ -178,6 +178,7 @@ MonoBehaviour:
   hoverColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   selectedColor: {r: 0, g: 1, b: 0, a: 1}
   emptyColor: {r: 1, g: 1, b: 1, a: 0.3}
+  draggingEmptyColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}
   arColor: {r: 1, g: 0, b: 0, a: 1}
   hgColor: {r: 0, g: 0, b: 1, a: 1}
   mgColor: {r: 1, g: 0, b: 1, a: 1}

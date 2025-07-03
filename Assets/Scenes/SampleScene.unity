@@ -4233,10 +4233,9 @@ MonoBehaviour:
   slotPrefab: {fileID: 9019924046384971551, guid: 359da22fea6d1a74ab8538039824f099, type: 3}
   weaponSlotManager: {fileID: 262997118}
   weaponSlot: {fileID: 482475857}
-  maxSlots: 20
-  slotsPerRow: 5
-  slotSize: 70
+  slotSize: {x: 120, y: 60}
   slotSpacing: 10
+  minEmptySlots: 2
   sortDropdown: {fileID: 0}
   filterDropdown: {fileID: 0}
   sortButton: {fileID: 0}
