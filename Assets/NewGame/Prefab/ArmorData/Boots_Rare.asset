@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c21f47c2daaaf4c4f8ce77bc2421232b, type: 3}
+  m_Name: Boots_Rare
+  m_EditorClassIdentifier: 
+  armorName: "\uAC15\uD654\uB41C \uC2E0\uBC1C"
+  armorType: 3
+  rarity: 1
+  icon: {fileID: 21300000, guid: 33ecf9ec13a42524cbaed293f19d67c2, type: 3}
+  defense: 5
+  maxHealth: 5
+  damageReduction: 0.05
+  moveSpeedBonus: 0.15
+  jumpForceBonus: 0.1
+  dashCooldownReduction: 0.1
+  hasRegeneration: 1
+  regenerationRate: 0.6323353
+  hasInvincibilityFrame: 0
+  invincibilityBonus: 0
+  description: "\uAC15\uD654\uB41C \uC2E0\uBC1C\uB85C \uB354 \uBE60\uB978 \uC774\uB3D9\uC774
+    \uAC00\uB2A5\uD558\uB2E4"
+  rarityColor: {r: 0, g: 0, b: 1, a: 1}
+  visualEffect: {fileID: 0}

@@ -65,12 +65,15 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     
     // 🌍 전역 드래그 상태 (WeaponSlot에서 접근 가능)
     public static WeaponData CurrentlyDraggedWeapon { get; private set; } = null;
+    public static ArmorData CurrentlyDraggedArmor { get; private set; } = null; // 🆕 방어구 드래그 상태
     public static InventorySlot CurrentlyDraggingSlot { get; private set; } = null;
     
     // Public properties
     public WeaponData weaponData { get; private set; }
+    public ArmorData armorData { get; private set; } // 🆕 방어구 데이터 추가
     public int slotIndex { get; set; }
     public InventoryManager inventoryManager { get; set; }
+    public bool isArmorSlot { get; set; } = false; // 🆕 방어구 슬롯 여부
     
     // Private variables
     private Canvas canvas;
@@ -81,6 +84,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     // 🎮 게임식 드래그앤드롭을 위한 변수들
     private GameObject draggedItemImage; // 드래그되는 아이템 이미지
     private WeaponData draggedWeaponData; // 드래그 중인 무기 데이터
+    private ArmorData draggedArmorData; // 🆕 드래그 중인 방어구 데이터
     private bool isTemporarilyEmpty = false; // 드래그 중 일시적으로 빈 상태
     
     // Tooltip variables
@@ -113,12 +117,22 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         public void SetWeapon(WeaponData newWeaponData)
     {
         weaponData = newWeaponData;
+        armorData = null; // 무기 설정 시 방어구 클리어
+        UpdateVisuals();
+    }
+    
+    // 🆕 방어구 설정 메서드
+    public void SetArmor(ArmorData newArmorData)
+    {
+        armorData = newArmorData;
+        weaponData = null; // 방어구 설정 시 무기 클리어
         UpdateVisuals();
     }
     
     public void ClearSlot()
     {
         weaponData = null;
+        armorData = null;
         UpdateVisuals();
     }
     
@@ -133,46 +147,13 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         
         if (weaponData != null)
         {
-            // 아이콘 설정
-            if (iconImage != null)
-            {
-                iconImage.sprite = weaponData.icon;
-                iconImage.color = Color.white;
-                iconImage.enabled = true;
-                
-                // 아이콘 크기를 슬롯 크기에 맞춰 조정
-                AdjustIconSize();
-            }
-            
-            // 탄약 정보 표시
-            if (ammoText != null)
-            {
-                if (weaponData.infiniteAmmo)
-                    ammoText.text = "∞";
-                else
-                    ammoText.text = $"{weaponData.currentAmmo}/{weaponData.maxAmmo}";
-                ammoText.enabled = true;
-            }
-            
-            // 플레이버 텍스트 표시
-            if (flavorText != null)
-            {
-                flavorText.text = weaponData.flavorText;
-                flavorText.enabled = true;
-            }
-            
-            // 무기 타입별 색상
-            if (borderImage != null)
-            {
-                borderImage.color = GetWeaponTypeColor(weaponData.weaponType);
-                borderImage.enabled = true;
-            }
-            
-            // 희귀도 효과 (나중에 확장 가능)
-            if (rarityGlow != null)
-            {
-                rarityGlow.SetActive(weaponData.damage > 50); // 임시로 데미지 50 이상이면 효과
-            }
+            // 무기 표시
+            ShowWeaponVisuals();
+        }
+        else if (armorData != null)
+        {
+            // 🆕 방어구 표시
+            ShowArmorVisuals();
         }
         else
         {
@@ -180,6 +161,89 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
         
         UpdateSlotColor();
+    }
+    
+    // 🆕 무기 시각적 요소 표시
+    void ShowWeaponVisuals()
+    {
+        // 아이콘 설정
+        if (iconImage != null)
+        {
+            iconImage.sprite = weaponData.icon;
+            iconImage.color = Color.white;
+            iconImage.enabled = true;
+            AdjustIconSize();
+        }
+        
+        // 탄약 정보 표시
+        if (ammoText != null)
+        {
+            if (weaponData.infiniteAmmo)
+                ammoText.text = "∞";
+            else
+                ammoText.text = $"{weaponData.currentAmmo}/{weaponData.maxAmmo}";
+            ammoText.enabled = true;
+        }
+        
+        // 플레이버 텍스트 표시
+        if (flavorText != null)
+        {
+            flavorText.text = weaponData.flavorText;
+            flavorText.enabled = true;
+        }
+        
+        // 무기 타입별 색상
+        if (borderImage != null)
+        {
+            borderImage.color = GetWeaponTypeColor(weaponData.weaponType);
+            borderImage.enabled = true;
+        }
+        
+        // 희귀도 효과
+        if (rarityGlow != null)
+        {
+            rarityGlow.SetActive(weaponData.damage > 50);
+        }
+    }
+    
+    // 🆕 방어구 시각적 요소 표시
+    void ShowArmorVisuals()
+    {
+        // 아이콘 설정
+        if (iconImage != null)
+        {
+            iconImage.sprite = armorData.icon;
+            iconImage.color = Color.white;
+            iconImage.enabled = true;
+            AdjustIconSize();
+        }
+        
+        // 방어력 정보 표시 (탄약 텍스트 재사용)
+        if (ammoText != null)
+        {
+            ammoText.text = $"방어력: {armorData.defense}";
+            ammoText.enabled = true;
+        }
+        
+        // 방어구 이름 표시 (플레이버 텍스트 재사용)
+        if (flavorText != null)
+        {
+            flavorText.text = armorData.armorName;
+            flavorText.enabled = true;
+        }
+        
+        // 방어구 레어리티별 색상
+        if (borderImage != null)
+        {
+            borderImage.color = armorData.GetRarityColor();
+            borderImage.enabled = true;
+        }
+        
+        // 레어리티 효과
+        if (rarityGlow != null)
+        {
+            rarityGlow.SetActive(armorData.rarity >= ArmorRarity.Rare);
+        }
     }
     
     void ShowEmptySlot(bool isDraggingEmpty)
@@ -250,14 +314,25 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     // 🎮 진짜 게임식 드래그 앤 드롭 시스템
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (weaponData == null) return;
+        // 🆕 무기 또는 방어구가 있어야 드래그 가능
+        if (weaponData == null && armorData == null) return;
         
         isDragging = true;
-        draggedWeaponData = weaponData;
         
-        // 🌍 전역 드래그 상태 설정
-        CurrentlyDraggedWeapon = draggedWeaponData;
-        CurrentlyDraggingSlot = this;
+        if (weaponData != null)
+        {
+            draggedWeaponData = weaponData;
+            // 🌍 전역 드래그 상태 설정
+            CurrentlyDraggedWeapon = draggedWeaponData;
+            CurrentlyDraggingSlot = this;
+        }
+        else if (armorData != null)
+        {
+            // 🆕 방어구 드래그 상태 설정
+            draggedArmorData = armorData;
+            CurrentlyDraggedArmor = draggedArmorData;
+            CurrentlyDraggingSlot = this;
+        }
         
         // 드래그할 아이템 이미지 생성
         CreateDraggedItemImage();
@@ -294,9 +369,15 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         // 드롭 대상 찾기
         GameObject dropTarget = eventData.pointerCurrentRaycast.gameObject;
         
+        // 🆕 ArmorSlot에 드롭했는지 확인
+        ArmorSlot armorSlot = dropTarget?.GetComponent<ArmorSlot>();
+        if (armorSlot != null && CurrentlyDraggedArmor != null)
+        {
+            // ArmorSlot이 OnDrop에서 처리하도록 놔둠
+            itemMoved = true; // ArmorSlot 드롭은 성공으로 간주
+        }
         // WeaponSlot에 드롭했는지 확인
-        WeaponSlot weaponSlot = dropTarget?.GetComponent<WeaponSlot>();
-        if (weaponSlot != null)
+        else if (dropTarget?.GetComponent<WeaponSlot>() != null && CurrentlyDraggedWeapon != null)
         {
             // WeaponSlot이 OnDrop에서 처리하도록 놔둠
             itemMoved = true; // WeaponSlot 드롭은 성공으로 간주
@@ -313,7 +394,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             }
         }
         
-        // 🆕 WeaponSlot 처리를 위해 약간 지연 후 전역 상태 초기화
+        // 🆕 ArmorSlot/WeaponSlot 처리를 위해 약간 지연 후 전역 상태 초기화
         StartCoroutine(ClearDragStateDelayed(itemMoved));
         
         // 드래그된 아이템 이미지 제거
@@ -323,23 +404,34 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             draggedItemImage = null;
         }
         
+        // 🆕 로컬 드래그 상태 초기화
         draggedWeaponData = null;
+        draggedArmorData = null;
     }
     
     // 🆕 지연된 드래그 상태 초기화
     System.Collections.IEnumerator ClearDragStateDelayed(bool itemMoved)
     {
-        // WeaponSlot의 OnDrop이 처리될 시간을 줌 (1프레임 대기)
+        // ArmorSlot/WeaponSlot의 OnDrop이 처리될 시간을 줌 (1프레임 대기)
         yield return null;
         
         // 🌍 전역 드래그 상태 초기화
         CurrentlyDraggedWeapon = null;
+        CurrentlyDraggedArmor = null; // 🆕 방어구 드래그 상태 초기화
         CurrentlyDraggingSlot = null;
         
-        // 아이템이 이동했다면 원래 슬롯에서 무기 제거
+        // 아이템이 이동했다면 원래 슬롯에서 아이템 제거
         if (itemMoved)
         {
-            weaponData = null; // 🔥 원래 슬롯에서 무기 제거
+            // 🆕 무기 또는 방어구 중 하나만 제거
+            if (draggedWeaponData != null)
+            {
+                weaponData = null; // 🔥 원래 슬롯에서 무기 제거
+            }
+            else if (draggedArmorData != null)
+            {
+                armorData = null; // 🆕 원래 슬롯에서 방어구 제거
+            }
             isTemporarilyEmpty = false;
             UpdateVisuals();
         }
@@ -353,22 +445,50 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     
     void CreateDraggedItemImage()
     {
-        if (draggedWeaponData == null || canvas == null) return;
+        if (canvas == null) return;
+        
+        // 🆕 무기 또는 방어구 데이터 확인
+        Sprite iconSprite = null;
+        bool isArmor = false;
+        
+        if (draggedWeaponData != null)
+        {
+            iconSprite = draggedWeaponData.icon;
+            isArmor = false;
+        }
+        else if (draggedArmorData != null)
+        {
+            iconSprite = draggedArmorData.icon;
+            isArmor = true;
+        }
+        
+        if (iconSprite == null) return;
         
         // 드래그될 아이템 이미지 오브젝트 생성
         draggedItemImage = new GameObject("DraggedItem");
         draggedItemImage.transform.SetParent(canvas.transform, false);
         
-        // RectTransform 설정 (슬롯 크기에 맞춰 동적 조정)
+        // RectTransform 설정
         RectTransform rect = draggedItemImage.AddComponent<RectTransform>();
         
-        // 현재 슬롯 크기를 가져와서 드래그 이미지 크기 설정
-        Vector2 dragImageSize = GetCurrentSlotSize() * 0.9f; // 슬롯의 90% 크기
+        // 🆕 아이템 타입에 따라 드래그 이미지 크기 설정
+        Vector2 dragImageSize;
+        if (isArmor)
+        {
+            // 방어구: 80x80 고정 크기
+            dragImageSize = new Vector2(80f, 80f);
+        }
+        else
+        {
+            // 무기: 슬롯의 90% 크기 (기존 방식)
+            dragImageSize = GetCurrentSlotSize() * 0.9f;
+        }
+        
         rect.sizeDelta = dragImageSize;
         
         // Image 컴포넌트 추가
         Image dragImage = draggedItemImage.AddComponent<Image>();
-        dragImage.sprite = draggedWeaponData.icon;
+        dragImage.sprite = iconSprite;
         dragImage.color = new Color(1f, 1f, 1f, 0.8f); // 약간 투명하게
         dragImage.raycastTarget = false; // 레이캐스트 차단 안함
         
@@ -382,6 +502,39 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     
     public void OnDrop(PointerEventData eventData)
     {
+        // 🆕 ArmorSlot에서 드래그된 방어구 확인
+        ArmorData armorSlotDraggedArmor = ArmorSlot.CurrentlyDraggedArmor;
+        ArmorSlot armorSlotSource = ArmorSlot.CurrentlyDraggedSlot;
+        
+        if (armorSlotDraggedArmor != null && armorSlotSource != null)
+        {
+            // 현재 슬롯에 방어구가 있다면 ArmorSlot으로 이동
+            if (armorData != null)
+            {
+                armorSlotSource.SetArmorData(armorData);
+            }
+            else
+            {
+                // ArmorSlot을 비움
+                armorSlotSource.SetArmorData(null);
+            }
+            
+            // 현재 슬롯에 ArmorSlot의 방어구 설정
+            armorData = armorSlotDraggedArmor;
+            
+            // 두 슬롯 모두 시각적 업데이트
+            armorSlotSource.ForceUpdateVisuals();
+            UpdateVisuals();
+            
+            // 인벤토리 새로고침
+            if (inventoryManager != null)
+            {
+                inventoryManager.RefreshInventory();
+            }
+            
+            return;
+        }
+        
         // WeaponSlot에서 드래그된 무기 확인
         WeaponData weaponSlotDraggedWeapon = WeaponSlot.CurrentlyDraggedWeapon;
         WeaponSlot weaponSlotSource = WeaponSlot.CurrentlyDraggedSlot;
@@ -415,11 +568,19 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             return;
         }
         
-        // 다른 InventorySlot에서 드래그된 무기 확인 (기존 로직)
+        // 다른 InventorySlot에서 드래그된 아이템 확인 (무기 또는 방어구)
         WeaponData inventoryDraggedWeapon = CurrentlyDraggedWeapon;
+        ArmorData inventoryDraggedArmor = CurrentlyDraggedArmor; // 🆕 방어구 드래그 확인
         InventorySlot inventorySlotSource = CurrentlyDraggingSlot;
         
         if (inventoryDraggedWeapon != null && inventorySlotSource != null && inventorySlotSource != this)
+        {
+            SwapItems(inventorySlotSource);
+            return;
+        }
+        
+        // 🆕 다른 InventorySlot에서 드래그된 방어구 처리
+        if (inventoryDraggedArmor != null && inventorySlotSource != null && inventorySlotSource != this)
         {
             SwapItems(inventorySlotSource);
             return;
@@ -430,15 +591,29 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (targetSlot == null || inventoryManager == null) return;
         
-        WeaponData myWeapon = draggedWeaponData;
-        WeaponData targetWeapon = targetSlot.weaponData;
-        
-        // 아이템 교환
-        weaponData = targetWeapon;
-        targetSlot.weaponData = myWeapon;
+        // 🆕 전역 드래그 상태 사용 (OnDrop에서 호출될 때)
+        if (CurrentlyDraggedWeapon != null)
+        {
+            // 무기 교환
+            WeaponData myWeapon = CurrentlyDraggedWeapon;
+            WeaponData targetWeapon = targetSlot.weaponData;
+            
+            weaponData = targetWeapon;
+            targetSlot.weaponData = myWeapon;
+        }
+        else if (CurrentlyDraggedArmor != null)
+        {
+            // 방어구 교환
+            ArmorData myArmor = CurrentlyDraggedArmor;
+            ArmorData targetArmor = targetSlot.armorData;
+            
+            armorData = targetArmor;
+            targetSlot.armorData = myArmor;
+        }
         
         // 두 슬롯 모두 업데이트
         isTemporarilyEmpty = false;
+        targetSlot.isTemporarilyEmpty = false;
         UpdateVisuals();
         targetSlot.UpdateVisuals();
         
@@ -465,7 +640,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     // 클릭 이벤트
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (weaponData == null || isTemporarilyEmpty) return;
+        if (isTemporarilyEmpty) return;
         
         if (eventData.button == PointerEventData.InputButton.Left)
         {
@@ -474,11 +649,69 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         }
         else if (eventData.button == PointerEventData.InputButton.Right)
         {
-            // 우클릭: 무기 장착
-            if (inventoryManager != null)
+            // 우클릭: 무기 또는 방어구 장착
+            if (weaponData != null)
             {
-                inventoryManager.EquipWeapon(weaponData);
+                if (inventoryManager != null)
+                {
+                    inventoryManager.EquipWeapon(weaponData);
+                }
             }
+            else if (armorData != null)
+            {
+                // 🆕 방어구 우클릭: 자동 장착
+                TryEquipArmor();
+            }
+        }
+    }
+    
+    // 🆕 방어구 자동 장착 시도
+    void TryEquipArmor()
+    {
+        if (armorData == null || inventoryManager == null) return;
+        
+        // ArmorSlotManager 찾기
+        ArmorSlotManager armorSlotManager = FindFirstObjectByType<ArmorSlotManager>();
+        if (armorSlotManager == null)
+        {
+            Debug.LogWarning("⚠️ [InventorySlot] ArmorSlotManager를 찾을 수 없습니다.");
+            return;
+        }
+        
+        // 해당 타입의 슬롯에 자동 장착 시도
+        int slotIndex = GetSlotIndexForArmorType(armorData.armorType);
+        if (slotIndex >= 0)
+        {
+            bool success = armorSlotManager.EquipArmorToSlot(armorData, slotIndex);
+            if (success)
+            {
+                Debug.Log($"🛡️ {armorData.armorName}이(가) 슬롯 {slotIndex}에 자동 장착되었습니다!");
+                
+                // 🆕 인벤토리 새로고침
+                if (inventoryManager != null)
+                {
+                    inventoryManager.RefreshInventory();
+                }
+            }
+            else
+            {
+                Debug.Log($"⚠️ {armorData.armorName} 자동 장착 실패 (슬롯 {slotIndex}에 이미 방어구가 장착되어 있음)");
+            }
+        }
+    }
+    
+    // 🆕 방어구 타입에 따른 슬롯 인덱스 반환
+    int GetSlotIndexForArmorType(ArmorType armorType)
+    {
+        switch (armorType)
+        {
+            case ArmorType.Helmet: return 0;    // 머리
+            case ArmorType.Chest: return 1;     // 상체
+            case ArmorType.Legs: return 2;      // 하체
+            case ArmorType.Boots: return 3;     // 신발
+            case ArmorType.Shoulder: return 4;  // 어깨
+            case ArmorType.Accessory: return 5; // 악세사리
+            default: return -1;
         }
     }
     
@@ -552,15 +785,24 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         RectTransform iconRect = iconImage.GetComponent<RectTransform>();
         if (iconRect == null) return;
         
-        // InventoryManager에서 슬롯 크기 가져오기
-        Vector2 slotSize = inventoryManager.slotSize;
+        // 🆕 아이템 타입에 따라 아이콘 크기 설정
+        Vector2 iconSize;
         
-        // 아이콘 크기는 슬롯 크기의 85%로 설정 (여백 확보)
-        Vector2 iconSize = slotSize * 0.85f;
-        
-        // 최소/최대 크기 제한
-        iconSize.x = Mathf.Clamp(iconSize.x, 20f, 150f);
-        iconSize.y = Mathf.Clamp(iconSize.y, 20f, 150f);
+        if (armorData != null)
+        {
+            // 방어구: 80x80 고정 크기
+            iconSize = new Vector2(80f, 80f);
+        }
+        else
+        {
+            // 무기: 슬롯 크기의 85%로 설정 (기존 방식)
+            Vector2 slotSize = inventoryManager.slotSize;
+            iconSize = slotSize * 0.85f;
+            
+            // 최소/최대 크기 제한
+            iconSize.x = Mathf.Clamp(iconSize.x, 20f, 150f);
+            iconSize.y = Mathf.Clamp(iconSize.y, 20f, 150f);
+        }
         
         iconRect.sizeDelta = iconSize;
         

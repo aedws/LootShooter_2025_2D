@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class PlayerInventory : MonoBehaviour
 {
@@ -15,6 +16,13 @@ public class PlayerInventory : MonoBehaviour
     public Transform weaponHolder;
     
     private GameObject currentWeaponObj;
+    
+    [Header("🛡️ Armor Management")]
+    [Tooltip("장착된 방어구들 (타입별로 관리)")]
+    public Dictionary<ArmorType, ArmorData> equippedArmors = new Dictionary<ArmorType, ArmorData>();
+    
+    [Tooltip("방어구 슬롯 매니저 (자동으로 찾아서 연결됨)")]
+    public ArmorSlotManager armorSlotManager;
     
     [Header("🔗 UI References")]
     [Tooltip("인벤토리 매니저 (자동으로 찾아서 연결됨)")]
@@ -48,10 +56,21 @@ public class PlayerInventory : MonoBehaviour
         if (weaponSlotManager == null)
             weaponSlotManager = FindAnyObjectByType<WeaponSlotManager>();
         
+        // 🆕 ArmorSlotManager 자동 연결
+        if (armorSlotManager == null)
+            armorSlotManager = FindAnyObjectByType<ArmorSlotManager>();
+        
         // WeaponSlotManager 이벤트 구독
         if (weaponSlotManager != null)
         {
             weaponSlotManager.OnWeaponSwitched += OnWeaponSwitched;
+        }
+        
+        // 🆕 ArmorSlotManager 이벤트 구독
+        if (armorSlotManager != null)
+        {
+            armorSlotManager.OnArmorEquipped += OnArmorEquipped;
+            armorSlotManager.OnArmorUnequipped += OnArmorUnequipped;
         }
     }
 
@@ -61,6 +80,13 @@ public class PlayerInventory : MonoBehaviour
         if (weaponSlotManager != null)
         {
             weaponSlotManager.OnWeaponSwitched -= OnWeaponSwitched;
+        }
+        
+        // 🆕 ArmorSlotManager 이벤트 구독 해제
+        if (armorSlotManager != null)
+        {
+            armorSlotManager.OnArmorEquipped -= OnArmorEquipped;
+            armorSlotManager.OnArmorUnequipped -= OnArmorUnequipped;
         }
     }
 
@@ -352,5 +378,137 @@ public class PlayerInventory : MonoBehaviour
         {
             // Debug.LogWarning("⚠️ [PlayerInventory] PlayerController를 찾을 수 없어 이동속도를 업데이트할 수 없습니다!");
         }
+    }
+    
+    // 🆕 방어구 관련 메서드들
+    
+    // 방어구 장착 이벤트 핸들러
+    void OnArmorEquipped(ArmorData armor)
+    {
+        equippedArmors[armor.armorType] = armor;
+        UpdateArmorStats();
+        Debug.Log($"🛡️ [PlayerInventory] 방어구 장착: {armor.armorName}");
+    }
+    
+    // 방어구 해제 이벤트 핸들러
+    void OnArmorUnequipped(ArmorData armor)
+    {
+        equippedArmors.Remove(armor.armorType);
+        UpdateArmorStats();
+        Debug.Log($"🛡️ [PlayerInventory] 방어구 해제: {armor.armorName}");
+    }
+    
+    // 방어구 장착 설정
+    public void SetEquippedArmor(ArmorData armor, ArmorType armorType)
+    {
+        if (armor != null)
+        {
+            equippedArmors[armorType] = armor;
+        }
+        else
+        {
+            equippedArmors.Remove(armorType);
+        }
+        UpdateArmorStats();
+    }
+    
+    // 방어구 능력치 업데이트
+    public void UpdateArmorStats()
+    {
+        if (playerController == null) return;
+        
+        // 총 방어력 계산
+        int totalDefense = 0;
+        int totalHealthBonus = 0;
+        float totalSpeedBonus = 0f;
+        float totalDamageReduction = 0f;
+        
+        foreach (var armor in equippedArmors.Values)
+        {
+            totalDefense += armor.defense;
+            totalHealthBonus += armor.maxHealth;
+            totalSpeedBonus += armor.moveSpeedBonus;
+            totalDamageReduction += armor.damageReduction;
+        }
+        
+        // 플레이어 능력치 적용
+        ApplyArmorStats(totalDefense, totalHealthBonus, totalSpeedBonus, totalDamageReduction);
+    }
+    
+    // 방어구 능력치를 플레이어에 적용
+    void ApplyArmorStats(int defense, int healthBonus, float speedBonus, float damageReduction)
+    {
+        // Health 컴포넌트에 체력 보너스 적용
+        Health playerHealth = GetComponent<Health>();
+        if (playerHealth != null)
+        {
+            // 최대 체력 업데이트 (기본 체력 + 보너스)
+            int baseMaxHealth = 100; // 기본 최대 체력 (설정에서 가져올 수 있음)
+            playerHealth.SetMaxHealth(baseMaxHealth + healthBonus);
+        }
+        
+        // PlayerController에 이동속도 보너스 적용
+        if (playerController != null)
+        {
+            // 이동속도 보너스는 무기와 별도로 적용
+            // (무기 이동속도 배수 * 방어구 보너스)
+            float baseSpeed = playerController.GetBaseMoveSpeed();
+            float weaponSpeedMultiplier = 1f;
+            
+            // 현재 무기의 이동속도 배수 가져오기
+            if (equippedWeapon != null)
+            {
+                weaponSpeedMultiplier = equippedWeapon.movementSpeedMultiplier;
+            }
+            
+            // 최종 이동속도 = 기본속도 * 무기배수 * (1 + 방어구보너스)
+            float finalSpeed = baseSpeed * weaponSpeedMultiplier * (1f + speedBonus);
+            playerController.currentMoveSpeed = finalSpeed;
+        }
+        
+        // 데미지 감소율은 Health 컴포넌트에서 처리 (필요시 구현)
+        // damageReduction 값을 Health 컴포넌트에 전달
+    }
+    
+    // 방어구 관련 getter 메서드들
+    public ArmorData GetEquippedArmor(ArmorType armorType)
+    {
+        return equippedArmors.ContainsKey(armorType) ? equippedArmors[armorType] : null;
+    }
+    
+    public Dictionary<ArmorType, ArmorData> GetAllEquippedArmors()
+    {
+        return new Dictionary<ArmorType, ArmorData>(equippedArmors);
+    }
+    
+    public int GetEquippedArmorCount()
+    {
+        return equippedArmors.Count;
+    }
+    
+    public bool IsArmorEquipped(ArmorType armorType)
+    {
+        return equippedArmors.ContainsKey(armorType);
+    }
+    
+    public int GetTotalDefense()
+    {
+        return equippedArmors.Values.Sum(armor => armor.defense);
+    }
+    
+    public int GetTotalHealthBonus()
+    {
+        return equippedArmors.Values.Sum(armor => armor.maxHealth);
+    }
+    
+    public float GetTotalSpeedBonus()
+    {
+        return equippedArmors.Values.Sum(armor => armor.moveSpeedBonus);
+    }
+    
+    public float GetTotalDamageReduction()
+    {
+        float totalReduction = equippedArmors.Values.Sum(armor => armor.damageReduction);
+        return Mathf.Clamp01(totalReduction); // 최대 100% 제한
     }
 } 

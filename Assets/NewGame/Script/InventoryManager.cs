@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,7 +11,9 @@ public enum SortType
     Name,
     Type,
     Damage,
-    FireRate
+    FireRate,
+    Defense,    // 🆕 방어구 방어력 정렬
+    Rarity      // 🆕 방어구 레어리티 정렬
 }
 
 [System.Serializable]
@@ -23,6 +26,13 @@ public enum FilterType
     SG,  // Shotgun
     SMG, // Submachine Gun
     SR   // Sniper Rifle
+}
+
+[System.Serializable]
+public enum InventoryTab
+{
+    Weapons,
+    Armors
 }
 
 [System.Serializable]
@@ -52,6 +62,13 @@ public class InventoryManager : MonoBehaviour
     [Tooltip("⚠️ 레거시 무기 슬롯 (단일 슬롯, 호환성 유지)")]
     public WeaponSlot weaponSlot;
     
+    [Header("🛡️ Armor Slot System")]
+    [Tooltip("🆕 방어구 슬롯 매니저 (6개 슬롯 지원)")]
+    public ArmorSlotManager armorSlotManager;
+    
+    [Tooltip("🆕 방어구 슬롯 패널 (인벤토리와 함께 표시됨)")]
+    public GameObject armorSlotsPanel;
+    
     [Header("⚙️ Inventory Settings")]
     [Tooltip("각 슬롯의 크기 (픽셀) - X: 가로, Y: 세로")]
     public Vector2 slotSize = new Vector2(200f, 50f);
@@ -79,6 +96,19 @@ public class InventoryManager : MonoBehaviour
     
     [Tooltip("인벤토리 제목 텍스트 (개수 표시용)")]
     public Text inventoryTitle;
+    
+    [Header("📑 Tab System")]
+    [Tooltip("무기 탭 버튼")]
+    public Button weaponTabButton;
+    
+    [Tooltip("방어구 탭 버튼")]
+    public Button armorTabButton;
+    
+    [Tooltip("무기 탭 활성화 색상")]
+    public Color activeTabColor = Color.cyan;
+    
+    [Tooltip("탭 비활성화 색상")]
+    public Color inactiveTabColor = Color.gray;
     
     [Header("💬 Tooltip System (선택사항)")]
     [Tooltip("툴팁 표시 패널")]
@@ -122,6 +152,11 @@ public class InventoryManager : MonoBehaviour
     private List<InventorySlot> inventorySlots = new List<InventorySlot>();
     private List<WeaponData> weapons = new List<WeaponData>();
     private List<WeaponData> filteredWeapons = new List<WeaponData>();
+    
+    // 🆕 방어구 관련 변수들
+    private List<ArmorData> armors = new List<ArmorData>();
+    private List<ArmorData> filteredArmors = new List<ArmorData>();
+    
     private PlayerInventory playerInventory;
     private bool isInitialized = false;
     private bool isOpen = false;
@@ -129,22 +164,37 @@ public class InventoryManager : MonoBehaviour
     private FilterType currentFilter = FilterType.All;
     private string currentSearchTerm = "";
     
+    // 🆕 탭 시스템 변수들
+    private InventoryTab currentTab = InventoryTab.Weapons;
+    
     // Events
     public System.Action<bool> OnInventoryToggle;
     public System.Action<WeaponData> OnWeaponEquipped;
     public System.Action<WeaponData> OnWeaponUnequipped;
     
+    // 🆕 방어구 이벤트들
+    public System.Action<ArmorData> OnArmorAdded;
+    public System.Action<ArmorData> OnArmorRemoved;
+    
     void Awake()
     {
-        playerInventory = FindAnyObjectByType<PlayerInventory>();
+        playerInventory = FindFirstObjectByType<PlayerInventory>();
         
         // WeaponSlotManager 자동 연결
         if (weaponSlotManager == null)
-            weaponSlotManager = FindAnyObjectByType<WeaponSlotManager>();
+            weaponSlotManager = FindFirstObjectByType<WeaponSlotManager>();
         
         // WeaponSlotsPanel 자동 연결
         if (weaponSlotsPanel == null)
             weaponSlotsPanel = GameObject.Find("WeaponSlotsPanel");
+        
+        // 🆕 ArmorSlotManager 자동 연결
+        if (armorSlotManager == null)
+            armorSlotManager = FindFirstObjectByType<ArmorSlotManager>();
+        
+        // 🆕 ArmorSlotsPanel 자동 연결
+        if (armorSlotsPanel == null)
+            armorSlotsPanel = GameObject.Find("ArmorSlotsPanel");
         
         CreateInventoryGrid();
         SetupUI();
@@ -160,6 +210,10 @@ public class InventoryManager : MonoBehaviour
         
         if (weaponSlotsPanel != null)
             weaponSlotsPanel.SetActive(false);
+        
+        // 🆕 방어구 슬롯 패널도 함께 관리
+        if (armorSlotsPanel != null)
+            armorSlotsPanel.SetActive(false);
         
         if (tooltipPanel != null)
             tooltipPanel.SetActive(false);
@@ -305,6 +359,63 @@ public class InventoryManager : MonoBehaviour
         {
             sortButton.onClick.AddListener(RefreshInventory);
         }
+        
+        // 🆕 탭 버튼 설정
+        if (weaponTabButton != null)
+        {
+            weaponTabButton.onClick.AddListener(() => SwitchTab(InventoryTab.Weapons));
+        }
+        
+        if (armorTabButton != null)
+        {
+            armorTabButton.onClick.AddListener(() => SwitchTab(InventoryTab.Armors));
+        }
+    }
+    
+    // 🆕 탭 전환 메서드
+    public void SwitchTab(InventoryTab newTab)
+    {
+        if (currentTab == newTab) return;
+        
+        currentTab = newTab;
+        UpdateTabVisuals();
+        RefreshInventory();
+        
+        // 🆕 UI 입력 포커스 설정으로 게임 입력 충돌 방지
+        StartCoroutine(ClearInputFocusAfterTabSwitch());
+        
+        Debug.Log($"🔄 인벤토리 탭 전환: {currentTab}");
+    }
+    
+    // 🆕 탭 전환 후 입력 포커스 정리
+    System.Collections.IEnumerator ClearInputFocusAfterTabSwitch()
+    {
+        // 1프레임 대기 후 입력 포커스 해제
+        yield return null;
+        
+        // EventSystem에서 선택된 UI 요소 해제
+        if (EventSystem.current != null)
+        {
+            EventSystem.current.SetSelectedGameObject(null);
+        }
+    }
+    
+    // 🆕 탭 시각적 업데이트
+    void UpdateTabVisuals()
+    {
+        if (weaponTabButton != null)
+        {
+            ColorBlock colors = weaponTabButton.colors;
+            colors.normalColor = currentTab == InventoryTab.Weapons ? activeTabColor : inactiveTabColor;
+            weaponTabButton.colors = colors;
+        }
+        
+        if (armorTabButton != null)
+        {
+            ColorBlock colors = armorTabButton.colors;
+            colors.normalColor = currentTab == InventoryTab.Armors ? activeTabColor : inactiveTabColor;
+            armorTabButton.colors = colors;
+        }
     }
     
     public void ToggleInventory()
@@ -321,12 +432,22 @@ public class InventoryManager : MonoBehaviour
         {
             inventoryPanel.SetActive(true);
             isOpen = true;
+            
+            // 🆕 탭 시각적 업데이트
+            UpdateTabVisuals();
+            
             RefreshInventory();
             
             // 무기 슬롯 패널도 함께 활성화
             if (weaponSlotsPanel != null)
             {
                 weaponSlotsPanel.SetActive(true);
+            }
+            
+            // 🆕 방어구 슬롯 패널도 함께 활성화
+            if (armorSlotsPanel != null)
+            {
+                armorSlotsPanel.SetActive(true);
             }
             
             if (audioSource != null && openSound != null)
@@ -348,6 +469,12 @@ public class InventoryManager : MonoBehaviour
             if (weaponSlotsPanel != null)
             {
                 weaponSlotsPanel.SetActive(false);
+            }
+            
+            // 🆕 방어구 슬롯 패널도 함께 비활성화
+            if (armorSlotsPanel != null)
+            {
+                armorSlotsPanel.SetActive(false);
             }
             
             if (audioSource != null && closeSound != null)
@@ -458,7 +585,7 @@ public class InventoryManager : MonoBehaviour
     
     void ApplyFiltersAndSort()
     {
-        // 필터링
+        // 🆕 무기 필터링
         filteredWeapons = weapons.Where(weapon => 
         {
             // 🔫 WeaponSlotManager에 장착된 무기들은 인벤토리에서 제외
@@ -491,34 +618,103 @@ public class InventoryManager : MonoBehaviour
             return true;
         }).ToList();
         
+        // 🆕 방어구 필터링 (장착된 방어구 제외)
+        filteredArmors = armors.Where(armor => 
+        {
+            // ArmorSlotManager에 장착된 방어구들은 인벤토리에서 제외
+            if (armorSlotManager != null && armorSlotManager.IsArmorEquipped(armor))
+            {
+                return false;
+            }
+            
+            // 검색 필터 (방어구 이름으로도 검색 가능)
+            if (!string.IsNullOrEmpty(currentSearchTerm))
+            {
+                if (!armor.armorName.ToLower().Contains(currentSearchTerm.ToLower()))
+                    return false;
+            }
+            
+            return true;
+        }).ToList();
+        
         // 정렬
         switch (currentSort)
         {
             case SortType.Name:
                 filteredWeapons = filteredWeapons.OrderBy(w => w.weaponName).ToList();
+                filteredArmors = filteredArmors.OrderBy(a => a.armorName).ToList();
                 break;
             case SortType.Type:
                 filteredWeapons = filteredWeapons.OrderBy(w => w.weaponType).ToList();
+                filteredArmors = filteredArmors.OrderBy(a => a.armorType).ToList();
                 break;
             case SortType.Damage:
                 filteredWeapons = filteredWeapons.OrderByDescending(w => w.damage).ToList();
+                filteredArmors = filteredArmors.OrderByDescending(a => a.defense).ToList();
                 break;
             case SortType.FireRate:
                 filteredWeapons = filteredWeapons.OrderBy(w => w.fireRate).ToList();
+                // 방어구는 발사속도가 없으므로 레어리티로 정렬
+                filteredArmors = filteredArmors.OrderByDescending(a => a.rarity).ToList();
+                break;
+            case SortType.Defense:
+                // 🆕 방어구 전용: 방어력 순 정렬
+                filteredWeapons = filteredWeapons.OrderByDescending(w => w.damage).ToList(); // 무기는 데미지로 대체
+                filteredArmors = filteredArmors.OrderByDescending(a => a.defense).ToList();
+                break;
+            case SortType.Rarity:
+                // 🆕 방어구 전용: 레어리티 순 정렬
+                filteredWeapons = filteredWeapons.OrderByDescending(w => w.damage).ToList(); // 무기는 데미지로 대체
+                filteredArmors = filteredArmors.OrderByDescending(a => a.rarity).ToList();
                 break;
         }
     }
     
     void UpdateSlots()
     {
+        // 🆕 탭별로 다른 아이템 표시
+        List<object> itemsToShow = new List<object>();
+        
+        if (currentTab == InventoryTab.Weapons)
+        {
+            // 무기 탭: 무기만 표시
+            itemsToShow.AddRange(filteredWeapons.Cast<object>());
+        }
+        else if (currentTab == InventoryTab.Armors)
+        {
+            // 방어구 탭: 방어구만 표시
+            itemsToShow.AddRange(filteredArmors.Cast<object>());
+        }
+        
+        // 필요한 슬롯 수만큼 확보
+        while (inventorySlots.Count < itemsToShow.Count)
+        {
+            CreateSingleSlot(inventorySlots.Count);
+        }
+        
+        // 현재 탭의 아이템들 표시
         for (int i = 0; i < inventorySlots.Count; i++)
         {
-            if (i < filteredWeapons.Count)
+            if (i < itemsToShow.Count)
             {
-                inventorySlots[i].SetWeapon(filteredWeapons[i]);
+                if (currentTab == InventoryTab.Weapons)
+                {
+                    // 무기 표시
+                    WeaponData weapon = itemsToShow[i] as WeaponData;
+                    inventorySlots[i].isArmorSlot = false;
+                    inventorySlots[i].SetWeapon(weapon);
+                }
+                else if (currentTab == InventoryTab.Armors)
+                {
+                    // 방어구 표시
+                    ArmorData armor = itemsToShow[i] as ArmorData;
+                    inventorySlots[i].isArmorSlot = true;
+                    inventorySlots[i].SetArmor(armor);
+                }
             }
             else
             {
+                // 빈 슬롯
                 inventorySlots[i].ClearSlot();
             }
         }
@@ -528,11 +724,24 @@ public class InventoryManager : MonoBehaviour
     {
         if (inventoryTitle != null)
         {
-            int totalWeapons = weapons.Count;
-            int filteredCount = filteredWeapons.Count;
-            int equippedCount = GetEquippedWeaponCount();
+            string title = "";
             
-            inventoryTitle.text = $"Inventory ({filteredCount}/{totalWeapons}) | Equipped: {equippedCount}";
+            if (currentTab == InventoryTab.Weapons)
+            {
+                int totalWeapons = weapons.Count;
+                int filteredWeaponCount = filteredWeapons.Count;
+                int equippedWeaponCount = GetEquippedWeaponCount();
+                title = $"무기 인벤토리 ({filteredWeaponCount}/{totalWeapons}) | 장착: {equippedWeaponCount}";
+            }
+            else if (currentTab == InventoryTab.Armors)
+            {
+                int totalArmors = armors.Count;
+                int filteredArmorCount = filteredArmors.Count;
+                int equippedArmorCount = armorSlotManager != null ? armorSlotManager.GetEquippedArmorCount() : 0;
+                title = $"방어구 인벤토리 ({filteredArmorCount}/{totalArmors}) | 장착: {equippedArmorCount}";
+            }
+            
+            inventoryTitle.text = title;
         }
     }
     
@@ -761,6 +970,9 @@ public class InventoryManager : MonoBehaviour
         PlayerPrefs.SetInt("InventorySort", (int)currentSort);
         PlayerPrefs.SetInt("InventoryFilter", (int)currentFilter);
         PlayerPrefs.SetString("InventorySearch", currentSearchTerm);
+        
+        // 🆕 탭 상태 저장
+        PlayerPrefs.SetInt("InventoryTab", (int)currentTab);
     }
     
     void LoadInventoryState()
@@ -768,6 +980,9 @@ public class InventoryManager : MonoBehaviour
         currentSort = (SortType)PlayerPrefs.GetInt("InventorySort", 0);
         currentFilter = (FilterType)PlayerPrefs.GetInt("InventoryFilter", 0);
         currentSearchTerm = PlayerPrefs.GetString("InventorySearch", "");
+        
+        // 🆕 탭 상태 로드
+        currentTab = (InventoryTab)PlayerPrefs.GetInt("InventoryTab", 0);
         
         // UI 업데이트
         if (sortDropdown != null) sortDropdown.value = (int)currentSort;
@@ -799,8 +1014,80 @@ public class InventoryManager : MonoBehaviour
         return weapons.Count >= maxReasonableWeapons;
     }
     
+    // 🆕 방어구 관련 메서드들
+    
+    public void AddArmor(ArmorData armor)
+    {
+        if (armor == null) 
+        {
+            Debug.LogError("❌ [InventoryManager] 방어구 데이터가 null입니다!");
+            return;
+        }
+        
+        if (!armors.Contains(armor))
+        {
+            armors.Add(armor);
+            OnArmorAdded?.Invoke(armor);
+            Debug.Log($"🛡️ 방어구 추가: {armor.armorName} (총 {armors.Count}개 보유)");
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ [InventoryManager] 이미 보유한 방어구입니다: {armor.armorName}");
+        }
+    }
+    
+    public void RemoveArmor(ArmorData armor, bool shouldRefresh = true)
+    {
+        if (armor == null) return;
+        
+        if (armors.Remove(armor))
+        {
+            OnArmorRemoved?.Invoke(armor);
+            Debug.Log($"🛡️ 방어구 제거: {armor.armorName}");
+            
+            if (shouldRefresh)
+            {
+                RefreshInventory();
+            }
+        }
+    }
+    
+    public List<ArmorData> GetArmorsByType(ArmorType armorType)
+    {
+        return armors.Where(armor => armor.armorType == armorType).ToList();
+    }
+    
+    public List<ArmorData> GetArmorsByRarity(ArmorRarity rarity)
+    {
+        return armors.Where(armor => armor.rarity == rarity).ToList();
+    }
+    
+    public List<ArmorData> GetAllArmors()
+    {
+        return new List<ArmorData>(armors);
+    }
+    
+    public bool HasArmor(ArmorData armor)
+    {
+        return armors.Contains(armor);
+    }
+    
+    public int GetArmorCount()
+    {
+        return armors.Count;
+    }
+    
+    public int GetArmorCountByType(ArmorType armorType)
+    {
+        return armors.Count(armor => armor.armorType == armorType);
+    }
+    
     void OnDestroy()
     {
         SaveInventoryState();
+        
+        // 🆕 방어구 이벤트 구독 해제
+        OnArmorAdded = null;
+        OnArmorRemoved = null;
     }
 } 

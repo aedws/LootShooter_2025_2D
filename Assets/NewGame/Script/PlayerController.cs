@@ -6,7 +6,7 @@ public class PlayerController : MonoBehaviour
 {
     [Header("이동/점프")]
     public float baseMoveSpeed = 5f; // 기본 이동속도 (무기 없을 때)
-    [SerializeField] private float currentMoveSpeed = 5f; // 현재 적용 중인 이동속도 (무기 영향 포함)
+    [SerializeField] public float currentMoveSpeed = 5f; // 현재 적용 중인 이동속도 (무기 영향 포함)
     public float jumpForce = 13f; // 기본 점프력 - 밸런스 조정
     public float jumpBoost = 2.0f; // 점프 시 X축 속도 배수 (더 빠르게)
     public float maxJumpTime = 0.15f; // 점프 최대 지속 시간(초) - 미묘한 차이용
