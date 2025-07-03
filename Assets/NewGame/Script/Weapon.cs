@@ -28,6 +28,8 @@ public class Weapon : MonoBehaviour
     private bool wasFireButtonPressed = false;
     private float timeSinceLastShot = 0f;
     
+    private Coroutine autoReloadCoroutine;
+    
     // 이벤트 및 델리게이트
     public System.Action<int, int> OnAmmoChanged; // 현재탄약, 최대탄약
     public System.Action OnReloadStart;
@@ -86,7 +88,8 @@ public class Weapon : MonoBehaviour
         }
     }
 
-    public bool TryFire(Vector2 direction, Vector3 weaponPosition, bool isFireButtonPressed)
+    // isBurst: 3점사 여부, isFireButtonPressed: 연사/단발 입력
+    public bool TryFire(Vector2 direction, Vector3 weaponPosition, bool isFireButtonPressed, bool isBurst)
     {
         if (weaponData == null || isReloading) return false;
         
@@ -105,14 +108,22 @@ public class Weapon : MonoBehaviour
         bool isNewPress = isFireButtonPressed && !wasFireButtonPressed;
         wasFireButtonPressed = isFireButtonPressed;
         
-        // AR: 3점사
+        // AR: 3점사/연사 분기
         if (weaponData.weaponType == WeaponType.AR)
         {
-            if (isNewPress)
+            if (isBurst)
             {
-                StartCoroutine(BurstFire(direction, weaponPosition, 3, 0.07f)); // 3발, 0.07초 간격
+                if (isNewPress)
+                {
+                    StartCoroutine(BurstFire(direction, weaponPosition, 3, 0.07f)); // 3발, 0.07초 간격
+                }
+                return false;
             }
-            return false; // 단일 발사 직접 실행 X
+            else
+            {
+                // 연사(자동사격): 기존 Fire 호출
+                return Fire(direction, weaponPosition, isNewPress);
+            }
         }
         
         // 저격총: 단발만 가능
@@ -204,6 +215,14 @@ public class Weapon : MonoBehaviour
             // 특수 효과 적용
             ApplySpecialEffects(projectile, isCritical);
         }
+
+        // 탄약이 0이 되었을 때 자동 재장전 예약
+        if (!weaponData.infiniteAmmo && currentAmmo == 0 && !isReloading)
+        {
+            if (autoReloadCoroutine != null)
+                StopCoroutine(autoReloadCoroutine);
+            autoReloadCoroutine = StartCoroutine(AutoReloadAfterDelay(0.3f));
+        }
     }
 
     private void FireShotgun(Vector2 direction, Vector3 spawnPosition)
@@ -232,6 +251,13 @@ public class Weapon : MonoBehaviour
                 projectile.Init(spreadDirection.normalized, finalDamage, GetCurrentProjectileSpeed());
                 ApplySpecialEffects(projectile, isCritical);
             }
+        }
+        // 샷건도 탄약 0이면 자동 재장전 예약
+        if (!weaponData.infiniteAmmo && currentAmmo == 0 && !isReloading)
+        {
+            if (autoReloadCoroutine != null)
+                StopCoroutine(autoReloadCoroutine);
+            autoReloadCoroutine = StartCoroutine(AutoReloadAfterDelay(0.3f));
         }
     }
 
@@ -522,4 +548,13 @@ public class Weapon : MonoBehaviour
     public bool IsReloading() => isReloading;
     public float GetReloadProgress() => isReloading ? (1f - (reloadTimeRemaining / weaponData.reloadTime)) : 0f;
     public float GetCurrentRecoilAngle() => currentRecoilAngle; // 현재 반동 각도
+
+    private IEnumerator AutoReloadAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (!isReloading && !weaponData.infiniteAmmo && currentAmmo == 0)
+        {
+            TryReload();
+        }
+    }
 }

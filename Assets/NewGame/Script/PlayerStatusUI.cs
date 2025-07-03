@@ -197,14 +197,23 @@ public class PlayerStatusUI : MonoBehaviour
         UpdateWeaponUI();
     }
 
-    void UpdateWeaponUI()
+    public void UpdateWeaponUI()
     {
         if (currentWeapon != null)
         {
-            // 무기 이름 표시
+            // 무기 이름 표시 (AR이면 모드도 함께)
             if (weaponNameText != null)
             {
-                weaponNameText.text = currentWeapon.GetWeaponData().weaponName;
+                string name = currentWeapon.GetWeaponData().weaponName;
+                if (currentWeapon.GetWeaponData().weaponType == WeaponType.AR && player != null)
+                {
+                    var pc = player.GetComponent<PlayerController>();
+                    if (pc != null)
+                    {
+                        name += pc.isBurstMode ? " [3점사]" : " [연사]";
+                    }
+                }
+                weaponNameText.text = name;
             }
 
             // 탄약 표시

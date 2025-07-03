@@ -64,6 +64,9 @@ public class PlayerController : MonoBehaviour
     // 무기 반동 관련
     private Weapon currentSubscribedWeapon = null; // 현재 이벤트 구독 중인 무기
 
+    // 3점사/연사 모드 토글 변수
+    public bool isBurstMode = false;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -174,6 +177,24 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        // X키로 3점사/연사 모드 토글
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            isBurstMode = !isBurstMode;
+
+            // UI 즉시 갱신
+            var statusUI = FindAnyObjectByType<PlayerStatusUI>();
+            if (statusUI != null)
+                statusUI.UpdateWeaponUI();
+        }
+
+        // Z키로 발사 (현재 모드에 따라)
+        bool isFire = Input.GetKey(KeyCode.Z);
+        if (isFire)
+        {
+            TryFireWeapon(isBurstMode, isFire);
+        }
+
         // 쫄깃한 중력 적용
         if (rb.linearVelocity.y < 0)
         {
@@ -212,11 +233,6 @@ public class PlayerController : MonoBehaviour
 
         // 무기 반동 이벤트 구독 관리
         UpdateWeaponEventSubscription();
-        
-        // 무기 발사 (연속 발사 지원)
-        bool isFireButtonPressed = Input.GetKey(KeyCode.Z); // Z키를 누르고 있는 동안
-        if (isFireButtonPressed)
-            TryFireWeapon(isFireButtonPressed);
     }
 
     void Move()
@@ -442,28 +458,35 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void TryFireWeapon(bool isFireButtonPressed)
+    // TryFireWeapon 오버로드: isBurst, isAuto 구분
+    void TryFireWeapon(bool isBurst, bool isAuto)
     {
         if (playerInventory == null)
             return;
 
         Weapon currentWeapon = playerInventory.GetCurrentWeapon();
         if (currentWeapon == null)
-        {
-            // Debug.Log("[TryFireWeapon] 장착된 무기가 없습니다.");
             return;
+
+        // AR 무기일 때만 분기, 그 외는 기존 방식
+        if (currentWeapon.GetWeaponData() != null && currentWeapon.GetWeaponData().weaponType == WeaponType.AR)
+        {
+            if (isBurst)
+            {
+                // 3점사 (X키)
+                currentWeapon.TryFire(GetFireDirection(), GetFirePosition(), true, true);
+            }
+            else if (isAuto)
+            {
+                // 연사 (Z키)
+                currentWeapon.TryFire(GetFireDirection(), GetFirePosition(), true, false);
+            }
         }
-
-        // 플레이어가 바라보는 방향과 무기 각도를 고려한 발사 방향 계산
-        Vector2 fireDirection = GetFireDirection();
-        Vector3 firePosition = GetFirePosition();
-
-        // Debug.Log($"🔫 [FIRE] 무기 발사: {currentWeapon.GetWeaponData().weaponName}");
-        // Debug.Log($"🔫 [FIRE] 발사방향: {fireDirection}, 현재각도: {currentWeaponAngle}도, 바라보는방향: {(facingRight ? "오른쪽" : "왼쪽")}");
-        // Debug.Log($"🔫 [FIRE] 발사위치: {firePosition}");
-        
-        // 무기 발사
-        currentWeapon.TryFire(fireDirection, firePosition, isFireButtonPressed);
+        else
+        {
+            // 기존 방식 (연사)
+            currentWeapon.TryFire(GetFireDirection(), GetFirePosition(), isAuto, false);
+        }
     }
 
     void HandleWeaponAiming()
