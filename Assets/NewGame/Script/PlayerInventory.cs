@@ -32,6 +32,10 @@ public class PlayerInventory : MonoBehaviour
     [Tooltip("플레이어 컨트롤러 (자동으로 찾아서 연결됨)")]
     public PlayerController playerController;
 
+    [Header("🔔 Events")]
+    // 무기 변경 시 발생하는 이벤트 (새 무기, 이전 무기)
+    public System.Action<WeaponData, WeaponData> OnWeaponChanged;
+
     void Start()
     {
         if (playerController == null)
@@ -63,7 +67,12 @@ public class PlayerInventory : MonoBehaviour
     // WeaponSlotManager에서 무기가 교체될 때 호출되는 이벤트 핸들러
     void OnWeaponSwitched(WeaponData newWeapon)
     {
+        WeaponData oldWeapon = equippedWeapon;
         SetEquippedWeapon(newWeapon);
+        
+        // 무기 변경 이벤트 발생
+        OnWeaponChanged?.Invoke(newWeapon, oldWeapon);
+        
         // Debug.Log($"🔄 [PlayerInventory] 무기 교체됨: {(newWeapon != null ? newWeapon.weaponName : "없음")}");
     }
 

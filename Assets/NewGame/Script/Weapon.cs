@@ -105,6 +105,16 @@ public class Weapon : MonoBehaviour
         bool isNewPress = isFireButtonPressed && !wasFireButtonPressed;
         wasFireButtonPressed = isFireButtonPressed;
         
+        // AR: 3점사
+        if (weaponData.weaponType == WeaponType.AR)
+        {
+            if (isNewPress)
+            {
+                StartCoroutine(BurstFire(direction, weaponPosition, 3, 0.07f)); // 3발, 0.07초 간격
+            }
+            return false; // 단일 발사 직접 실행 X
+        }
+        
         // 저격총: 단발만 가능
         if (weaponData.weaponType == WeaponType.SR && weaponData.singleFireOnly)
         {
@@ -119,6 +129,21 @@ public class Weapon : MonoBehaviour
         
         // 발사 실행
         return Fire(direction, weaponPosition, isNewPress);
+    }
+
+    // 3점사 코루틴
+    private IEnumerator BurstFire(Vector2 direction, Vector3 weaponPosition, int burstCount, float burstInterval)
+    {
+        for (int i = 0; i < burstCount; i++)
+        {
+            if (!weaponData.infiniteAmmo && currentAmmo <= 0)
+            {
+                TryReload();
+                yield break;
+            }
+            Fire(direction, weaponPosition, true);
+            yield return new WaitForSeconds(burstInterval);
+        }
     }
 
     private bool Fire(Vector2 direction, Vector3 weaponPosition, bool isNewPress)

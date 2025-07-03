@@ -59,6 +59,7 @@ public class Health : MonoBehaviour
         
         // 이벤트 발생
         OnDamaged?.Invoke(damage);
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
         
         // 체력이 0이 되면 죽음 처리
         if (currentHealth <= 0 && !isDead)
@@ -78,6 +79,7 @@ public class Health : MonoBehaviour
         // Debug.Log($"[Health] {gameObject.name}이(가) {amount} 회복했습니다. 현재 체력: {currentHealth}/{maxHealth}");
         
         OnHealed?.Invoke(amount);
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
     }
     
     public void SetMaxHealth(int newMaxHealth)

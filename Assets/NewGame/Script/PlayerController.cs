@@ -159,6 +159,19 @@ public class PlayerController : MonoBehaviour
             
             if (Input.GetKeyDown(KeyCode.LeftShift) && dashCooldownTimer <= 0)
                 StartCoroutine(Dash());
+
+            // R키로 재장전
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                if (playerInventory != null)
+                {
+                    Weapon weapon = playerInventory.GetCurrentWeapon();
+                    if (weapon != null)
+                    {
+                        weapon.TryReload();
+                    }
+                }
+            }
         }
 
         // 쫄깃한 중력 적용
