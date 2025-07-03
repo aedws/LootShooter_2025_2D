@@ -350,7 +350,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         RectTransform rect = draggedItemImage.AddComponent<RectTransform>();
         
         // 현재 슬롯 크기를 가져와서 드래그 이미지 크기 설정
-        Vector2 dragImageSize = GetCurrentSlotSize() * 0.8f; // 슬롯의 80% 크기
+        Vector2 dragImageSize = GetCurrentSlotSize() * 0.9f; // 슬롯의 90% 크기
         rect.sizeDelta = dragImageSize;
         
         // Image 컴포넌트 추가
@@ -542,8 +542,8 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         // InventoryManager에서 슬롯 크기 가져오기
         Vector2 slotSize = inventoryManager.slotSize;
         
-        // 아이콘 크기는 슬롯 크기의 70%로 설정 (여백 확보)
-        Vector2 iconSize = slotSize * 0.7f;
+        // 아이콘 크기는 슬롯 크기의 85%로 설정 (여백 확보)
+        Vector2 iconSize = slotSize * 0.85f;
         
         // 최소/최대 크기 제한
         iconSize.x = Mathf.Clamp(iconSize.x, 20f, 150f);
