@@ -30,7 +30,7 @@ public class InventoryManager : MonoBehaviour
 {
     [Header("📋 사용 방법")]
     [TextArea(3, 8)]
-    public string instructions = "🆕 동적 세로 인벤토리 시스템:\n1. inventoryPanel에 인벤토리 UI 패널 연결\n2. slotParent에 VerticalLayoutGroup이 있는 부모 Transform 연결\n3. slotPrefab에 InventorySlot 컴포넌트가 있는 프리팹 연결\n4. weaponSlotManager에 WeaponSlotManager 연결 (3개 슬롯 지원)\n5. slotSize로 가로/세로 크기 개별 조정 가능 (기본: 200x50)\n6. 무기 추가 시 자동으로 슬롯 생성 (1개씩 세로로)\n7. 무기 제거 시 불필요한 빈 슬롯 자동 정리\n8. I키로 인벤토리 열기/닫기\n\n💡 이제 격자가 아닌 리스트 형태로 동적 확장됩니다!";
+    public string instructions = "🆕 동적 세로 인벤토리 시스템:\n1. inventoryPanel에 인벤토리 UI 패널 연결\n2. slotParent에 VerticalLayoutGroup이 있는 부모 Transform 연결\n3. slotPrefab에 InventorySlot 컴포넌트가 있는 프리팹 연결\n4. weaponSlotManager에 WeaponSlotManager 연결 (3개 슬롯 지원)\n5. slotSize로 가로/세로 크기 개별 조정 가능 (기본: 200x50)\n6. 무기 추가 시 자동으로 슬롯 생성 (1개씩 세로로)\n7. 무기 제거 시 불필요한 빈 슬롯 자동 정리\n8. I키로 인벤토리 열기/닫기\n9. 플레이버 텍스트: 프리팹에서 설정한 레이아웃 그대로 사용\n\n💡 이제 격자가 아닌 리스트 형태로 동적 확장됩니다!";
     
     [Header("🔧 UI References")]
     [Tooltip("인벤토리 UI 전체 패널 (활성화/비활성화됨)")]

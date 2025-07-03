@@ -23,6 +23,10 @@ public class WeaponData : ScriptableObject
     [Tooltip("무기 종류 (AR=돌격소총, HG=권총, MG=기관총, SG=산탄총, SMG=기관단총, SR=저격총)")]
     public WeaponType weaponType;
     
+    [Tooltip("무기 플레이버 텍스트 (설명, 배경 스토리 등)")]
+    [TextArea(2, 4)]
+    public string flavorText = "이 무기에 대한 설명이 여기에 표시됩니다.";
+    
     [Header("기본 스탯 - Basic Stats")]
     [Tooltip("발사 간격 (초 단위, 낮을수록 빠름)")]
     public float fireRate;

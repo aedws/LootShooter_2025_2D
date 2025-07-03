@@ -7,7 +7,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 {
     [Header("📋 슬롯 사용법")]
     [TextArea(3, 5)]
-    public string slotInstructions = "• 좌클릭: 슬롯 선택\n• 우클릭: 무기 즉시 장착\n• 드래그: WeaponSlot으로 무기 이동\n• 드롭: WeaponSlot에서 무기 반환 받기\n• 마우스 호버: 0.5초 후 툴팁 표시\n• 무기 타입별로 테두리 색상 변경";
+    public string slotInstructions = "• 좌클릭: 슬롯 선택\n• 우클릭: 무기 즉시 장착\n• 드래그: WeaponSlot으로 무기 이동\n• 드롭: WeaponSlot에서 무기 반환 받기\n• 마우스 호버: 0.5초 후 툴팁 표시\n• 무기 타입별로 테두리 색상 변경\n• 플레이버 텍스트: 프리팹에서 설정한 대로 표시";
 
     [Header("🖼️ Slot Components")]
     [Tooltip("무기 아이콘을 표시할 Image 컴포넌트")]
@@ -21,6 +21,9 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     
     [Tooltip("탄약 정보를 표시할 Text 컴포넌트")]
     public Text ammoText;
+    
+    [Tooltip("무기 플레이버 텍스트를 표시할 Text 컴포넌트")]
+    public Text flavorText;
     
     [Tooltip("고급 무기용 빛 효과 오브젝트")]
     public GameObject rarityGlow;
@@ -151,6 +154,13 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 ammoText.enabled = true;
             }
             
+            // 플레이버 텍스트 표시
+            if (flavorText != null)
+            {
+                flavorText.text = weaponData.flavorText;
+                flavorText.enabled = true;
+            }
+            
             // 무기 타입별 색상
             if (borderImage != null)
             {
@@ -183,6 +193,9 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
         if (ammoText != null)
             ammoText.enabled = false;
+        
+        if (flavorText != null)
+            flavorText.enabled = false;
         
         if (borderImage != null)
             borderImage.enabled = false;
@@ -572,4 +585,6 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             return selfRect != null ? selfRect.sizeDelta : new Vector2(70f, 70f);
         }
     }
+    
+
 } 
