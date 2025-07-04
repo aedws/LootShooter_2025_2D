@@ -262,7 +262,7 @@ public class InventoryManager : MonoBehaviour
         if (verticalLayout == null)
             verticalLayout = slotParent.gameObject.AddComponent<VerticalLayoutGroup>();
         
-        // 세로 레이아웃 설정
+        // 세로 레이아웃 설정 (위쪽 기준점에서 아래로만 늘어남)
         verticalLayout.spacing = slotSpacing;
         verticalLayout.childAlignment = TextAnchor.UpperCenter;
         verticalLayout.childControlHeight = false;
@@ -277,6 +277,19 @@ public class InventoryManager : MonoBehaviour
         
         contentSizeFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
         contentSizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        
+        // 🆕 위쪽 기준점 고정을 위한 추가 설정
+        RectTransform parentRect = slotParent.GetComponent<RectTransform>();
+        if (parentRect != null)
+        {
+            // 앵커를 위쪽 중앙으로 설정
+            parentRect.anchorMin = new Vector2(0.5f, 1f);
+            parentRect.anchorMax = new Vector2(0.5f, 1f);
+            parentRect.pivot = new Vector2(0.5f, 1f);
+            
+            // 🆕 상단에서 185픽셀 아래, 중앙에서 우측으로 285픽셀 위치 조정
+            parentRect.anchoredPosition = new Vector2(285f, -185f);
+        }
         
         // 초기 슬롯 생성 (동적으로 필요한 만큼만 생성)
         CreateInitialSlots();
