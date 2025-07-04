@@ -17,8 +17,8 @@ TagManager:
   - Player
   - pickupLayer
   - Enemy
-  - 
-  - 
+  - EnemyProjectile
+  - Effects
   - 
   - 
   - 
@@ -42,8 +42,17 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: UI
+  - name: Enemy
     uniqueID: 3343880545
+    locked: 0
+  - name: EnemyProjectlie
+    uniqueID: 3067961723
+    locked: 0
+  - name: Effects
+    uniqueID: 1666743707
+    locked: 0
+  - name: UI
+    uniqueID: 3107577653
     locked: 0
   m_RenderingLayers:
   - Default
