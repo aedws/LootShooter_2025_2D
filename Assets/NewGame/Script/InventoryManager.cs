@@ -83,17 +83,16 @@ public class InventoryManager : MonoBehaviour
     [Header("⚙️ Inventory Settings")]
     [Tooltip("각 슬롯의 크기 (픽셀) - X: 가로, Y: 세로")]
     public Vector2 slotSize = new Vector2(200f, 50f);
-    
     [Tooltip("슬롯 간 간격 (픽셀)")]
     [Range(5f, 20f)]
     public float slotSpacing = 10f;
-    
     [Tooltip("최소 빈 슬롯 개수 (항상 이만큼 여유분 유지)")]
     [Range(1, 5)]
     public int minEmptySlots = 10;
-    
     [Tooltip("인벤토리 최대 슬롯 수 (확장 가능)")]
     public int maxInventorySlots = 100;
+    [Tooltip("인벤토리 정보 텍스트 (현재/최대/장착 수 등)")]
+    public Text inventoryInfoText;
     
     [Header("🎛️ UI Components (선택사항)")]
     [Tooltip("정렬 방식 선택 드롭다운")]
@@ -828,26 +827,22 @@ public class InventoryManager : MonoBehaviour
     
     void UpdateUI()
     {
-        if (inventoryTitle != null)
+        if (inventoryInfoText != null)
         {
-            string title = "";
-            
+            string info = "";
             if (currentTab == InventoryTab.Weapons)
             {
                 int totalWeapons = weapons.Count;
-                int filteredWeaponCount = filteredWeapons.Count;
                 int equippedWeaponCount = GetEquippedWeaponCount();
-                title = $"무기 인벤토리 ({filteredWeaponCount}/{totalWeapons}) | 장착: {equippedWeaponCount}";
+                info = $"무기: {totalWeapons} / {maxInventorySlots} | 장착: {equippedWeaponCount}";
             }
             else if (currentTab == InventoryTab.Armors)
             {
                 int totalArmors = armors.Count;
-                int filteredArmorCount = filteredArmors.Count;
                 int equippedArmorCount = armorSlotManager != null ? armorSlotManager.GetEquippedArmorCount() : 0;
-                title = $"방어구 인벤토리 ({filteredArmorCount}/{totalArmors}) | 장착: {equippedArmorCount}";
+                info = $"방어구: {totalArmors} / {maxInventorySlots} | 장착: {equippedArmorCount}";
             }
-            
-            inventoryTitle.text = title;
+            inventoryInfoText.text = info;
         }
     }
     
