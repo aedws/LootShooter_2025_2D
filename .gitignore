@@ -56,4 +56,11 @@ $RECYCLE.BIN/
 *.msi
 *.msm
 *.msp
-*.lnk 
+*.lnk
+
+# API Keys and sensitive data
+Assets/Resources/GoogleSheetsConfig.asset
+*.env
+.env.local
+.env.development
+.env.production 
