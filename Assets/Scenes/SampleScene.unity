@@ -3565,6 +3565,56 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2a04d9eb4c0366441b355313fb5d32a7, type: 3}
+--- !u!1 &1210224241
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1210224242}
+  - component: {fileID: 1210224243}
+  m_Layer: 0
+  m_Name: GoogleSheetsManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1210224242
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1210224241}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -7.8173594, y: 9.377394, z: -0.29206863}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1210224243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1210224241}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 472fc62a055850246b77dffef05aab26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  config:
+    spreadsheetId: 1TKSEJoQb1cevAHrt_43MYiEzWNZqbJYVqAmCefrFYd4
+    apiKey: AIzaSyDMdAHgAnoBIjWCZWWz4n7Qb8Rttghol5w
+    weaponsSheetName: Weapons
+    armorsSheetName: Armors
+  debugMode: 1
 --- !u!1 &1240913580
 GameObject:
   m_ObjectHideFlags: 0
@@ -8262,6 +8312,7 @@ PrefabInstance:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 1210224242}
   - {fileID: 619394802}
   - {fileID: 1163192265}
   - {fileID: 1767698840}
