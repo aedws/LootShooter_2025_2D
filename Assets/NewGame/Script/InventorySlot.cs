@@ -404,15 +404,16 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             draggedItemImage = null;
         }
         
-        // 🆕 로컬 드래그 상태 초기화
-        draggedWeaponData = null;
-        draggedArmorData = null;
+        // 🆕 로컬 드래그 상태 초기화 (지연된 초기화로 이동)
+        // draggedWeaponData = null;
+        // draggedArmorData = null;
     }
     
     // 🆕 지연된 드래그 상태 초기화
     System.Collections.IEnumerator ClearDragStateDelayed(bool itemMoved)
     {
-        // ArmorSlot/WeaponSlot의 OnDrop이 처리될 시간을 줌 (1프레임 대기)
+        // ArmorSlot/WeaponSlot의 OnDrop이 처리될 시간을 줌 (2프레임 대기)
+        yield return null;
         yield return null;
         
         // 🌍 전역 드래그 상태 초기화
@@ -420,15 +421,19 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         CurrentlyDraggedArmor = null; // 🆕 방어구 드래그 상태 초기화
         CurrentlyDraggingSlot = null;
         
+        // 🆕 로컬 드래그 상태 초기화
+        draggedWeaponData = null;
+        draggedArmorData = null;
+        
         // 아이템이 이동했다면 원래 슬롯에서 아이템 제거
         if (itemMoved)
         {
             // 🆕 무기 또는 방어구 중 하나만 제거
-            if (draggedWeaponData != null)
+            if (weaponData != null && armorData == null)
             {
                 weaponData = null; // 🔥 원래 슬롯에서 무기 제거
             }
-            else if (draggedArmorData != null)
+            else if (armorData != null && weaponData == null)
             {
                 armorData = null; // 🆕 원래 슬롯에서 방어구 제거
             }
@@ -526,7 +531,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             armorSlotSource.ForceUpdateVisuals();
             UpdateVisuals();
             
-            // 인벤토리 새로고침
+            // 인벤토리 새로고침 (즉시 호출)
             if (inventoryManager != null)
             {
                 inventoryManager.RefreshInventory();
@@ -559,7 +564,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             weaponSlotSource.ForceUpdateVisuals();
             UpdateVisuals();
             
-            // 인벤토리 새로고침
+            // 인벤토리 새로고침 (즉시 호출)
             if (inventoryManager != null)
             {
                 inventoryManager.RefreshInventory();
@@ -617,8 +622,11 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         UpdateVisuals();
         targetSlot.UpdateVisuals();
         
-        // 인벤토리 매니저에 변경사항 알림
-        inventoryManager.RefreshInventory();
+        // 인벤토리 매니저에 변경사항 알림 (즉시 호출)
+        if (inventoryManager != null)
+        {
+            inventoryManager.RefreshInventory();
+        }
     }
     
     // 마우스 호버 이벤트들

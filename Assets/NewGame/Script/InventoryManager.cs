@@ -39,8 +39,8 @@ public enum InventoryTab
 public class InventoryManager : MonoBehaviour
 {
     [Header("📋 사용 방법")]
-    [TextArea(3, 8)]
-    public string instructions = "🆕 동적 세로 인벤토리 시스템:\n1. inventoryPanel에 인벤토리 UI 패널 연결\n2. slotParent에 VerticalLayoutGroup이 있는 부모 Transform 연결\n3. slotPrefab에 InventorySlot 컴포넌트가 있는 프리팹 연결\n4. weaponSlotManager에 WeaponSlotManager 연결 (3개 슬롯 지원)\n5. slotSize로 가로/세로 크기 개별 조정 가능 (기본: 200x50)\n6. 무기 추가 시 자동으로 슬롯 생성 (1개씩 세로로)\n7. 무기 제거 시 불필요한 빈 슬롯 자동 정리\n8. I키로 인벤토리 열기/닫기\n9. 플레이버 텍스트: 프리팹에서 설정한 레이아웃 그대로 사용\n\n💡 이제 격자가 아닌 리스트 형태로 동적 확장됩니다!";
+    [TextArea(4, 10)]
+    public string instructions = "🆕 동적 세로 인벤토리 시스템 + 스크롤바:\n1. inventoryPanel에 인벤토리 UI 패널 연결\n2. slotParent에 VerticalLayoutGroup이 있는 부모 Transform 연결\n3. slotPrefab에 InventorySlot 컴포넌트가 있는 프리팹 연결\n4. weaponSlotManager에 WeaponSlotManager 연결 (3개 슬롯 지원)\n5. slotSize로 가로/세로 크기 개별 조정 가능 (기본: 200x50)\n6. 무기 추가 시 자동으로 슬롯 생성 (1개씩 세로로)\n7. 무기 제거 시 불필요한 빈 슬롯 자동 정리\n8. I키로 인벤토리 열기/닫기\n9. 🆕 스크롤바: scrollViewHeight로 스크롤 영역 높이 조정\n10. 🆕 스크롤바: scrollbar에 Scrollbar 컴포넌트 연결 (선택사항)\n11. 🆕 마스킹: viewport 영역 밖의 슬롯들은 자동으로 숨김\n\n💡 이제 격자가 아닌 리스트 형태로 동적 확장되며 스크롤 가능합니다!";
     
     [Header("🔧 UI References")]
     [Tooltip("인벤토리 UI 전체 패널 (활성화/비활성화됨)")]
@@ -54,6 +54,17 @@ public class InventoryManager : MonoBehaviour
     
     [Tooltip("InventorySlot 컴포넌트가 있는 슬롯 프리팹")]
     public GameObject slotPrefab;
+    
+    [Header("📜 Scroll System")]
+    [Tooltip("🆕 스크롤 영역을 제한하는 viewport 패널")]
+    public GameObject scrollViewport;
+    
+    [Tooltip("🆕 스크롤바 UI 컴포넌트")]
+    public Scrollbar scrollbar;
+    
+    [Tooltip("🆕 스크롤 영역의 높이 (픽셀)")]
+    [Range(200f, 800f)]
+    public float scrollViewHeight = 400f;
     
     [Header("🔫 Weapon Slot System")]
     [Tooltip("🆕 무기 슬롯 매니저 (3개 슬롯 지원)")]
@@ -79,7 +90,10 @@ public class InventoryManager : MonoBehaviour
     
     [Tooltip("최소 빈 슬롯 개수 (항상 이만큼 여유분 유지)")]
     [Range(1, 5)]
-    public int minEmptySlots = 2;
+    public int minEmptySlots = 10;
+    
+    [Tooltip("인벤토리 최대 슬롯 수 (확장 가능)")]
+    public int maxInventorySlots = 100;
     
     [Header("🎛️ UI Components (선택사항)")]
     [Tooltip("정렬 방식 선택 드롭다운")]
@@ -243,6 +257,9 @@ public class InventoryManager : MonoBehaviour
     {
         if (slotParent == null || slotPrefab == null) return;
         
+        // 🆕 스크롤 시스템 설정
+        SetupScrollSystem();
+        
         // 기존 슬롯들 제거
         foreach (Transform child in slotParent)
         {
@@ -261,7 +278,8 @@ public class InventoryManager : MonoBehaviour
         VerticalLayoutGroup verticalLayout = slotParent.GetComponent<VerticalLayoutGroup>();
         if (verticalLayout == null)
             verticalLayout = slotParent.gameObject.AddComponent<VerticalLayoutGroup>();
-        
+        // 위쪽 여유 10 적용
+        verticalLayout.padding.top = 10;
         // 세로 레이아웃 설정 (위쪽 기준점에서 아래로만 늘어남)
         verticalLayout.spacing = slotSpacing;
         verticalLayout.childAlignment = TextAnchor.UpperCenter;
@@ -278,7 +296,7 @@ public class InventoryManager : MonoBehaviour
         contentSizeFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
         contentSizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         
-        // 🆕 위쪽 기준점 고정을 위한 추가 설정
+        // 🆕 slotParent 설정 (위쪽 중앙 앵커, Y축 0에서 시작)
         RectTransform parentRect = slotParent.GetComponent<RectTransform>();
         if (parentRect != null)
         {
@@ -286,13 +304,97 @@ public class InventoryManager : MonoBehaviour
             parentRect.anchorMin = new Vector2(0.5f, 1f);
             parentRect.anchorMax = new Vector2(0.5f, 1f);
             parentRect.pivot = new Vector2(0.5f, 1f);
-            
-            // 🆕 상단에서 185픽셀 아래, 중앙에서 우측으로 285픽셀 위치 조정
-            parentRect.anchoredPosition = new Vector2(285f, -185f);
+            // 위치 조정: X축 -245, Y축 -10
+            parentRect.anchoredPosition = new Vector2(-245f, -10f);
         }
         
         // 초기 슬롯 생성 (동적으로 필요한 만큼만 생성)
         CreateInitialSlots();
+    }
+    
+    // 🆕 스크롤바 가시성 제어
+    void UpdateScrollbarVisibility()
+    {
+        if (scrollbar == null) return;
+        
+        // Content의 높이와 Viewport의 높이 비교
+        RectTransform contentRect = slotParent.GetComponent<RectTransform>();
+        RectTransform viewportRect = scrollViewport != null ? scrollViewport.GetComponent<RectTransform>() : null;
+        
+        if (contentRect != null && viewportRect != null)
+        {
+            float contentHeight = contentRect.sizeDelta.y;
+            float viewportHeight = viewportRect.sizeDelta.y;
+            
+            // Content가 Viewport보다 크면 스크롤바 표시
+            bool shouldShowScrollbar = contentHeight > viewportHeight;
+            scrollbar.gameObject.SetActive(shouldShowScrollbar);
+        }
+    }
+    
+    // 🆕 스크롤 시스템 설정
+    void SetupScrollSystem()
+    {
+        // ScrollRect 컴포넌트 추가
+        ScrollRect scrollRect = slotParent.parent.GetComponent<ScrollRect>();
+        if (scrollRect == null)
+        {
+            scrollRect = slotParent.parent.gameObject.AddComponent<ScrollRect>();
+        }
+        
+        // ScrollRect 설정
+        scrollRect.content = slotParent.GetComponent<RectTransform>();
+        scrollRect.horizontal = false; // 수평 스크롤 비활성화
+        scrollRect.vertical = true;    // 수직 스크롤 활성화
+        scrollRect.scrollSensitivity = 10f; // 스크롤 감도
+        scrollRect.inertia = true;     // 관성 스크롤 활성화
+        scrollRect.decelerationRate = 0.135f; // 감속률
+        
+        // 🆕 Viewport 설정 (스크롤 영역 제한)
+        if (scrollViewport == null)
+        {
+            // Viewport 자동 생성
+            scrollViewport = new GameObject("ScrollViewport");
+            scrollViewport.transform.SetParent(slotParent.parent);
+            scrollViewport.transform.SetSiblingIndex(slotParent.GetSiblingIndex());
+        }
+        
+        RectTransform viewportRect = scrollViewport.GetComponent<RectTransform>();
+        if (viewportRect == null)
+            viewportRect = scrollViewport.AddComponent<RectTransform>();
+        
+        // Viewport 크기 및 위치 설정 (Unity에서 설정한 값 그대로 사용)
+        // anchorMin, anchorMax, sizeDelta 등은 Unity에서 직접 설정
+        
+        // Mask 컴포넌트 추가 (영역 밖 숨김)
+        Mask mask = scrollViewport.GetComponent<Mask>();
+        if (mask == null)
+            mask = scrollViewport.AddComponent<Mask>();
+        
+        // Mask 배경 이미지 추가
+        Image maskImage = scrollViewport.GetComponent<Image>();
+        if (maskImage == null)
+            maskImage = scrollViewport.AddComponent<Image>();
+        
+        maskImage.color = new Color(1f, 1f, 1f, 0.1f); // 반투명 배경
+        
+        // slotParent를 viewport의 자식으로 이동
+        slotParent.SetParent(viewportRect);
+        
+        // ScrollRect의 viewport 설정
+        scrollRect.viewport = viewportRect;
+        
+        // 🆕 스크롤바 설정 (필요할 때만 표시)
+        if (scrollbar != null)
+        {
+            scrollRect.verticalScrollbar = scrollbar;
+            scrollbar.onValueChanged.AddListener((value) => {
+                // 스크롤바 값 변경 시 추가 처리 (필요시)
+            });
+            
+            // 초기에는 스크롤바 숨김
+            scrollbar.gameObject.SetActive(false);
+        }
     }
     
     void CreateInitialSlots()
@@ -382,6 +484,15 @@ public class InventoryManager : MonoBehaviour
         if (armorTabButton != null)
         {
             armorTabButton.onClick.AddListener(() => SwitchTab(InventoryTab.Armors));
+        }
+        
+        // 🆕 스크롤바 설정
+        if (scrollbar != null)
+        {
+            // 스크롤바 값 변경 시 추가 처리 (필요시)
+            scrollbar.onValueChanged.AddListener((value) => {
+                // 스크롤바 드래그 시 추가 로직 (필요시)
+            });
         }
     }
     
@@ -541,9 +652,6 @@ public class InventoryManager : MonoBehaviour
         {
             weapons.Remove(weapon);
             
-            // 빈 슬롯이 너무 많으면 제거
-            CleanupExcessSlots();
-            
             // 초기화가 완료되고 새로고침이 요청된 경우에만 UI 새로고침
             if (shouldRefresh && isInitialized)
             {
@@ -551,34 +659,6 @@ public class InventoryManager : MonoBehaviour
             }
             
 
-        }
-    }
-    
-    void CleanupExcessSlots()
-    {
-        // 필요한 슬롯 수 계산
-        int requiredSlots = weapons.Count + minEmptySlots;
-        int maxAllowedSlots = weapons.Count + (minEmptySlots * 2); // 최대 허용 슬롯 (여유분 2배)
-        
-        // 슬롯이 너무 많으면 뒤에서부터 제거
-        while (inventorySlots.Count > maxAllowedSlots && inventorySlots.Count > requiredSlots)
-        {
-            int lastIndex = inventorySlots.Count - 1;
-            InventorySlot lastSlot = inventorySlots[lastIndex];
-            
-            // 빈 슬롯만 제거
-            if (lastSlot != null && lastSlot.weaponData == null)
-            {
-                inventorySlots.RemoveAt(lastIndex);
-                if (lastSlot.gameObject != null)
-                {
-                    DestroyImmediate(lastSlot.gameObject);
-                }
-            }
-            else
-            {
-                break; // 무기가 있는 슬롯을 만나면 중단
-            }
         }
     }
     
@@ -594,6 +674,9 @@ public class InventoryManager : MonoBehaviour
         ApplyFiltersAndSort();
         UpdateSlots();
         UpdateUI();
+        
+        // 🆕 스크롤바 가시성 업데이트
+        UpdateScrollbarVisibility();
     }
     
     void ApplyFiltersAndSort()
@@ -683,43 +766,53 @@ public class InventoryManager : MonoBehaviour
         }
     }
     
+    void ForceRebuildLayout()
+    {
+        if (slotParent != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(slotParent.GetComponent<RectTransform>());
+        }
+    }
+
+    System.Collections.IEnumerator DelayedRebuildLayout()
+    {
+        yield return null; // 한 프레임 대기
+        ForceRebuildLayout();
+        UpdateScrollbarVisibility();
+    }
+
     void UpdateSlots()
     {
-        // 🆕 탭별로 다른 아이템 표시
         List<object> itemsToShow = new List<object>();
-        
         if (currentTab == InventoryTab.Weapons)
         {
-            // 무기 탭: 무기만 표시
             itemsToShow.AddRange(filteredWeapons.Cast<object>());
         }
         else if (currentTab == InventoryTab.Armors)
         {
-            // 방어구 탭: 방어구만 표시
             itemsToShow.AddRange(filteredArmors.Cast<object>());
         }
-        
-        // 필요한 슬롯 수만큼 확보
-        while (inventorySlots.Count < itemsToShow.Count)
+
+        int targetSlotCount = Mathf.Min(itemsToShow.Count + minEmptySlots, maxInventorySlots);
+
+        // 슬롯이 부족하면 새로 생성
+        while (inventorySlots.Count < targetSlotCount)
         {
             CreateSingleSlot(inventorySlots.Count);
         }
-        
-        // 현재 탭의 아이템들 표시
+        // 남는 슬롯은 ClearSlot만 호출 (파괴하지 않음)
         for (int i = 0; i < inventorySlots.Count; i++)
         {
             if (i < itemsToShow.Count)
             {
                 if (currentTab == InventoryTab.Weapons)
                 {
-                    // 무기 표시
                     WeaponData weapon = itemsToShow[i] as WeaponData;
                     inventorySlots[i].isArmorSlot = false;
                     inventorySlots[i].SetWeapon(weapon);
                 }
                 else if (currentTab == InventoryTab.Armors)
                 {
-                    // 방어구 표시
                     ArmorData armor = itemsToShow[i] as ArmorData;
                     inventorySlots[i].isArmorSlot = true;
                     inventorySlots[i].SetArmor(armor);
@@ -727,10 +820,10 @@ public class InventoryManager : MonoBehaviour
             }
             else
             {
-                // 빈 슬롯
                 inventorySlots[i].ClearSlot();
             }
         }
+        StartCoroutine(DelayedRebuildLayout());
     }
     
     void UpdateUI()
