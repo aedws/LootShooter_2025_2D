@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class ArmorPickup : MonoBehaviour, IItemPickup
+public class ArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
 {
     [Header("🛡️ 방어구 픽업 설정")]
     [Tooltip("픽업할 방어구 데이터")]

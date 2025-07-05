@@ -52,6 +52,15 @@ public class GoogleSheetsManager : MonoBehaviour
         StartCoroutine(FetchArmorsData());
     }
     
+    /// <summary>
+    /// 모든 데이터를 로드합니다 (GameDataRepository 호환용)
+    /// </summary>
+    public void LoadAllData()
+    {
+        LoadWeapons();
+        LoadArmors();
+    }
+    
     private IEnumerator FetchWeaponsData()
     {
         string apiKey = config.GetApiKey();
@@ -61,7 +70,8 @@ public class GoogleSheetsManager : MonoBehaviour
             yield break;
         }
         
-        string url = $"https://sheets.googleapis.com/v4/spreadsheets/{config.WeaponsSpreadsheetId}/values/Sheet1!A:Z?key={apiKey}";
+        string url = $"https://sheets.googleapis.com/v4/spreadsheets/{config.WeaponsSpreadsheetId}/values/{config.WeaponsSheetName}?key={config.ApiKey}";
+        Debug.Log($"[GoogleSheetsManager] 무기 데이터 요청 URL: {url}");
         
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
@@ -87,7 +97,8 @@ public class GoogleSheetsManager : MonoBehaviour
             yield break;
         }
         
-        string url = $"https://sheets.googleapis.com/v4/spreadsheets/{config.ArmorsSpreadsheetId}/values/Sheet1!A:Z?key={apiKey}";
+        string url = $"https://sheets.googleapis.com/v4/spreadsheets/{config.ArmorsSpreadsheetId}/values/{config.ArmorsSheetName}?key={config.ApiKey}";
+        Debug.Log($"[GoogleSheetsManager] 방어구 데이터 요청 URL: {url}");
         
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {

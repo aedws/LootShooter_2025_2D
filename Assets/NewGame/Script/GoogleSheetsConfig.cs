@@ -8,6 +8,10 @@ public class GoogleSheetsConfig : ScriptableObject
     [SerializeField] private string weaponsSpreadsheetId = "";
     [SerializeField] private string armorsSpreadsheetId = "";
     
+    [Header("시트 이름 (탭 이름)")]
+    [SerializeField] public string WeaponsSheetName = "Weapons";
+    [SerializeField] public string ArmorsSheetName = "Armors";
+    
     // 싱글톤 인스턴스
     private static GoogleSheetsConfig _instance;
     public static GoogleSheetsConfig Instance
