@@ -63,6 +63,10 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     [Tooltip("저격총(SR) 테두리 색상")]
     public Color srColor = Color.green;
     
+    [Header("기본 아이콘 (icon이 null일 때)")]
+    public Sprite defaultWeaponIcon;
+    public Sprite defaultArmorIcon;
+    
     // 🌍 전역 드래그 상태 (WeaponSlot에서 접근 가능)
     public static WeaponData CurrentlyDraggedWeapon { get; private set; } = null;
     public static ArmorData CurrentlyDraggedArmor { get; private set; } = null; // 🆕 방어구 드래그 상태
@@ -166,10 +170,11 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     // 🆕 무기 시각적 요소 표시
     void ShowWeaponVisuals()
     {
-        // 아이콘 설정
         if (iconImage != null)
         {
-            iconImage.sprite = weaponData.icon;
+            if (weaponData.icon != null)
+                iconImage.sprite = weaponData.icon;
+            // icon이 null이면 sprite를 변경하지 않음 (기본값 유지)
             iconImage.color = Color.white;
             iconImage.enabled = true;
             AdjustIconSize();
@@ -209,10 +214,11 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     // 🆕 방어구 시각적 요소 표시
     void ShowArmorVisuals()
     {
-        // 아이콘 설정
         if (iconImage != null)
         {
-            iconImage.sprite = armorData.icon;
+            if (armorData.icon != null)
+                iconImage.sprite = armorData.icon;
+            // icon이 null이면 sprite를 변경하지 않음 (기본값 유지)
             iconImage.color = Color.white;
             iconImage.enabled = true;
             AdjustIconSize();

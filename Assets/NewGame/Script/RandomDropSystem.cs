@@ -15,6 +15,23 @@ public class RandomDropSystem : MonoBehaviour
     [SerializeField] private GameObject weaponDropPrefab;
     [SerializeField] private GameObject armorDropPrefab;
     
+    [System.Serializable]
+    public struct WeaponDropPrefabEntry
+    {
+        public WeaponType weaponType;
+        public GameObject prefab;
+    }
+    [Header("드롭 프리팹 (타입별)")]
+    [SerializeField] public WeaponDropPrefabEntry[] weaponDropPrefabs;
+
+    [System.Serializable]
+    public struct ArmorDropPrefabEntry
+    {
+        public ArmorType armorType;
+        public GameObject prefab;
+    }
+    [SerializeField] public ArmorDropPrefabEntry[] armorDropPrefabs;
+    
     [Header("드롭 가중치")]
     [SerializeField] private float weaponDropWeight = 0.6f; // 60% 무기, 40% 방어구
     
@@ -83,32 +100,22 @@ public class RandomDropSystem : MonoBehaviour
     {
         var repo = GameDataRepository.Instance;
         WeaponData randomWeapon = repo.GetRandomWeapon();
-        
-        if (randomWeapon == null)
+        if (randomWeapon == null) return;
+
+        // 타입별 프리팹 찾기
+        GameObject prefab = weaponDropPrefabs != null ? System.Array.Find(weaponDropPrefabs, e => e.weaponType == randomWeapon.weaponType).prefab : null;
+        if (prefab == null) prefab = weaponDropPrefab; // fallback
+
+        Vector3 dropPosition = position + Vector3.up * 1.5f;
+        GameObject dropObject = Instantiate(prefab, dropPosition, Quaternion.identity);
+        WeaponPickup weaponPickup = dropObject.GetComponent<WeaponPickup>();
+        if (weaponPickup != null)
         {
-            Debug.LogWarning("[RandomDropSystem] 드롭할 무기가 없습니다.");
-            return;
-        }
-        
-        // 랜덤 위치 계산
-        Vector3 dropPosition = position + Random.insideUnitSphere * dropRadius;
-        dropPosition.z = 0; // 2D 게임이므로 Z축 고정
-        
-        // 무기 드롭 생성
-        if (weaponDropPrefab != null)
-        {
-            GameObject dropObject = Instantiate(weaponDropPrefab, dropPosition, Quaternion.identity);
-            WeaponPickup weaponPickup = dropObject.GetComponent<WeaponPickup>();
-            
-            if (weaponPickup != null)
-            {
-                weaponPickup.weaponData = randomWeapon;
-                
-                if (debugMode)
-                {
-                    Debug.Log($"[RandomDropSystem] 무기 드롭 생성: {randomWeapon.weaponName} ({randomWeapon.weaponType})");
-                }
-            }
+            weaponPickup.weaponData = randomWeapon;
+            // 아이콘 즉시 적용
+            SpriteRenderer sr = dropObject.GetComponent<SpriteRenderer>();
+            if (sr != null && randomWeapon.icon != null)
+                sr.sprite = randomWeapon.icon;
         }
     }
     
@@ -118,42 +125,24 @@ public class RandomDropSystem : MonoBehaviour
     private void CreateArmorDrop(Vector3 position)
     {
         var repo = GameDataRepository.Instance;
-        
-        // 레어리티 결정
         ArmorRarity rarity = DetermineRarity();
         ArmorData randomArmor = repo.GetRandomArmorByRarity(rarity);
-        
-        // 해당 레어리티에 방어구가 없으면 전체에서 랜덤 선택
-        if (randomArmor == null)
+        if (randomArmor == null) randomArmor = repo.GetRandomArmor();
+        if (randomArmor == null) return;
+
+        GameObject prefab = armorDropPrefabs != null ? System.Array.Find(armorDropPrefabs, e => e.armorType == randomArmor.armorType).prefab : null;
+        if (prefab == null) prefab = armorDropPrefab; // fallback
+
+        Vector3 dropPosition = position + Vector3.up * 1.5f;
+        GameObject dropObject = Instantiate(prefab, dropPosition, Quaternion.identity);
+        ArmorPickup armorPickup = dropObject.GetComponent<ArmorPickup>();
+        if (armorPickup != null)
         {
-            randomArmor = repo.GetRandomArmor();
-        }
-        
-        if (randomArmor == null)
-        {
-            Debug.LogWarning("[RandomDropSystem] 드롭할 방어구가 없습니다.");
-            return;
-        }
-        
-        // 랜덤 위치 계산
-        Vector3 dropPosition = position + Random.insideUnitSphere * dropRadius;
-        dropPosition.z = 0; // 2D 게임이므로 Z축 고정
-        
-        // 방어구 드롭 생성
-        if (armorDropPrefab != null)
-        {
-            GameObject dropObject = Instantiate(armorDropPrefab, dropPosition, Quaternion.identity);
-            ArmorPickup armorPickup = dropObject.GetComponent<ArmorPickup>();
-            
-            if (armorPickup != null)
-            {
-                armorPickup.armorData = randomArmor;
-                
-                if (debugMode)
-                {
-                    Debug.Log($"[RandomDropSystem] 방어구 드롭 생성: {randomArmor.armorName} ({randomArmor.armorType}, {randomArmor.rarity})");
-                }
-            }
+            armorPickup.armorData = randomArmor;
+            // 아이콘 즉시 적용
+            SpriteRenderer sr = dropObject.GetComponent<SpriteRenderer>();
+            if (sr != null && randomArmor.icon != null)
+                sr.sprite = randomArmor.icon;
         }
     }
     

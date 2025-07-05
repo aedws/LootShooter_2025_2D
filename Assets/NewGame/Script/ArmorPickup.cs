@@ -33,7 +33,9 @@ public class ArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
         // 방어구 아이콘 설정
         if (armorData != null && spriteRenderer != null)
         {
-            spriteRenderer.sprite = armorData.icon;
+            if (armorData.icon != null)
+                spriteRenderer.sprite = armorData.icon;
+            // icon이 null이면 프리팹의 Sprite를 그대로 사용
             spriteRenderer.color = armorData.GetRarityColor();
         }
         

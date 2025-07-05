@@ -4571,7 +4571,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1356433551}
-  - component: {fileID: 1356433550}
+  - component: {fileID: 1356433552}
   m_Layer: 0
   m_Name: RandomDropSystem
   m_TagString: Untagged
@@ -4579,29 +4579,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1356433550
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1356433549}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bc9fc94764e94fb44a4c4fe26d45396a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  enableRandomDrops: 1
-  dropChance: 0.3
-  dropRadius: 2
-  weaponDropPrefab: {fileID: 1323876041243235962, guid: b37b7ada8b1fbfe4d986d5a4f95ad25d, type: 3}
-  armorDropPrefab: {fileID: 3115948570456368544, guid: 76b6521c879bc8544bc734a47676dfc6, type: 3}
-  weaponDropWeight: 0.6
-  commonWeight: 0.5
-  rareWeight: 0.3
-  epicWeight: 0.15
-  legendaryWeight: 0.05
-  debugMode: 0
 --- !u!4 &1356433551
 Transform:
   m_ObjectHideFlags: 0
@@ -4617,6 +4594,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1356433552
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1356433549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc9fc94764e94fb44a4c4fe26d45396a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enableRandomDrops: 1
+  dropChance: 0.3
+  dropRadius: 2
+  weaponDropPrefab: {fileID: 0}
+  armorDropPrefab: {fileID: 0}
+  weaponDropPrefabs:
+  - weaponType: 0
+    prefab: {fileID: 1323876041243235962, guid: 11c3e983763e4c44aa59c8638005d597, type: 3}
+  - weaponType: 1
+    prefab: {fileID: 1323876041243235962, guid: ed415ae6945d50c49b2f1b51f8c8eae6, type: 3}
+  - weaponType: 2
+    prefab: {fileID: 1323876041243235962, guid: 0dfb5cbe837a96247962d16ab2f6a216, type: 3}
+  - weaponType: 3
+    prefab: {fileID: 1323876041243235962, guid: 16814f9f9edf85949a10ccf56545b06f, type: 3}
+  - weaponType: 4
+    prefab: {fileID: 1323876041243235962, guid: 8e1026cafae51234d8c35bd6eb85bdf3, type: 3}
+  - weaponType: 5
+    prefab: {fileID: 1323876041243235962, guid: f866e37a420a4184493ab3e7c6f28f3a, type: 3}
+  armorDropPrefabs:
+  - armorType: 0
+    prefab: {fileID: 60777462988403338, guid: df04299bef29e744c9816d49f4a13e64, type: 3}
+  - armorType: 1
+    prefab: {fileID: 60777462988403338, guid: 4e08845977b4fad4da2ee55530c84e77, type: 3}
+  - armorType: 4
+    prefab: {fileID: 60777462988403338, guid: 0cc9dd97e77f31d498ae5dcc5570bdf3, type: 3}
+  - armorType: 2
+    prefab: {fileID: 60777462988403338, guid: f7b04c38d7733f344befc19881efcddb, type: 3}
+  - armorType: 3
+    prefab: {fileID: 60777462988403338, guid: ed89896690006a54aaf9a2c942bc7ebb, type: 3}
+  - armorType: 5
+    prefab: {fileID: 60777462988403338, guid: 0a7c3d5fdfa60cc4f81c6526feee47a4, type: 3}
+  weaponDropWeight: 0.6
+  commonWeight: 0.5
+  rareWeight: 0.3
+  epicWeight: 0.15
+  legendaryWeight: 0.05
+  debugMode: 0
 --- !u!1001 &1383858352
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6933,7 +6959,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1618091014
 MonoBehaviour:
   m_ObjectHideFlags: 0
