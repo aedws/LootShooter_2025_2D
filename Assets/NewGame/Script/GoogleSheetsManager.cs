@@ -123,16 +123,16 @@ public class GoogleSheetsManager : MonoBehaviour
         try
         {
             var response = JsonConvert.DeserializeObject<GoogleSheetsResponse>(jsonData);
-            if (response?.values == null || response.values.Count < 2)
+            if (response?.values == null || response.values.Count < 4)
             {
-                OnError?.Invoke("무기 데이터가 비어있습니다.");
+                OnError?.Invoke("무기 데이터가 비어있습니다. (최소 4행 필요: 헤더 3행 + 데이터 1행)");
                 return;
             }
             
             List<WeaponData> weapons = new List<WeaponData>();
             
-            // 첫 번째 행은 헤더이므로 건너뛰기
-            for (int i = 1; i < response.values.Count; i++)
+            // 상위 3행은 헤더이므로 건너뛰기 (4번째 행부터 데이터 시작)
+            for (int i = 3; i < response.values.Count; i++)
             {
                 var row = response.values[i];
                 if (row.Count >= 31) // 모든 필드가 있는지 확인
@@ -282,16 +282,16 @@ public class GoogleSheetsManager : MonoBehaviour
         try
         {
             var response = JsonConvert.DeserializeObject<GoogleSheetsResponse>(jsonData);
-            if (response?.values == null || response.values.Count < 2)
+            if (response?.values == null || response.values.Count < 4)
             {
-                OnError?.Invoke("방어구 데이터가 비어있습니다.");
+                OnError?.Invoke("방어구 데이터가 비어있습니다. (최소 4행 필요: 헤더 3행 + 데이터 1행)");
                 return;
             }
             
             List<ArmorData> armors = new List<ArmorData>();
             
-            // 첫 번째 행은 헤더이므로 건너뛰기
-            for (int i = 1; i < response.values.Count; i++)
+            // 상위 3행은 헤더이므로 건너뛰기 (4번째 행부터 데이터 시작)
+            for (int i = 3; i < response.values.Count; i++)
             {
                 var row = response.values[i];
                 if (row.Count >= 14) // 모든 필드가 있는지 확인
