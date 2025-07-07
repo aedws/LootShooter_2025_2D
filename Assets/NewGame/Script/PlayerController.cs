@@ -264,6 +264,9 @@ public class PlayerController : MonoBehaviour
         isDashing = true;
         dashCooldownTimer = dashCooldown;
 
+        // 대시 시작: 무적 적용
+        if (health != null) health.SetInvincible(true);
+
         float originalGravity = rb.gravityScale;
         rb.gravityScale = 0;
         dashDirection = new Vector2(Input.GetAxisRaw("Horizontal"), 0).normalized;
@@ -275,8 +278,20 @@ public class PlayerController : MonoBehaviour
         // 잔상 이펙트 시작
         StartCoroutine(CreateAfterImages());
 
+        // 🛡️ 방어구 무적 시간 보너스 합산
+        float bonusInvincible = 0f;
+        if (playerInventory != null)
+        {
+            var armors = playerInventory.GetAllEquippedArmors();
+            foreach (var armor in armors.Values)
+            {
+                bonusInvincible += armor.invincibilityBonus;
+            }
+        }
+        float totalInvincibleTime = dashInvincibleTime + bonusInvincible;
+
         // 무적 시간
-        float invincibleTimer = dashInvincibleTime;
+        float invincibleTimer = totalInvincibleTime;
         while (invincibleTimer > 0)
         {
             invincibleTimer -= Time.deltaTime;
@@ -284,10 +299,13 @@ public class PlayerController : MonoBehaviour
         }
 
         // 대시 지속 시간
-        yield return new WaitForSeconds(dashDuration - dashInvincibleTime);
+        yield return new WaitForSeconds(dashDuration - totalInvincibleTime);
 
         rb.gravityScale = originalGravity;
         isDashing = false;
+
+        // 대시 종료: 무적 해제
+        if (health != null) health.SetInvincible(false);
     }
 
     System.Collections.IEnumerator CreateAfterImages()
