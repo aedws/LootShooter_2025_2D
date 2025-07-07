@@ -143,6 +143,12 @@ public class WeaponData : ScriptableObject
     
     [Tooltip("폭발 반경 (hasExplosiveKills가 true일 때만 적용)")]
     public float explosionRadius = 2f;
+    
+    [Tooltip("폭발 시각 효과 프리팹 (선택사항)")]
+    public GameObject explosionEffectPrefab;
+    
+    [Tooltip("폭발 색상 (프리팹이 없을 때 사용)")]
+    public Color explosionColor = new Color(1f, 0.5f, 0f, 1f); // 주황색
 
     [Header("등급(레어리티)")]
     public WeaponRarity rarity = WeaponRarity.Common;

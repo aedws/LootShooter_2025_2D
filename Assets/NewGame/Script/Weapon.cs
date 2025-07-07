@@ -278,6 +278,13 @@ public class Weapon : MonoBehaviour
         if (weaponData.hasExplosiveKills)
         {
             projectile.SetExplosive(weaponData.explosionRadius, OnExplosion);
+            
+            // 폭발 시각 효과 설정
+            if (weaponData.explosionEffectPrefab != null)
+            {
+                projectile.explosionEffectPrefab = weaponData.explosionEffectPrefab;
+            }
+            projectile.explosionColor = weaponData.explosionColor;
         }
         
         // 예광탄 효과 (시각적 효과는 Projectile에서 처리)

@@ -209,8 +209,21 @@ public class SniperAimingSystem : MonoBehaviour
         // 왼쪽을 바라볼 때는 각도를 반전
         float actualAngle = facingRight ? currentWeaponAngle : -currentWeaponAngle;
         
+        // 현재 무기의 반동 각도 가져오기
+        float recoilAngle = 0f;
+        Weapon currentWeapon = playerInventory?.GetCurrentWeapon();
+        if (currentWeapon != null)
+        {
+            recoilAngle = currentWeapon.GetCurrentRecoilAngle();
+            // 왼쪽을 바라볼 때는 반동 각도도 반전
+            if (!facingRight) recoilAngle = -recoilAngle;
+        }
+        
+        // 조준 각도 + 반동 각도
+        float totalAngle = actualAngle + recoilAngle;
+        
         // 각도를 라디안으로 변환
-        float angleInRadians = actualAngle * Mathf.Deg2Rad;
+        float angleInRadians = totalAngle * Mathf.Deg2Rad;
         
         // 회전된 방향 벡터 계산 (PlayerController와 완전 동일)
         Vector2 rotatedDirection = new Vector2(

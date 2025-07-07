@@ -21,6 +21,11 @@ public class Projectile : MonoBehaviour
     private int currentDamage;
     private HashSet<Collider2D> hitTargets = new HashSet<Collider2D>();
     
+    [Header("폭발 시각 효과")]
+    public GameObject explosionEffectPrefab; // 폭발 이펙트 프리팹
+    public Color explosionColor = new Color(1f, 0.5f, 0f, 1f); // 폭발 색상 (주황색)
+    public float explosionDuration = 0.5f; // 폭발 지속 시간
+    
     private Vector2 moveDir;
     private bool isInitialized = false;
     
@@ -357,6 +362,9 @@ public class Projectile : MonoBehaviour
         
         // Debug.Log($"💥 [PROJECTILE] 폭발 발생! 위치: {explosionCenter}, 반경: {explosionRadius}");
         
+        // 폭발 시각 효과 생성
+        CreateExplosionVisualEffect(explosionCenter);
+        
         // 폭발 콜백 호출
         onExplosionCallback?.Invoke(explosionCenter, explosionRadius);
         
@@ -373,6 +381,104 @@ public class Projectile : MonoBehaviour
                 // Debug.Log($"💥 [EXPLOSION] 폭발 데미지 {explosionDamage}를 {enemy.enemyName}에게!");
             }
         }
+    }
+    
+    private void CreateExplosionVisualEffect(Vector3 position)
+    {
+        // 프리팹이 있으면 프리팹 사용
+        if (explosionEffectPrefab != null)
+        {
+            GameObject explosion = Instantiate(explosionEffectPrefab, position, Quaternion.identity);
+            Destroy(explosion, explosionDuration);
+        }
+        else
+        {
+            // 프리팹이 없으면 동적으로 생성
+            CreateDynamicExplosionEffect(position);
+        }
+    }
+    
+    private void CreateDynamicExplosionEffect(Vector3 position)
+    {
+        // 폭발 게임오브젝트 생성
+        GameObject explosion = new GameObject("ExplosionEffect");
+        explosion.transform.position = position;
+        
+        // 스프라이트 렌더러 추가
+        SpriteRenderer spriteRenderer = explosion.AddComponent<SpriteRenderer>();
+        spriteRenderer.sprite = CreateExplosionSprite();
+        spriteRenderer.color = explosionColor;
+        spriteRenderer.sortingOrder = 10; // 다른 오브젝트 위에 표시
+        
+        // 폭발 애니메이션 코루틴 시작
+        StartCoroutine(ExplosionAnimation(explosion, spriteRenderer));
+    }
+    
+    private Sprite CreateExplosionSprite()
+    {
+        int size = 64;
+        Texture2D texture = new Texture2D(size, size);
+        Color[] pixels = new Color[size * size];
+        
+        Vector2 center = new Vector2(size / 2f, size / 2f);
+        float radius = size / 2f;
+        
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                float distance = Vector2.Distance(new Vector2(x, y), center);
+                float alpha = 0f;
+                
+                if (distance <= radius)
+                {
+                    // 중심에서 멀어질수록 투명해짐
+                    alpha = 1f - (distance / radius);
+                    
+                    // 가장자리 부드럽게
+                    if (distance > radius - 4f)
+                    {
+                        alpha = Mathf.Lerp(1f, 0f, (distance - (radius - 4f)) / 4f);
+                    }
+                    
+                    // 폭발 패턴 (불규칙한 모양)
+                    float noise = Mathf.PerlinNoise(x * 0.1f, y * 0.1f);
+                    alpha *= noise;
+                }
+                
+                pixels[y * size + x] = new Color(1f, 1f, 1f, alpha);
+            }
+        }
+        
+        texture.SetPixels(pixels);
+        texture.Apply();
+        
+        return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
+    }
+    
+    private System.Collections.IEnumerator ExplosionAnimation(GameObject explosion, SpriteRenderer spriteRenderer)
+    {
+        Vector3 originalScale = explosion.transform.localScale;
+        float timer = 0f;
+        
+        while (timer < explosionDuration)
+        {
+            float normalizedTime = timer / explosionDuration;
+            
+            // 스케일 효과 (점점 커짐)
+            float scale = Mathf.Lerp(0.1f, explosionRadius * 2f, normalizedTime);
+            explosion.transform.localScale = originalScale * scale;
+            
+            // 색상 변화 (점점 밝아졌다가 어두워짐)
+            Color currentColor = Color.Lerp(explosionColor, Color.white, Mathf.Sin(normalizedTime * Mathf.PI));
+            float alpha = Mathf.Lerp(1f, 0f, normalizedTime);
+            spriteRenderer.color = new Color(currentColor.r, currentColor.g, currentColor.b, alpha);
+            
+            timer += Time.deltaTime;
+            yield return null;
+        }
+        
+        Destroy(explosion);
     }
 
     private void DestroyProjectile()
