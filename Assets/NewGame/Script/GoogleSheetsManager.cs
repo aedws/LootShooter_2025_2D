@@ -143,52 +143,56 @@ public class GoogleSheetsManager : MonoBehaviour
                     weapon.weaponName = row[0];
                     if (System.Enum.TryParse<WeaponType>(row[1], out WeaponType weaponType))
                         weapon.weaponType = weaponType;
-                    weapon.flavorText = row[2];
+                    if (System.Enum.TryParse<WeaponRarity>(row[2], true, out WeaponRarity weaponRarity))
+                        weapon.rarity = weaponRarity;
+                    else
+                        weapon.rarity = WeaponRarity.Common;
+                    weapon.flavorText = row[3];
                     
                     // 기본 스탯
-                    weapon.fireRate = float.Parse(row[3]);
-                    weapon.damage = int.Parse(row[4]);
-                    weapon.projectileSpeed = float.Parse(row[5]);
-                    weapon.maxAmmo = int.Parse(row[6]);
-                    weapon.currentAmmo = int.Parse(row[7]);
-                    weapon.reloadTime = float.Parse(row[8]);
-                    weapon.infiniteAmmo = bool.Parse(row[9]);
+                    weapon.fireRate = float.Parse(row[4]);
+                    weapon.damage = int.Parse(row[5]);
+                    weapon.projectileSpeed = float.Parse(row[6]);
+                    weapon.maxAmmo = int.Parse(row[7]);
+                    weapon.currentAmmo = int.Parse(row[8]);
+                    weapon.reloadTime = float.Parse(row[9]);
+                    weapon.infiniteAmmo = bool.Parse(row[10]);
                     
                     // 탄 퍼짐 설정
-                    weapon.baseSpread = float.Parse(row[10]);
-                    weapon.maxSpread = float.Parse(row[11]);
-                    weapon.spreadIncreaseRate = float.Parse(row[12]);
-                    weapon.spreadDecreaseRate = float.Parse(row[13]);
+                    weapon.baseSpread = float.Parse(row[11]);
+                    weapon.maxSpread = float.Parse(row[12]);
+                    weapon.spreadIncreaseRate = float.Parse(row[13]);
+                    weapon.spreadDecreaseRate = float.Parse(row[14]);
                     
                     // 샷건 설정
-                    weapon.pelletsPerShot = int.Parse(row[14]);
-                    weapon.shotgunSpreadAngle = float.Parse(row[15]);
+                    weapon.pelletsPerShot = int.Parse(row[15]);
+                    weapon.shotgunSpreadAngle = float.Parse(row[16]);
                     
                     // 머신건 설정
-                    weapon.warmupTime = float.Parse(row[16]);
-                    weapon.maxWarmupFireRate = float.Parse(row[17]);
+                    weapon.warmupTime = float.Parse(row[17]);
+                    weapon.maxWarmupFireRate = float.Parse(row[18]);
                     
                     // 저격총 설정
-                    weapon.singleFireOnly = bool.Parse(row[18]);
-                    weapon.aimingRange = float.Parse(row[19]);
+                    weapon.singleFireOnly = bool.Parse(row[19]);
+                    weapon.aimingRange = float.Parse(row[20]);
                     
                     // 이동속도 영향
-                    weapon.movementSpeedMultiplier = float.Parse(row[20]);
+                    weapon.movementSpeedMultiplier = float.Parse(row[21]);
                     
                     // 반동 설정
-                    weapon.recoilForce = float.Parse(row[21]);
-                    weapon.recoilDuration = float.Parse(row[22]);
-                    weapon.recoilRecoverySpeed = float.Parse(row[23]);
+                    weapon.recoilForce = float.Parse(row[22]);
+                    weapon.recoilDuration = float.Parse(row[23]);
+                    weapon.recoilRecoverySpeed = float.Parse(row[24]);
                     
                     // 특수 효과
-                    weapon.criticalChance = float.Parse(row[24]);
-                    weapon.criticalMultiplier = float.Parse(row[25]);
-                    weapon.pierceCount = int.Parse(row[26]);
-                    weapon.pierceDamageReduction = float.Parse(row[27]);
-                    weapon.hasTracerRounds = bool.Parse(row[28]);
-                    weapon.hasMuzzleFlash = bool.Parse(row[29]);
-                    weapon.hasExplosiveKills = bool.Parse(row[30]);
-                    weapon.explosionRadius = float.Parse(row[31]);
+                    weapon.criticalChance = float.Parse(row[25]);
+                    weapon.criticalMultiplier = float.Parse(row[26]);
+                    weapon.pierceCount = int.Parse(row[27]);
+                    weapon.pierceDamageReduction = float.Parse(row[28]);
+                    weapon.hasTracerRounds = bool.Parse(row[29]);
+                    weapon.hasMuzzleFlash = bool.Parse(row[30]);
+                    weapon.hasExplosiveKills = bool.Parse(row[31]);
+                    weapon.explosionRadius = float.Parse(row[32]);
                     
                     // 🆕 누락된 필드들 처리
                     SetupWeaponAssets(weapon);

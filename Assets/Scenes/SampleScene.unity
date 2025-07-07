@@ -2229,12 +2229,12 @@ MonoBehaviour:
   draggingColor: {r: 1, g: 1, b: 1, a: 0.5}
   playerInventory: {fileID: 1163192267}
   inventoryManager: {fileID: 2112165850}
-  defaultARIcon: {fileID: 0}
-  defaultHGIcon: {fileID: 0}
-  defaultMGIcon: {fileID: 0}
-  defaultSGIcon: {fileID: 0}
-  defaultSMGIcon: {fileID: 0}
-  defaultSRIcon: {fileID: 0}
+  defaultARIcon: {fileID: 21300000, guid: b7cad2917d053294aa83873fbd3d047a, type: 3}
+  defaultHGIcon: {fileID: 21300000, guid: 7e81c0a7920dec544807f9555d7917b0, type: 3}
+  defaultMGIcon: {fileID: 21300000, guid: 484588637166b3842adbbd16a02664ca, type: 3}
+  defaultSGIcon: {fileID: 21300000, guid: 21362401e3338714da339a239baabc2a, type: 3}
+  defaultSMGIcon: {fileID: 21300000, guid: 37c2f19c7012e604aa337bfad319b635, type: 3}
+  defaultSRIcon: {fileID: 21300000, guid: b65e2f326d0c2f14e972ccac8db3d077, type: 3}
   debugMode: 0
 --- !u!114 &650527598
 MonoBehaviour:
@@ -6681,7 +6681,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1618091014
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8249,12 +8249,12 @@ MonoBehaviour:
   draggingColor: {r: 1, g: 1, b: 1, a: 0.5}
   playerInventory: {fileID: 1163192267}
   inventoryManager: {fileID: 2112165850}
-  defaultARIcon: {fileID: 0}
-  defaultHGIcon: {fileID: 0}
-  defaultMGIcon: {fileID: 0}
-  defaultSGIcon: {fileID: 0}
-  defaultSMGIcon: {fileID: 0}
-  defaultSRIcon: {fileID: 0}
+  defaultARIcon: {fileID: 21300000, guid: b7cad2917d053294aa83873fbd3d047a, type: 3}
+  defaultHGIcon: {fileID: 21300000, guid: 7e81c0a7920dec544807f9555d7917b0, type: 3}
+  defaultMGIcon: {fileID: 21300000, guid: 484588637166b3842adbbd16a02664ca, type: 3}
+  defaultSGIcon: {fileID: 21300000, guid: 21362401e3338714da339a239baabc2a, type: 3}
+  defaultSMGIcon: {fileID: 21300000, guid: 37c2f19c7012e604aa337bfad319b635, type: 3}
+  defaultSRIcon: {fileID: 21300000, guid: b65e2f326d0c2f14e972ccac8db3d077, type: 3}
   debugMode: 0
 --- !u!114 &2091626279
 MonoBehaviour:

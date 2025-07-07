@@ -14,6 +14,7 @@ public enum ArmorType
 [System.Serializable]
 public enum ArmorRarity
 {
+    Primordial, // 태초(청록)
     Common,     // 흰색
     Rare,       // 파랑
     Epic,       // 보라
@@ -58,6 +59,9 @@ public class ArmorData : ScriptableObject
         // 레어리티에 따른 색상 자동 설정
         switch (rarity)
         {
+            case ArmorRarity.Primordial:
+                rarityColor = new Color(0f, 1f, 1f); // 청록색
+                break;
             case ArmorRarity.Common:
                 rarityColor = Color.white;
                 break;
@@ -84,6 +88,7 @@ public class ArmorData : ScriptableObject
     {
         switch (rarity)
         {
+            case ArmorRarity.Primordial: return "태초";
             case ArmorRarity.Common: return "일반";
             case ArmorRarity.Rare: return "희귀";
             case ArmorRarity.Epic: return "영웅";

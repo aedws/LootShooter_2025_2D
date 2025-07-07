@@ -10,6 +10,15 @@ public enum WeaponType
     SR   // Sniper Rifle
 }
 
+public enum WeaponRarity
+{
+    Primordial, // 태초(청록)
+    Common,     // 흰색
+    Rare,       // 파랑
+    Epic,       // 보라
+    Legendary   // 주황
+}
+
 [CreateAssetMenu(menuName = "LootShooter/WeaponData")]
 public class WeaponData : ScriptableObject
 {
@@ -134,4 +143,31 @@ public class WeaponData : ScriptableObject
     
     [Tooltip("폭발 반경 (hasExplosiveKills가 true일 때만 적용)")]
     public float explosionRadius = 2f;
+
+    [Header("등급(레어리티)")]
+    public WeaponRarity rarity = WeaponRarity.Common;
+    public Color rarityColor = Color.white;
+
+    void OnValidate()
+    {
+        switch (rarity)
+        {
+            case WeaponRarity.Primordial:
+                rarityColor = new Color(0f, 1f, 1f); // 청록색
+                break;
+            case WeaponRarity.Common:
+                rarityColor = Color.white;
+                break;
+            case WeaponRarity.Rare:
+                rarityColor = Color.blue;
+                break;
+            case WeaponRarity.Epic:
+                rarityColor = new Color(0.5f, 0f, 1f); // 보라색
+                break;
+            case WeaponRarity.Legendary:
+                rarityColor = new Color(1f, 0.5f, 0f); // 주황색
+                break;
+        }
+    }
+    public Color GetRarityColor() => rarityColor;
 } 
