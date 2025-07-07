@@ -80,7 +80,15 @@ public class ArmorData : ScriptableObject
     // 레어리티별 색상 반환
     public Color GetRarityColor()
     {
-        return rarityColor;
+        switch (rarity)
+        {
+            case ArmorRarity.Primordial: return new Color(0f, 1f, 1f); // 청록색
+            case ArmorRarity.Common: return Color.white;
+            case ArmorRarity.Rare: return Color.blue;
+            case ArmorRarity.Epic: return new Color(0.5f, 0f, 1f); // 보라색
+            case ArmorRarity.Legendary: return new Color(1f, 0.5f, 0f); // 주황색
+            default: return Color.white;
+        }
     }
     
     // 레어리티별 이름 반환

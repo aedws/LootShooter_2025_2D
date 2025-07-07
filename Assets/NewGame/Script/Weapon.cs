@@ -41,8 +41,13 @@ public class Weapon : MonoBehaviour
     {
         if (weaponData != null)
         {
+            Debug.Log($"[무기등급] {weaponData.weaponName} rarity: {weaponData.rarity}, color: {weaponData.GetRarityColor()}");
             InitializeFromWeaponData();
         }
+        // 등급별 색상 적용
+        var sr = GetComponent<SpriteRenderer>();
+        if (sr != null && weaponData != null)
+            sr.color = weaponData.GetRarityColor();
     }
 
     void Update()
@@ -531,11 +536,16 @@ public class Weapon : MonoBehaviour
     {
         if (weaponData != null)
         {
+            Debug.Log($"[무기등급] {weaponData.weaponName} rarity: {weaponData.rarity}, color: {weaponData.GetRarityColor()}");
             currentSpread = weaponData.baseSpread;
             warmupProgress = 0f;
             isWarmedUp = false;
             currentAmmo = weaponData.currentAmmo;
             OnAmmoChanged?.Invoke(currentAmmo, weaponData.maxAmmo);
+            // 등급별 색상 적용
+            var sr = GetComponent<SpriteRenderer>();
+            if (sr != null)
+                sr.color = weaponData.GetRarityColor();
         }
     }
 

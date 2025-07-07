@@ -146,28 +146,22 @@ public class WeaponData : ScriptableObject
 
     [Header("등급(레어리티)")]
     public WeaponRarity rarity = WeaponRarity.Common;
-    public Color rarityColor = Color.white;
 
     void OnValidate()
     {
+        // This method is kept empty as the existing code handles validation
+    }
+
+    public Color GetRarityColor()
+    {
         switch (rarity)
         {
-            case WeaponRarity.Primordial:
-                rarityColor = new Color(0f, 1f, 1f); // 청록색
-                break;
-            case WeaponRarity.Common:
-                rarityColor = Color.white;
-                break;
-            case WeaponRarity.Rare:
-                rarityColor = Color.blue;
-                break;
-            case WeaponRarity.Epic:
-                rarityColor = new Color(0.5f, 0f, 1f); // 보라색
-                break;
-            case WeaponRarity.Legendary:
-                rarityColor = new Color(1f, 0.5f, 0f); // 주황색
-                break;
+            case WeaponRarity.Primordial: return new Color(0f, 1f, 1f); // 청록색
+            case WeaponRarity.Common: return Color.white;
+            case WeaponRarity.Rare: return Color.blue;
+            case WeaponRarity.Epic: return new Color(0.5f, 0f, 1f); // 보라색
+            case WeaponRarity.Legendary: return new Color(1f, 0.5f, 0f); // 주황색
+            default: return Color.white;
         }
     }
-    public Color GetRarityColor() => rarityColor;
 } 

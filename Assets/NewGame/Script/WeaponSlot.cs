@@ -461,7 +461,7 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
         UpdateVisuals();
     }
     
-    // �� 외부에서 시각적 업데이트를 강제할 수 있는 public 메서드
+    // 🆕 외부에서 시각적 업데이트를 강제할 수 있는 public 메서드
     public void ForceUpdateVisuals()
     {
         UpdateVisuals();
@@ -485,7 +485,7 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
                 {
                     icon.sprite = weaponData.icon;
                     icon.enabled = true;
-                    icon.color = Color.white;
+                    icon.color = weaponData.GetRarityColor();
                     
                     // 🔧 강제 새로고침
                     icon.gameObject.SetActive(false);
@@ -496,7 +496,7 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
                     // 무기 타입별 기본 아이콘 사용
                     icon.sprite = GetDefaultWeaponIcon(weaponData.weaponType);
                     icon.enabled = true;
-                    icon.color = Color.white;
+                    icon.color = weaponData.GetRarityColor();
                     
                     if (debugMode)
                         Debug.LogWarning($"[WeaponSlot] WeaponData '{weaponData.weaponName}'의 icon이 null이어서 기본 아이콘을 사용합니다.");

@@ -207,6 +207,10 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     // 🆕 무기 시각적 요소 표시
     void ShowWeaponVisuals()
     {
+        if (weaponData != null)
+        {
+            Debug.Log($"[무기등급] {weaponData.weaponName} rarity: {weaponData.rarity}, color: {weaponData.GetRarityColor()}");
+        }
         if (iconImage != null)
         {
             // 🎯 아이콘이 null이면 무기 타입별 기본 아이콘 사용
@@ -219,8 +223,8 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 // 무기 타입별 기본 아이콘 설정
                 iconImage.sprite = GetDefaultWeaponIcon(weaponData.weaponType);
             }
-            
-            iconImage.color = Color.white;
+            // 등급별 색상 적용
+            iconImage.color = weaponData.GetRarityColor();
             iconImage.enabled = true;
             AdjustIconSize();
         }
