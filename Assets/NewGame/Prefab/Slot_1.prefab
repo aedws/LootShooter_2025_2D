@@ -349,3 +349,9 @@ MonoBehaviour:
   defaultSMGIcon: {fileID: 21300000, guid: 37c2f19c7012e604aa337bfad319b635, type: 3}
   defaultSRIcon: {fileID: 21300000, guid: 37b68706d2fd49c4fa3a5bee18ad9aa5, type: 3}
   defaultArmorIcon: {fileID: 21300000, guid: 6b11b3095215bac4190dee61f7cb70a7, type: 3}
+  defaultHelmetIcon: {fileID: 21300000, guid: e9a8390f5c126fe4ca429f01fb7306c0, type: 3}
+  defaultChestIcon: {fileID: 21300000, guid: 603e026921ee6c44ab5c48b149bb31e9, type: 3}
+  defaultLegsIcon: {fileID: 21300000, guid: 7d4f9cff490ea9e4e8de620ec2fadcb5, type: 3}
+  defaultBootsIcon: {fileID: 21300000, guid: f8bac558190ebf54a99e3764c03249dc, type: 3}
+  defaultShoulderIcon: {fileID: 21300000, guid: 37ab19403e5d557408d685eb455cb0d6, type: 3}
+  defaultAccessoryIcon: {fileID: 21300000, guid: 161d4730f36de6b42ad214d0d33e423d, type: 3}

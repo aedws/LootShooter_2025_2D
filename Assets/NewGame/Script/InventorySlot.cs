@@ -82,9 +82,27 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     [Tooltip("SR 타입 기본 아이콘")]
     public Sprite defaultSRIcon;
     
-    [Header("🛡️ 기본 방어구 아이콘")]
+    [Header("🛡️ 기본 방어구 아이콘 (icon이 null일 때)")]
     [Tooltip("방어구 기본 아이콘")]
     public Sprite defaultArmorIcon;
+    
+    [Tooltip("머리 기본 아이콘")]
+    public Sprite defaultHelmetIcon;
+    
+    [Tooltip("상체 기본 아이콘")]
+    public Sprite defaultChestIcon;
+    
+    [Tooltip("하체 기본 아이콘")]
+    public Sprite defaultLegsIcon;
+    
+    [Tooltip("신발 기본 아이콘")]
+    public Sprite defaultBootsIcon;
+    
+    [Tooltip("어깨 기본 아이콘")]
+    public Sprite defaultShoulderIcon;
+    
+    [Tooltip("악세사리 기본 아이콘")]
+    public Sprite defaultAccessoryIcon;
     
     // 🌍 전역 드래그 상태 (WeaponSlot에서 접근 가능)
     public static WeaponData CurrentlyDraggedWeapon { get; private set; } = null;
@@ -243,11 +261,37 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (iconImage != null)
         {
-            if (armorData.icon != null)
-                iconImage.sprite = armorData.icon;
-            // icon이 null이면 sprite를 변경하지 않음 (기본값 유지)
+            Sprite iconToUse = armorData.icon;
+            if (iconToUse == null)
+            {
+                switch (armorData.armorType)
+                {
+                    case ArmorType.Helmet:
+                        iconToUse = defaultHelmetIcon;
+                        break;
+                    case ArmorType.Chest:
+                        iconToUse = defaultChestIcon;
+                        break;
+                    case ArmorType.Legs:
+                        iconToUse = defaultLegsIcon;
+                        break;
+                    case ArmorType.Boots:
+                        iconToUse = defaultBootsIcon;
+                        break;
+                    case ArmorType.Shoulder:
+                        iconToUse = defaultShoulderIcon;
+                        break;
+                    case ArmorType.Accessory:
+                        iconToUse = defaultAccessoryIcon;
+                        break;
+                    default:
+                        iconToUse = null;
+                        break;
+                }
+            }
+            iconImage.sprite = iconToUse;
             iconImage.color = Color.white;
-            iconImage.enabled = true;
+            iconImage.enabled = (iconToUse != null);
             AdjustIconSize();
         }
         

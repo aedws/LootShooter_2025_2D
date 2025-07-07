@@ -611,6 +611,12 @@ MonoBehaviour:
   highlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   playerInventory: {fileID: 0}
   inventoryManager: {fileID: 0}
+  defaultHelmetIcon: {fileID: 21300000, guid: e9a8390f5c126fe4ca429f01fb7306c0, type: 3}
+  defaultChestIcon: {fileID: -5698099113237103401, guid: 368d3a656f84fa247851ff88f8036389, type: 3}
+  defaultLegsIcon: {fileID: 21300000, guid: 7d4f9cff490ea9e4e8de620ec2fadcb5, type: 3}
+  defaultBootsIcon: {fileID: 21300000, guid: f8bac558190ebf54a99e3764c03249dc, type: 3}
+  defaultShoulderIcon: {fileID: 21300000, guid: 37ab19403e5d557408d685eb455cb0d6, type: 3}
+  defaultAccessoryIcon: {fileID: 21300000, guid: 161d4730f36de6b42ad214d0d33e423d, type: 3}
 --- !u!1 &8046603752086727208
 GameObject:
   m_ObjectHideFlags: 0

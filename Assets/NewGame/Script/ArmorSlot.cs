@@ -34,6 +34,14 @@ public class ArmorSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     [SerializeField] private PlayerInventory playerInventory;
     [SerializeField] private InventoryManager inventoryManager;
     
+    [Header("🛡️ 기본 방어구 아이콘 (icon이 null일 때)")]
+    public Sprite defaultHelmetIcon;
+    public Sprite defaultChestIcon;
+    public Sprite defaultLegsIcon;
+    public Sprite defaultBootsIcon;
+    public Sprite defaultShoulderIcon;
+    public Sprite defaultAccessoryIcon;
+    
     // Private variables
     private ArmorData armorData;
     private bool isHighlighted = false;
@@ -377,9 +385,38 @@ public class ArmorSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
             
             if (iconImage != null)
             {
-                iconImage.sprite = armorData.icon;
+                // 아이콘이 null이면 타입별 기본 아이콘 사용
+                Sprite iconToUse = armorData.icon;
+                if (iconToUse == null)
+                {
+                    switch (armorData.armorType)
+                    {
+                        case ArmorType.Helmet:
+                            iconToUse = defaultHelmetIcon;
+                            break;
+                        case ArmorType.Chest:
+                            iconToUse = defaultChestIcon;
+                            break;
+                        case ArmorType.Legs:
+                            iconToUse = defaultLegsIcon;
+                            break;
+                        case ArmorType.Boots:
+                            iconToUse = defaultBootsIcon;
+                            break;
+                        case ArmorType.Shoulder:
+                            iconToUse = defaultShoulderIcon;
+                            break;
+                        case ArmorType.Accessory:
+                            iconToUse = defaultAccessoryIcon;
+                            break;
+                        default:
+                            iconToUse = null;
+                            break;
+                    }
+                }
+                iconImage.sprite = iconToUse;
                 iconImage.color = armorData.GetRarityColor();
-                iconImage.enabled = true;
+                iconImage.enabled = (iconToUse != null);
             }
             
             if (nameText != null)
