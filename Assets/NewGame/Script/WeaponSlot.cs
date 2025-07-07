@@ -42,6 +42,29 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
     [Tooltip("인벤토리 매니저 컴포넌트 (자동 연결됨)")]
     public InventoryManager inventoryManager;
     
+    [Header("🎯 기본 무기 아이콘 (icon이 null일 때)")]
+    [Tooltip("AR 타입 기본 아이콘")]
+    public Sprite defaultARIcon;
+    
+    [Tooltip("HG 타입 기본 아이콘")]
+    public Sprite defaultHGIcon;
+    
+    [Tooltip("MG 타입 기본 아이콘")]
+    public Sprite defaultMGIcon;
+    
+    [Tooltip("SG 타입 기본 아이콘")]
+    public Sprite defaultSGIcon;
+    
+    [Tooltip("SMG 타입 기본 아이콘")]
+    public Sprite defaultSMGIcon;
+    
+    [Tooltip("SR 타입 기본 아이콘")]
+    public Sprite defaultSRIcon;
+    
+    [Header("디버그")]
+    [Tooltip("디버그 모드 활성화")]
+    public bool debugMode = false;
+    
     // Properties
     public WeaponData weaponData { get; private set; }
     private bool isHovered = false;
@@ -457,6 +480,7 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
         {
             if (weaponData != null)
             {
+                // 🎯 아이콘이 null이면 무기 타입별 기본 아이콘 사용
                 if (weaponData.icon != null)
                 {
                     icon.sprite = weaponData.icon;
@@ -469,11 +493,13 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
                 }
                 else
                 {
-                    Debug.LogError($"❌ [WeaponSlot] WeaponData '{weaponData.weaponName}'의 icon이 null입니다!");
-                    // 아이콘이 없어도 빈 이미지라도 표시
-                    icon.sprite = null;
+                    // 무기 타입별 기본 아이콘 사용
+                    icon.sprite = GetDefaultWeaponIcon(weaponData.weaponType);
                     icon.enabled = true;
-                    icon.color = Color.red; // 빨간색으로 표시하여 문제 있음을 알림
+                    icon.color = Color.white;
+                    
+                    if (debugMode)
+                        Debug.LogWarning($"[WeaponSlot] WeaponData '{weaponData.weaponName}'의 icon이 null이어서 기본 아이콘을 사용합니다.");
                 }
             }
             else
@@ -553,6 +579,32 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
             {
                 icon = images[0];
             }
+        }
+    }
+    
+    /// <summary>
+    /// 무기 타입별 기본 아이콘을 반환합니다.
+    /// </summary>
+    Sprite GetDefaultWeaponIcon(WeaponType weaponType)
+    {
+        switch (weaponType)
+        {
+            case WeaponType.AR:
+                return defaultARIcon ?? defaultSRIcon; // AR이 없으면 SR 사용
+            case WeaponType.HG:
+                return defaultHGIcon ?? defaultSRIcon; // HG가 없으면 SR 사용
+            case WeaponType.MG:
+                return defaultMGIcon ?? defaultSRIcon; // MG가 없으면 SR 사용
+            case WeaponType.SG:
+                return defaultSGIcon ?? defaultSRIcon; // SG가 없으면 SR 사용
+            case WeaponType.SMG:
+                return defaultSMGIcon ?? defaultSRIcon; // SMG가 없으면 SR 사용
+            case WeaponType.SR:
+                return defaultSRIcon;
+            default:
+                if (debugMode)
+                    Debug.LogWarning($"[WeaponSlot] 알 수 없는 무기 타입: {weaponType}");
+                return defaultSRIcon; // 기본값으로 SR 사용
         }
     }
 

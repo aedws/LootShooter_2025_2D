@@ -174,12 +174,19 @@ public class PlayerInventory : MonoBehaviour
             currentWeaponObj.transform.localPosition = Vector3.zero;
             currentWeaponObj.transform.localRotation = Quaternion.identity;
             currentWeaponObj.transform.localScale = prefabScale; // 프리팹 크기 유지
-            
-            // Debug.Log($"✅ [PlayerInventory] 무기 오브젝트 생성: {weaponData.weaponName}");
+
+            // ⭐ Weapon 컴포넌트에 WeaponData 할당
+            Weapon weaponComponent = currentWeaponObj.GetComponent<Weapon>();
+            if (weaponComponent != null)
+                weaponComponent.weaponData = weaponData;
+            else
+                Debug.LogWarning("[PlayerInventory] Weapon 컴포넌트를 찾을 수 없습니다!");
+
+            Debug.Log($"[PlayerInventory] 무기 장착 시도: weaponName={weaponData.weaponName}, prefab={weaponData.weaponPrefab}, holder={weaponHolder}, obj={currentWeaponObj}");
         }
         else
         {
-            // Debug.Log($"🔄 [PlayerInventory] 무기 해제됨");
+            Debug.Log($"[PlayerInventory] 무기 장착 실패 또는 해제: weaponData={(weaponData != null ? weaponData.weaponName : "null")}, prefab={(weaponData != null ? weaponData.weaponPrefab : "null")}, holder={weaponHolder}");
         }
         
         // 🏃‍♂️ 플레이어 이동속도 업데이트

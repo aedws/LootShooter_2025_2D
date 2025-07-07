@@ -63,8 +63,27 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     [Tooltip("저격총(SR) 테두리 색상")]
     public Color srColor = Color.green;
     
-    [Header("기본 아이콘 (icon이 null일 때)")]
-    public Sprite defaultWeaponIcon;
+    [Header("🎯 기본 무기 아이콘 (icon이 null일 때)")]
+    [Tooltip("AR 타입 기본 아이콘")]
+    public Sprite defaultARIcon;
+    
+    [Tooltip("HG 타입 기본 아이콘")]
+    public Sprite defaultHGIcon;
+    
+    [Tooltip("MG 타입 기본 아이콘")]
+    public Sprite defaultMGIcon;
+    
+    [Tooltip("SG 타입 기본 아이콘")]
+    public Sprite defaultSGIcon;
+    
+    [Tooltip("SMG 타입 기본 아이콘")]
+    public Sprite defaultSMGIcon;
+    
+    [Tooltip("SR 타입 기본 아이콘")]
+    public Sprite defaultSRIcon;
+    
+    [Header("🛡️ 기본 방어구 아이콘")]
+    [Tooltip("방어구 기본 아이콘")]
     public Sprite defaultArmorIcon;
     
     // 🌍 전역 드래그 상태 (WeaponSlot에서 접근 가능)
@@ -172,9 +191,17 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (iconImage != null)
         {
+            // 🎯 아이콘이 null이면 무기 타입별 기본 아이콘 사용
             if (weaponData.icon != null)
+            {
                 iconImage.sprite = weaponData.icon;
-            // icon이 null이면 sprite를 변경하지 않음 (기본값 유지)
+            }
+            else
+            {
+                // 무기 타입별 기본 아이콘 설정
+                iconImage.sprite = GetDefaultWeaponIcon(weaponData.weaponType);
+            }
+            
             iconImage.color = Color.white;
             iconImage.enabled = true;
             AdjustIconSize();
@@ -314,6 +341,31 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             case WeaponType.SMG: return smgColor;
             case WeaponType.SR: return srColor;
             default: return Color.white;
+        }
+    }
+    
+    /// <summary>
+    /// 무기 타입별 기본 아이콘을 반환합니다.
+    /// </summary>
+    Sprite GetDefaultWeaponIcon(WeaponType weaponType)
+    {
+        switch (weaponType)
+        {
+            case WeaponType.AR:
+                return defaultARIcon ?? defaultSRIcon; // AR이 없으면 SR 사용
+            case WeaponType.HG:
+                return defaultHGIcon ?? defaultSRIcon; // HG가 없으면 SR 사용
+            case WeaponType.MG:
+                return defaultMGIcon ?? defaultSRIcon; // MG가 없으면 SR 사용
+            case WeaponType.SG:
+                return defaultSGIcon ?? defaultSRIcon; // SG가 없으면 SR 사용
+            case WeaponType.SMG:
+                return defaultSMGIcon ?? defaultSRIcon; // SMG가 없으면 SR 사용
+            case WeaponType.SR:
+                return defaultSRIcon;
+            default:
+                Debug.LogWarning($"[InventorySlot] 알 수 없는 무기 타입: {weaponType}");
+                return defaultSRIcon; // 기본값으로 SR 사용
         }
     }
 

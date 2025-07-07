@@ -342,3 +342,10 @@ MonoBehaviour:
   sgColor: {r: 1, g: 0.5, b: 0, a: 1}
   smgColor: {r: 0, g: 1, b: 1, a: 1}
   srColor: {r: 0, g: 1, b: 0, a: 1}
+  defaultARIcon: {fileID: 21300000, guid: b7cad2917d053294aa83873fbd3d047a, type: 3}
+  defaultHGIcon: {fileID: 21300000, guid: 7e81c0a7920dec544807f9555d7917b0, type: 3}
+  defaultMGIcon: {fileID: 21300000, guid: 484588637166b3842adbbd16a02664ca, type: 3}
+  defaultSGIcon: {fileID: 21300000, guid: 21362401e3338714da339a239baabc2a, type: 3}
+  defaultSMGIcon: {fileID: 21300000, guid: 37c2f19c7012e604aa337bfad319b635, type: 3}
+  defaultSRIcon: {fileID: 21300000, guid: 37b68706d2fd49c4fa3a5bee18ad9aa5, type: 3}
+  defaultArmorIcon: {fileID: 21300000, guid: 6b11b3095215bac4190dee61f7cb70a7, type: 3}

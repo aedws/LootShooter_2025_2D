@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
 using System;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class GoogleSheetsManager : MonoBehaviour
 {
@@ -187,6 +190,9 @@ public class GoogleSheetsManager : MonoBehaviour
                     weapon.hasExplosiveKills = bool.Parse(row[30]);
                     weapon.explosionRadius = float.Parse(row[31]);
                     
+                    // 🆕 누락된 필드들 처리
+                    SetupWeaponAssets(weapon);
+                    
                     weapons.Add(weapon);
                 }
                 else
@@ -202,6 +208,69 @@ public class GoogleSheetsManager : MonoBehaviour
         {
             OnError?.Invoke($"무기 데이터 파싱 오류: {e.Message}");
         }
+    }
+    
+    /// <summary>
+    /// 무기 타입별로 아이콘과 프리팹을 설정합니다.
+    /// </summary>
+    private void SetupWeaponAssets(WeaponData weapon)
+    {
+        // 반동 방향 설정 (무기 타입별로 다름)
+        switch (weapon.weaponType)
+        {
+            case WeaponType.AR:
+                weapon.recoilDirection = new Vector2(0.1f, 1f); // 약간 오른쪽 위로
+                break;
+            case WeaponType.HG:
+                weapon.recoilDirection = new Vector2(0f, 1f); // 수직 위로
+                break;
+            case WeaponType.MG:
+                weapon.recoilDirection = new Vector2(0.2f, 1f); // 더 많이 오른쪽 위로
+                break;
+            case WeaponType.SG:
+                weapon.recoilDirection = new Vector2(0f, 1.2f); // 강한 수직 반동
+                break;
+            case WeaponType.SMG:
+                weapon.recoilDirection = new Vector2(0.15f, 0.8f); // 약한 반동
+                break;
+            case WeaponType.SR:
+                weapon.recoilDirection = new Vector2(0f, 1.5f); // 매우 강한 수직 반동
+                break;
+            default:
+                weapon.recoilDirection = Vector2.up;
+                break;
+        }
+        
+        weapon.icon = null;
+
+#if UNITY_EDITOR
+        // 무기 프리팹 자동 할당
+        string assetPath = $"Assets/NewGame/Prefab/Network/WeaponPickup_{weapon.weaponType}.prefab";
+        weapon.weaponPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+        if (weapon.weaponPrefab == null)
+        {
+            Debug.LogWarning($"[GoogleSheetsManager] 네트워크 무기 프리팹을 찾을 수 없습니다: {assetPath}");
+        }
+        else
+        {
+            Debug.Log($"[GoogleSheetsManager] 네트워크 무기 프리팹 자동 할당 성공: {assetPath}");
+        }
+
+        // 투사체 프리팹 자동 할당
+        string projectilePath = $"Assets/NewGame/Prefab/Network/Projectile_{weapon.weaponType}.prefab";
+        weapon.projectilePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(projectilePath);
+        if (weapon.projectilePrefab == null)
+        {
+            Debug.LogWarning($"[GoogleSheetsManager] 투사체 프리팹을 찾을 수 없습니다: {projectilePath}");
+        }
+        else
+        {
+            Debug.Log($"[GoogleSheetsManager] 투사체 프리팹 자동 할당 성공: {projectilePath}");
+        }
+#else
+        weapon.weaponPrefab = null;
+        weapon.projectilePrefab = null;
+#endif
     }
     
     private void ParseArmorsData(string jsonData)

@@ -88,12 +88,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ba28ab7e62833b4cb2524c74a7d611f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponSlotInstructions: "\u2022 \uC778\uBCA4\uD1A0\uB9AC\uC5D0\uC11C \uBB34\uAE30\uB97C
-    \uB4DC\uB798\uADF8\uD558\uC5EC \uC7A5\uCC29\n\u2022 \uC6B0\uD074\uB9AD\uC73C\uB85C
-    \uBB34\uAE30 \uD574\uC81C\n\u2022 \uB9C8\uC6B0\uC2A4 \uD638\uBC84\uB85C \uBB34\uAE30
-    \uC815\uBCF4 \uD234\uD301 \uD45C\uC2DC\n\u2022 \uBB34\uAE30 \uC7A5\uCC29 \uC2DC
-    \uB179\uC0C9\uC73C\uB85C \uD45C\uC2DC\n\u2022 PlayerInventory\uC640 \uC790\uB3D9
-    \uC5F0\uB3D9"
+  usageInfo: "\u2022 \uC778\uBCA4\uD1A0\uB9AC\uC5D0\uC11C \uBB34\uAE30\uB97C \uB4DC\uB798\uADF8\uD574\uC11C
+    \uC7A5\uCC29\n\u2022 \uC6B0\uD074\uB9AD\uC73C\uB85C \uBB34\uAE30 \uD574\uC81C\n\u2022
+    \uC2AC\uB86F \uAC04 \uB4DC\uB798\uADF8\uB85C \uBB34\uAE30 \uAD50\uCCB4\n\u2022
+    \uC2AC\uB86F\uC5D0\uC11C \uC778\uBCA4\uD1A0\uB9AC\uB85C \uB4DC\uB798\uADF8\uD574\uC11C
+    \uBC18\uD658"
   icon: {fileID: 0}
   backgroundImage: {fileID: 0}
   weaponNameText: {fileID: 0}
@@ -101,5 +100,13 @@ MonoBehaviour:
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   hoverColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   equippedColor: {r: 0, g: 1, b: 0, a: 1}
+  draggingColor: {r: 1, g: 1, b: 1, a: 0.5}
   playerInventory: {fileID: 0}
   inventoryManager: {fileID: 0}
+  defaultARIcon: {fileID: 21300000, guid: b7cad2917d053294aa83873fbd3d047a, type: 3}
+  defaultHGIcon: {fileID: 21300000, guid: 7e81c0a7920dec544807f9555d7917b0, type: 3}
+  defaultMGIcon: {fileID: 21300000, guid: 484588637166b3842adbbd16a02664ca, type: 3}
+  defaultSGIcon: {fileID: 21300000, guid: 21362401e3338714da339a239baabc2a, type: 3}
+  defaultSMGIcon: {fileID: 21300000, guid: 37c2f19c7012e604aa337bfad319b635, type: 3}
+  defaultSRIcon: {fileID: 21300000, guid: 37b68706d2fd49c4fa3a5bee18ad9aa5, type: 3}
+  debugMode: 0
