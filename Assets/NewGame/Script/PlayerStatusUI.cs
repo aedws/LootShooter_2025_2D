@@ -11,6 +11,8 @@ public class PlayerStatusUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI weaponNameText;
     [SerializeField] private Image reloadProgressBar;
     [SerializeField] private GameObject reloadProgressContainer;
+    [SerializeField] private Image dashCooldownProgressBar;
+    [SerializeField] private GameObject dashCooldownProgressContainer;
 
     [Header("UI 위치 설정")]
     [SerializeField] private Transform player;
@@ -96,6 +98,8 @@ public class PlayerStatusUI : MonoBehaviour
 
         // 재장전 진행 바 업데이트
         UpdateReloadProgress();
+        // 대시 쿨타임 바 업데이트
+        UpdateDashCooldownProgress();
     }
 
     void UpdatePosition()
@@ -319,6 +323,27 @@ public class PlayerStatusUI : MonoBehaviour
             isShaking = false;
             transform.localPosition = originalPosition;
         }
+    }
+
+    public void ShowDashCooldownBar()
+    {
+        if (dashCooldownProgressContainer != null)
+            dashCooldownProgressContainer.SetActive(true);
+    }
+    public void HideDashCooldownBar()
+    {
+        if (dashCooldownProgressContainer != null)
+            dashCooldownProgressContainer.SetActive(false);
+    }
+    public void UpdateDashCooldown(float current, float max)
+    {
+        if (dashCooldownProgressBar != null)
+            dashCooldownProgressBar.fillAmount = Mathf.Clamp01(current / max);
+    }
+    void UpdateDashCooldownProgress()
+    {
+        // PlayerController에서 값을 받아와야 함. (외부에서 호출 권장)
+        // 이 함수는 필요시 확장 가능
     }
 
     void OnDestroy()

@@ -128,6 +128,17 @@ public class PlayerController : MonoBehaviour
         if (dashCooldownTimer > 0)
             dashCooldownTimer -= Time.deltaTime;
 
+        // 대시 쿨타임 UI 갱신 및 표시/숨김 제어
+        var statusUI = FindAnyObjectByType<PlayerStatusUI>();
+        if (statusUI != null)
+        {
+            statusUI.UpdateDashCooldown(dashCooldownTimer, dashCooldown);
+            if (dashCooldownTimer > 0f)
+                statusUI.ShowDashCooldownBar();
+            else
+                statusUI.HideDashCooldownBar();
+        }
+
         if (!isDashing)
         {
             Move();
@@ -175,17 +186,16 @@ public class PlayerController : MonoBehaviour
                     }
                 }
             }
-        }
 
-        // X키로 3점사/연사 모드 토글
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            isBurstMode = !isBurstMode;
+            // X키로 3점사/연사 모드 토글
+            if (Input.GetKeyDown(KeyCode.X))
+            {
+                isBurstMode = !isBurstMode;
 
-            // UI 즉시 갱신
-            var statusUI = FindAnyObjectByType<PlayerStatusUI>();
-            if (statusUI != null)
-                statusUI.UpdateWeaponUI();
+                // UI 즉시 갱신
+                if (statusUI != null)
+                    statusUI.UpdateWeaponUI();
+            }
         }
 
         // Z키로 발사 (현재 모드에 따라)
