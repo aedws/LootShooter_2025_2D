@@ -419,6 +419,31 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
                 return defaultSRIcon; // 기본값으로 SR 사용
         }
     }
+    
+    /// <summary>
+    /// 방어구 타입별 기본 아이콘을 반환합니다.
+    /// </summary>
+    Sprite GetDefaultArmorIcon(ArmorType armorType)
+    {
+        switch (armorType)
+        {
+            case ArmorType.Helmet:
+                return defaultHelmetIcon ?? defaultArmorIcon;
+            case ArmorType.Chest:
+                return defaultChestIcon ?? defaultArmorIcon;
+            case ArmorType.Legs:
+                return defaultLegsIcon ?? defaultArmorIcon;
+            case ArmorType.Boots:
+                return defaultBootsIcon ?? defaultArmorIcon;
+            case ArmorType.Shoulder:
+                return defaultShoulderIcon ?? defaultArmorIcon;
+            case ArmorType.Accessory:
+                return defaultAccessoryIcon ?? defaultArmorIcon;
+            default:
+                Debug.LogWarning($"[InventorySlot] 알 수 없는 방어구 타입: {armorType}");
+                return defaultArmorIcon; // 기본값으로 일반 방어구 아이콘 사용
+        }
+    }
 
     // 🎮 진짜 게임식 드래그 앤 드롭 시스템
     public void OnBeginDrag(PointerEventData eventData)
@@ -569,14 +594,31 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             iconSprite = draggedWeaponData.icon;
             isArmor = false;
+            
+            // 아이콘이 null이면 기본 아이콘 사용
+            if (iconSprite == null)
+            {
+                iconSprite = GetDefaultWeaponIcon(draggedWeaponData.weaponType);
+            }
         }
         else if (draggedArmorData != null)
         {
             iconSprite = draggedArmorData.icon;
             isArmor = true;
+            
+            // 아이콘이 null이면 기본 아이콘 사용
+            if (iconSprite == null)
+            {
+                iconSprite = GetDefaultArmorIcon(draggedArmorData.armorType);
+            }
         }
         
-        if (iconSprite == null) return;
+        // 여전히 null이면 드래그 불가
+        if (iconSprite == null) 
+        {
+            Debug.LogWarning($"[InventorySlot] 드래그할 아이템의 아이콘이 null입니다! 무기: {draggedWeaponData?.weaponName}, 방어구: {draggedArmorData?.armorName}");
+            return;
+        }
         
         // 드래그될 아이템 이미지 오브젝트 생성
         draggedItemImage = new GameObject("DraggedItem");
@@ -603,12 +645,29 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         // Image 컴포넌트 추가
         Image dragImage = draggedItemImage.AddComponent<Image>();
         dragImage.sprite = iconSprite;
-        dragImage.color = new Color(1f, 1f, 1f, 0.8f); // 약간 투명하게
+        dragImage.color = new Color(1f, 1f, 1f, 0.9f); // 더 선명하게 (0.8f → 0.9f)
         dragImage.raycastTarget = false; // 레이캐스트 차단 안함
         
         // Canvas Group 추가 (드래그 중 우선순위)
         CanvasGroup dragCanvasGroup = draggedItemImage.AddComponent<CanvasGroup>();
         dragCanvasGroup.blocksRaycasts = false;
+        
+        // 그림자 효과 추가 (드래그 중 시각적 피드백)
+        Shadow shadow = draggedItemImage.AddComponent<Shadow>();
+        shadow.effectColor = new Color(0f, 0f, 0f, 0.5f);
+        shadow.effectDistance = new Vector2(2f, -2f);
+        
+        // 테두리 효과 추가 (Outline 컴포넌트가 있다면)
+        Outline outline = draggedItemImage.GetComponent<Outline>();
+        if (outline == null)
+        {
+            outline = draggedItemImage.AddComponent<Outline>();
+        }
+        outline.effectColor = Color.white;
+        outline.effectDistance = new Vector2(1f, 1f);
+        
+        // 크기를 약간 더 크게 (드래그 중 더 명확하게 보이도록)
+        rect.sizeDelta *= 1.1f;
         
         // 가장 위에 표시되도록 설정
         draggedItemImage.transform.SetAsLastSibling();

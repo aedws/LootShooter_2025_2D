@@ -223,6 +223,12 @@ public class ArmorSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     {
         isHighlighted = true;
         
+        // 호버 시 색상 변경
+        if (backgroundImage != null && armorData != null)
+        {
+            backgroundImage.color = highlightColor;
+        }
+        
         // 툴팁 표시
         if (armorData != null)
         {
@@ -233,12 +239,16 @@ public class ArmorSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     public void OnPointerExit(PointerEventData eventData)
     {
         isHighlighted = false;
-        
-        // 원래 색상으로 복원
+
+        // 방어구가 있으면 등급색, 없으면 emptySlotColor로 복원
         if (backgroundImage != null)
-            backgroundImage.color = originalBackgroundColor;
-        
-        // 툴팁 숨기기
+        {
+            if (armorData != null)
+                backgroundImage.color = armorData.GetRarityColor(); // 등급색으로 복원
+            else
+                backgroundImage.color = emptySlotColor;
+        }
+
         HideTooltip();
     }
     
@@ -319,7 +329,11 @@ public class ArmorSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         UpdatePlayerStats();
         
         // 인벤토리에 방어구 다시 추가 및 UI 업데이트
-        ReturnArmorToInventory(oldArmor);
+        if (inventoryManager != null)
+        {
+            inventoryManager.AddArmor(oldArmor);
+            inventoryManager.ForceShowArmorsTabAndRefresh();
+        }
         
         UpdateVisuals();
         
@@ -379,8 +393,7 @@ public class ArmorSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
             // 방어구가 장착된 상태
             if (backgroundImage != null)
             {
-                backgroundImage.color = equippedSlotColor;
-                originalBackgroundColor = equippedSlotColor;
+                backgroundImage.color = armorData.GetRarityColor(); // 등급색으로!
             }
             
             if (iconImage != null)
@@ -447,7 +460,6 @@ public class ArmorSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
             if (backgroundImage != null)
             {
                 backgroundImage.color = emptySlotColor;
-                originalBackgroundColor = emptySlotColor;
             }
             
             if (iconImage != null)

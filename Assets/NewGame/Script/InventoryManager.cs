@@ -679,6 +679,11 @@ public class InventoryManager : MonoBehaviour
         // 🆕 스크롤바 가시성 업데이트
         UpdateScrollbarVisibility();
         
+        if (currentTab == InventoryTab.Armors)
+        {
+            filteredArmors = armors.ToList(); // 항상 최신화
+        }
+        
         Debug.Log($"✅ [InventoryManager] RefreshInventory 완료");
     }
     
@@ -1197,6 +1202,12 @@ public class InventoryManager : MonoBehaviour
         return armors.Count(armor => armor.armorType == armorType);
     }
     
+    public void ForceShowArmorsTabAndRefresh()
+    {
+        currentTab = InventoryTab.Armors;
+        RefreshInventory();
+    }
+
     void OnDestroy()
     {
         SaveInventoryState();
