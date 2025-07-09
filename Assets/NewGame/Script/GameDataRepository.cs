@@ -98,7 +98,7 @@ public class GameDataRepository : MonoBehaviour
     /// </summary>
     public void LoadAllData()
     {
-        Debug.Log("[GameDataRepository] 모든 데이터 로드 시작");
+        // 모든 데이터 로드 시작
         
         // Google Sheets에서 데이터 로드
         if (googleSheetsManager != null)
@@ -129,7 +129,7 @@ public class GameDataRepository : MonoBehaviour
     {
         _weapons = weapons;
         _weaponsLoaded = true;
-        Debug.Log($"[GameDataRepository] 무기 데이터 로드 완료: {weapons.Count}개");
+                    // 무기 데이터 로드 완료
         
         OnWeaponsUpdated?.Invoke(_weapons);
         CheckAllDataLoaded();
@@ -142,7 +142,7 @@ public class GameDataRepository : MonoBehaviour
     {
         _armors = armors;
         _armorsLoaded = true;
-        Debug.Log($"[GameDataRepository] 방어구 데이터 로드 완료: {armors.Count}개");
+                    // 방어구 데이터 로드 완료
         
         OnArmorsUpdated?.Invoke(_armors);
         CheckAllDataLoaded();
@@ -212,7 +212,7 @@ public class GameDataRepository : MonoBehaviour
     {
         if (IsAllDataLoaded)
         {
-            Debug.Log("[GameDataRepository] 모든 데이터 로드 완료!");
+            // 모든 데이터 로드 완료
             OnAllDataLoaded?.Invoke();
         }
     }
@@ -275,11 +275,7 @@ public class GameDataRepository : MonoBehaviour
         if (_weapons.Count == 0) return null;
         
         // 디버그: 모든 무기 출력
-        Debug.Log($"[GameDataRepository] 총 무기 수: {_weapons.Count}");
-        foreach (var weapon in _weapons)
-        {
-            Debug.Log($"[GameDataRepository] 무기: {weapon.weaponName}");
-        }
+        // 총 무기 수 확인
         
         // 가중치 기반 선택을 위해 무기 그룹별로 분류
         var weaponGroups = new Dictionary<string, List<WeaponData>>();
@@ -294,15 +290,7 @@ public class GameDataRepository : MonoBehaviour
             weaponGroups[baseName].Add(weapon);
         }
         
-        Debug.Log($"[GameDataRepository] 무기 그룹 수: {weaponGroups.Count}");
-        foreach (var group in weaponGroups)
-        {
-            Debug.Log($"[GameDataRepository] 그룹 '{group.Key}': {group.Value.Count}개 무기");
-            foreach (var weapon in group.Value)
-            {
-                Debug.Log($"[GameDataRepository]   - {weapon.weaponName}");
-            }
-        }
+        // 무기 그룹별 분류 완료
         
         // 각 그룹에서 하나씩 선택하여 후보 목록 생성
         var candidates = new List<WeaponData>();
@@ -313,7 +301,7 @@ public class GameDataRepository : MonoBehaviour
                 // 그룹 내에서 가중치 기반 선택
                 WeaponData selected = SelectWeaponByWeight(group);
                 candidates.Add(selected);
-                Debug.Log($"[GameDataRepository] 그룹에서 선택된 무기: {selected.weaponName}");
+                // 그룹에서 무기 선택 완료
             }
         }
         
@@ -321,13 +309,13 @@ public class GameDataRepository : MonoBehaviour
         if (candidates.Count > 0)
         {
             WeaponData finalSelected = candidates[UnityEngine.Random.Range(0, candidates.Count)];
-            Debug.Log($"[GameDataRepository] 최종 선택된 무기: {finalSelected.weaponName}");
+            // 최종 무기 선택 완료
             return finalSelected;
         }
         
         // 폴백: 기존 방식
         WeaponData fallbackSelected = _weapons[UnityEngine.Random.Range(0, _weapons.Count)];
-        Debug.Log($"[GameDataRepository] 폴백 선택된 무기: {fallbackSelected.weaponName}");
+        // 폴백 무기 선택 완료
         return fallbackSelected;
     }
     
@@ -370,7 +358,7 @@ public class GameDataRepository : MonoBehaviour
             { "Primordial", 4.0f }
         };
         
-        Debug.Log($"[GameDataRepository] 가중치 선택 시작 - 무기 수: {weapons.Count}");
+        // 가중치 선택 시작
         
         // 각 무기의 가중치 계산
         var weaponWeights = new List<float>();
@@ -386,7 +374,7 @@ public class GameDataRepository : MonoBehaviour
                 }
             }
             weaponWeights.Add(weight);
-            Debug.Log($"[GameDataRepository] 무기 '{weapon.weaponName}' 가중치: {weight}");
+            // 무기 가중치 계산
         }
         
         // 가중치 기반 랜덤 선택
@@ -399,21 +387,19 @@ public class GameDataRepository : MonoBehaviour
         float randomValue = UnityEngine.Random.Range(0f, totalWeight);
         float currentWeight = 0f;
         
-        Debug.Log($"[GameDataRepository] 총 가중치: {totalWeight}, 랜덤값: {randomValue}");
+        // 총 가중치 계산 완료
         
         for (int i = 0; i < weapons.Count; i++)
         {
             currentWeight += weaponWeights[i];
-            Debug.Log($"[GameDataRepository] 무기 {i}: {weapons[i].weaponName}, 누적가중치: {currentWeight}");
             if (randomValue <= currentWeight)
             {
-                Debug.Log($"[GameDataRepository] 선택됨: {weapons[i].weaponName}");
                 return weapons[i];
             }
         }
         
         // 폴백
-        Debug.Log($"[GameDataRepository] 폴백 선택: {weapons[weapons.Count - 1].weaponName}");
+        // 폴백 선택
         return weapons[weapons.Count - 1];
     }
 

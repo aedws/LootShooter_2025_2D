@@ -144,18 +144,14 @@ public class GoogleSheetsManager : MonoBehaviour
                     if (System.Enum.TryParse<WeaponType>(row[1], out WeaponType weaponType))
                         weapon.weaponType = weaponType;
                     
-                    // 무기 등급 파싱 디버그
+                    // 무기 등급 파싱
                     string weaponRarityString = row[2];
-                    Debug.Log($"[GoogleSheetsManager] 무기 등급 파싱 시도: '{weaponRarityString}' (행 {i + 1})");
-                    
                     if (System.Enum.TryParse<WeaponRarity>(weaponRarityString, true, out WeaponRarity weaponRarity))
                     {
                         weapon.rarity = weaponRarity;
-                        Debug.Log($"[GoogleSheetsManager] 무기 등급 파싱 성공: {weaponRarityString} -> {weaponRarity}");
                     }
                     else
                     {
-                        Debug.LogError($"[GoogleSheetsManager] 무기 등급 파싱 실패: '{weaponRarityString}' -> Common으로 설정됨");
                         weapon.rarity = WeaponRarity.Common;
                     }
                     
@@ -265,11 +261,7 @@ public class GoogleSheetsManager : MonoBehaviour
         weapon.weaponPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
         if (weapon.weaponPrefab == null)
         {
-            Debug.LogWarning($"[GoogleSheetsManager] 네트워크 무기 프리팹을 찾을 수 없습니다: {assetPath}");
-        }
-        else
-        {
-            Debug.Log($"[GoogleSheetsManager] 네트워크 무기 프리팹 자동 할당 성공: {assetPath}");
+            // 프리팹을 찾을 수 없는 경우 조용히 처리
         }
 
         // 투사체 프리팹 자동 할당
@@ -277,11 +269,7 @@ public class GoogleSheetsManager : MonoBehaviour
         weapon.projectilePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(projectilePath);
         if (weapon.projectilePrefab == null)
         {
-            Debug.LogWarning($"[GoogleSheetsManager] 투사체 프리팹을 찾을 수 없습니다: {projectilePath}");
-        }
-        else
-        {
-            Debug.Log($"[GoogleSheetsManager] 투사체 프리팹 자동 할당 성공: {projectilePath}");
+            // 프리팹을 찾을 수 없는 경우 조용히 처리
         }
 #else
         weapon.weaponPrefab = null;
@@ -315,18 +303,14 @@ public class GoogleSheetsManager : MonoBehaviour
                     if (System.Enum.TryParse<ArmorType>(row[1], out ArmorType armorType))
                         armor.armorType = armorType;
                     
-                    // 등급 파싱 디버그
+                    // 등급 파싱
                     string rarityString = row[2];
-                    Debug.Log($"[GoogleSheetsManager] 방어구 등급 파싱 시도: '{rarityString}' (행 {i + 1})");
-                    
                     if (System.Enum.TryParse<ArmorRarity>(rarityString, true, out ArmorRarity rarity))
                     {
                         armor.rarity = rarity;
-                        Debug.Log($"[GoogleSheetsManager] 방어구 등급 파싱 성공: {rarityString} -> {rarity}");
                     }
                     else
                     {
-                        Debug.LogError($"[GoogleSheetsManager] 방어구 등급 파싱 실패: '{rarityString}' -> Common으로 설정됨");
                         armor.rarity = ArmorRarity.Common;
                     }
                     

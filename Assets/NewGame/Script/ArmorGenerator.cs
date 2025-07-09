@@ -142,7 +142,6 @@ public class ArmorGenerator : MonoBehaviour
         cumulative += primordialChance;
         if (random <= cumulative) 
         {
-            Debug.Log($"🎲 [ArmorGenerator] Primordial 등급 결정! (random: {random:F3}, cumulative: {cumulative:F3})");
             return ArmorRarity.Primordial;
         }
         
@@ -150,7 +149,6 @@ public class ArmorGenerator : MonoBehaviour
         cumulative += commonChance;
         if (random <= cumulative) 
         {
-            Debug.Log($"🎲 [ArmorGenerator] Common 등급 결정! (random: {random:F3}, cumulative: {cumulative:F3})");
             return ArmorRarity.Common;
         }
         
@@ -158,7 +156,6 @@ public class ArmorGenerator : MonoBehaviour
         cumulative += rareChance;
         if (random <= cumulative) 
         {
-            Debug.Log($"🎲 [ArmorGenerator] Rare 등급 결정! (random: {random:F3}, cumulative: {cumulative:F3})");
             return ArmorRarity.Rare;
         }
         
@@ -166,12 +163,10 @@ public class ArmorGenerator : MonoBehaviour
         cumulative += epicChance;
         if (random <= cumulative) 
         {
-            Debug.Log($"🎲 [ArmorGenerator] Epic 등급 결정! (random: {random:F3}, cumulative: {cumulative:F3})");
             return ArmorRarity.Epic;
         }
         
         // Legendary (3%)
-        Debug.Log($"🎲 [ArmorGenerator] Legendary 등급 결정! (random: {random:F3}, cumulative: {cumulative:F3})");
         return ArmorRarity.Legendary;
     }
     

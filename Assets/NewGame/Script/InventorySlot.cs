@@ -299,8 +299,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             iconImage.enabled = (iconToUse != null);
             AdjustIconSize();
             
-            // 디버그 로그 추가
-            Debug.Log($"[InventorySlot] 방어구 색상 적용: {armorData.armorName} -> {armorData.rarity} -> {armorData.GetRarityColor()}");
+            // 방어구 색상 적용 완료
         }
         
         // 방어력 정보 표시 (탄약 텍스트 재사용)

@@ -59,12 +59,7 @@ public class TestArmorSystem : MonoBehaviour
         inventoryManager = FindAnyObjectByType<InventoryManager>();
         playerInventory = FindAnyObjectByType<PlayerInventory>();
         
-        Debug.Log("🛡️ [TestArmorSystem] 방어구 테스트 시스템 초기화 완료!");
-        Debug.Log("🎮 컨트롤:");
-        Debug.Log("   R키: 랜덤 방어구 생성");
-        Debug.Log("   T키: 특정 타입 방어구 생성");
-        Debug.Log("   Y키: 모든 타입 방어구 생성");
-        Debug.Log("   I키: 인벤토리 열기/닫기");
+        // 방어구 테스트 시스템 초기화 완료
     }
     
     void CheckAndSetupLayers()
@@ -72,25 +67,12 @@ public class TestArmorSystem : MonoBehaviour
         // Pickup 레이어 확인
         if (LayerMask.NameToLayer("Pickup") == -1)
         {
-            Debug.LogWarning("⚠️ [TestArmorSystem] 'Pickup' 레이어가 없습니다!");
-            Debug.Log("📋 해결 방법:");
-            Debug.Log("   1. Edit → Project Settings → Tags and Layers");
-            Debug.Log("   2. Layers 섹션에서 빈 슬롯에 'Pickup' 입력");
-            Debug.Log("   3. 또는 LayerSetup 스크립트를 사용하세요");
+                    Debug.LogWarning("⚠️ [TestArmorSystem] 'Pickup' 레이어가 없습니다!");
         }
-        else
-        {
-            Debug.Log("✅ Pickup 레이어가 설정되어 있습니다.");
-        }
-        
         // Player 레이어 확인
         if (LayerMask.NameToLayer("Player") == -1)
         {
             Debug.LogWarning("⚠️ [TestArmorSystem] 'Player' 레이어가 없습니다!");
-        }
-        else
-        {
-            Debug.Log("✅ Player 레이어가 설정되어 있습니다.");
         }
     }
     
@@ -118,35 +100,21 @@ public class TestArmorSystem : MonoBehaviour
     
     void SpawnRandomArmor()
     {
-        Debug.Log("🔍 [TestArmorSystem] F11 랜덤 방어구 생성 시작");
-        
         if (armorGenerator != null && spawnPoint != null)
         {
-            Debug.Log($"🔍 [TestArmorSystem] ArmorGenerator: {(armorGenerator != null ? "찾음" : "없음")}, SpawnPoint: {spawnPoint.position}");
-            
             GameObject pickup = armorGenerator.CreateRandomArmorPickup(spawnPoint.position);
             if (pickup != null)
             {
-                Debug.Log($"🛡️ [TestArmorSystem] 랜덤 방어구 생성 완료: {pickup.name}");
-                
                 // 생성된 픽업의 컴포넌트 확인
                 ArmorPickup armorPickup = pickup.GetComponent<ArmorPickup>();
-                if (armorPickup != null)
+                if (armorPickup != null && armorPickup.armorData != null)
                 {
-                    Debug.Log($"🔍 [TestArmorSystem] ArmorPickup 컴포넌트 확인: armorData={(armorPickup.armorData != null ? "있음" : "없음")}");
-                    if (armorPickup.armorData != null)
-                    {
-                        Debug.Log($"🔍 [TestArmorSystem] 방어구 데이터: {armorPickup.armorData.armorName}, 등급: {armorPickup.armorData.rarity}, 색상: {armorPickup.armorData.GetRarityColor()}");
-                    }
+                    // 방어구 데이터 확인
                 }
                 
                 // SpriteRenderer 확인
                 SpriteRenderer sr = pickup.GetComponent<SpriteRenderer>();
-                if (sr != null)
-                {
-                    Debug.Log($"🔍 [TestArmorSystem] SpriteRenderer 확인: sprite={(sr.sprite != null ? "있음" : "없음")}, color={sr.color}");
-                }
-                else
+                if (sr == null)
                 {
                     Debug.LogWarning("⚠️ [TestArmorSystem] SpriteRenderer가 없습니다!");
                 }
@@ -169,7 +137,7 @@ public class TestArmorSystem : MonoBehaviour
             GameObject pickup = armorGenerator.CreateRandomArmorPickup(spawnPoint.position, specificType);
             if (pickup != null)
             {
-                Debug.Log($"🛡️ {specificType} 타입 방어구 생성: {pickup.name}");
+                // 특정 타입 방어구 생성 완료
             }
         }
         else
@@ -196,7 +164,7 @@ public class TestArmorSystem : MonoBehaviour
                 
                 if (pickup != null)
                 {
-                    Debug.Log($"🛡️ {allTypes[i]} 타입 방어구 생성: {pickup.name}");
+                    // 모든 타입 방어구 생성 완료
                 }
             }
         }

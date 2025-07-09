@@ -179,10 +179,7 @@ public class RandomDropSystem : MonoBehaviour
             networkArmorPickup.armorTier = (int)randomArmor.rarity;
             networkArmorPickup.useRandomTier = false; // 이미 결정된 등급 사용
             
-            if (debugMode)
-            {
-                Debug.Log($"[RandomDropSystem] NetworkArmorPickup 설정: {randomArmor.armorType} 타입, {randomArmor.rarity} 등급");
-            }
+            // NetworkArmorPickup 설정 완료
         }
         else
         {
@@ -199,10 +196,7 @@ public class RandomDropSystem : MonoBehaviour
                 newArmorPickup.armorTier = (int)randomArmor.rarity;
                 newArmorPickup.useRandomTier = false;
                 
-                if (debugMode)
-                {
-                    Debug.Log($"[RandomDropSystem] ArmorPickup을 NetworkArmorPickup으로 자동 교체: {randomArmor.armorType} 타입, {randomArmor.rarity} 등급");
-                }
+                // ArmorPickup을 NetworkArmorPickup으로 자동 교체 완료
             }
             else
             {
@@ -272,10 +266,7 @@ public class RandomDropSystem : MonoBehaviour
                 networkWeaponPickup.weaponTier = (int)weapon.rarity;
                 networkWeaponPickup.useRandomTier = false;
                 
-                if (debugMode)
-                {
-                    Debug.Log($"[RandomDropSystem] NetworkWeaponPickup 설정: {weaponType} 타입, {weapon.rarity} 등급");
-                }
+                // NetworkWeaponPickup 설정 완료
             }
             else
             {
@@ -292,10 +283,7 @@ public class RandomDropSystem : MonoBehaviour
                     newWeaponPickup.weaponTier = (int)weapon.rarity;
                     newWeaponPickup.useRandomTier = false;
                     
-                    if (debugMode)
-                    {
-                        Debug.Log($"[RandomDropSystem] WeaponPickup을 NetworkWeaponPickup으로 자동 교체: {weaponType} 타입, {weapon.rarity} 등급");
-                    }
+                    // WeaponPickup을 NetworkWeaponPickup으로 자동 교체 완료
                 }
             }
         }
@@ -335,10 +323,7 @@ public class RandomDropSystem : MonoBehaviour
                 networkArmorPickup.armorTier = (int)armor.rarity;
                 networkArmorPickup.useRandomTier = false;
                 
-                if (debugMode)
-                {
-                    Debug.Log($"[RandomDropSystem] NetworkArmorPickup {armorType} 타입 방어구 드롭: {armor.armorName} ({armor.rarity})");
-                }
+                // NetworkArmorPickup 방어구 드롭 완료
             }
             else
             {
@@ -355,10 +340,7 @@ public class RandomDropSystem : MonoBehaviour
                     newArmorPickup.armorTier = (int)armor.rarity;
                     newArmorPickup.useRandomTier = false;
                     
-                    if (debugMode)
-                    {
-                        Debug.Log($"[RandomDropSystem] ArmorPickup을 NetworkArmorPickup으로 자동 교체: {armorType} 타입, {armor.rarity} 등급");
-                    }
+                    // ArmorPickup을 NetworkArmorPickup으로 자동 교체 완료
                 }
                 else
                 {

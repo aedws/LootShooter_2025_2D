@@ -26,23 +26,16 @@ public class ArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
     
     void Start()
     {
-        Debug.Log($"🔍 [ArmorPickup] Start() 시작 - 오브젝트: {gameObject.name}");
-        
         // 컴포넌트 초기화
         audioSource = GetComponent<AudioSource>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         
-        Debug.Log($"🔍 [ArmorPickup] 컴포넌트 확인 - audioSource: {(audioSource != null ? "있음" : "없음")}, spriteRenderer: {(spriteRenderer != null ? "있음" : "없음")}");
-        
         // 방어구 아이콘 설정
         if (armorData != null && spriteRenderer != null)
         {
-            Debug.Log($"🔍 [ArmorPickup] 방어구 데이터 설정 시작: {armorData.armorName}, 등급: {armorData.rarity}");
-            
             if (armorData.icon != null)
             {
                 spriteRenderer.sprite = armorData.icon;
-                Debug.Log($"🔍 [ArmorPickup] 아이콘 설정: {armorData.icon.name}");
             }
             else
             {
@@ -52,11 +45,10 @@ public class ArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
             // 등급별 색상 설정
             Color rarityColor = armorData.GetRarityColor();
             spriteRenderer.color = rarityColor;
-            Debug.Log($"🔍 [ArmorPickup] 색상 설정: {rarityColor} (등급: {armorData.rarity})");
         }
         else
         {
-            Debug.LogWarning($"⚠️ [ArmorPickup] armorData 또는 spriteRenderer가 null입니다! armorData: {(armorData != null ? "있음" : "없음")}, spriteRenderer: {(spriteRenderer != null ? "있음" : "없음")}");
+            Debug.LogWarning($"⚠️ [ArmorPickup] armorData 또는 spriteRenderer가 null입니다!");
         }
         
         // 픽업 레이어 설정 (안전하게 처리)
@@ -80,7 +72,7 @@ public class ArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
             collider.radius = pickupRange;
         }
         
-        Debug.Log($"🔍 [ArmorPickup] Start() 완료 - 최종 색상: {(spriteRenderer != null ? spriteRenderer.color.ToString() : "SpriteRenderer 없음")}");
+        // ArmorPickup 초기화 완료
     }
     
     void Update()
@@ -134,21 +126,16 @@ public class ArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
         }
         
         isPickedUp = true;
-        Debug.Log($"🛡️ [ArmorPickup] 방어구 픽업 시작: {armorData.armorName}");
         
         // 플레이어 인벤토리에 방어구 추가
         PlayerInventory playerInventory = player.GetComponent<PlayerInventory>();
         if (playerInventory != null)
         {
-            Debug.Log($"✅ [ArmorPickup] PlayerInventory 찾음");
-            
             // InventoryManager를 통해 방어구 추가
             InventoryManager inventoryManager = FindFirstObjectByType<InventoryManager>();
             if (inventoryManager != null)
             {
-                Debug.Log($"✅ [ArmorPickup] InventoryManager 찾음, 방어구 추가 시도...");
                 inventoryManager.AddArmor(armorData);
-                Debug.Log($"🛡️ 방어구 획득: {armorData.armorName} ({armorData.GetRarityName()})");
             }
             else
             {
@@ -191,7 +178,6 @@ public class ArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
         if (other.CompareTag("Player"))
         {
             // E키 픽업 안내
-            Debug.Log($"🛡️ {armorData.armorName} 발견! E키를 눌러 픽업하세요.");
         }
     }
     
