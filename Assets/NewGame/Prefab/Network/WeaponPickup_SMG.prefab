@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8680815750284569949}
   - component: {fileID: 1285858937059350974}
   - component: {fileID: 8508802614944451090}
-  - component: {fileID: 2574497863079466696}
+  - component: {fileID: 7300236063934515714}
   m_Layer: 9
   m_Name: WeaponPickup_SMG
   m_TagString: Untagged
@@ -80,7 +80,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 2d29e6e184f71134489359599b1a1d62, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 464f38ad41e26394e845e6f9d5945eca, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -105,6 +105,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponType: 4
   weaponTier: 1
+  useRandomTier: 1
+  minTier: 1
+  maxTier: 5
   debugMode: 0
 --- !u!114 &8508802614944451090
 MonoBehaviour:
@@ -119,7 +122,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   weaponData: {fileID: 0}
---- !u!61 &2574497863079466696
+--- !u!61 &7300236063934515714
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -149,7 +152,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -157,13 +160,13 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 3.34, y: 2.2}
+    oldSize: {x: 5.33, y: 2.89}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 3.34, y: 2.2}
+  m_Size: {x: 5.33, y: 2.89}
   m_EdgeRadius: 0
 --- !u!1 &8505731410782973680
 GameObject:
@@ -190,7 +193,7 @@ Transform:
   m_GameObject: {fileID: 8505731410782973680}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.67, y: 0.51, z: 0}
+  m_LocalPosition: {x: 2.66, y: 0.63, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

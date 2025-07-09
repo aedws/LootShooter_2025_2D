@@ -202,7 +202,16 @@ public class GoogleSheetsManager : MonoBehaviour
                     weapon.hasExplosiveKills = bool.Parse(row[31]);
                     weapon.explosionRadius = float.Parse(row[32]);
                     
-                    // 🆕 누락된 필드들 처리
+                    // 쌍권총 설정 파싱 (새로 추가된 필드들)
+                    if (row.Count > 33)
+                    {
+                        weapon.isDualPistol = bool.Parse(row[33]);
+                        weapon.dualPistolFireInterval = float.Parse(row[34]);
+                        weapon.dualPistolOffset = float.Parse(row[35]);
+                        weapon.dualPistolSpreadDifference = float.Parse(row[36]);
+                    }
+                    
+                    // 무기 등급 설정
                     SetupWeaponAssets(weapon);
                     
                     weapons.Add(weapon);

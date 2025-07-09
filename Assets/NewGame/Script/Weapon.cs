@@ -27,6 +27,10 @@ public class Weapon : MonoBehaviour
     [Header("발사 상태 추적")]
     private bool wasFireButtonPressed = false;
     private float timeSinceLastShot = 0f;
+
+    // 쌍권총 번갈아 발사용 변수
+    // private bool isLeftTurn = true; // 삭제
+    private const float dualPistolOffset = 0.25f;
     
     private Coroutine autoReloadCoroutine;
     
@@ -143,7 +147,8 @@ public class Weapon : MonoBehaviour
             if (!HandleMachineGunFiring(isFireButtonPressed)) return false;
         }
         
-        // 발사 실행
+        // TryFire 내부
+        // HG(권총)일 때도 기존 무기와 동일하게 1회만 발사
         return Fire(direction, weaponPosition, isNewPress);
     }
 
@@ -164,15 +169,22 @@ public class Weapon : MonoBehaviour
 
     private bool Fire(Vector2 direction, Vector3 weaponPosition, bool isNewPress)
     {
-        Vector3 spawnPosition = GetFirePosition(weaponPosition);
-        
+        Vector3 spawnPosition;
+        Transform firePoint = transform.Find("FirePoint");
+        if (firePoint != null)
+            spawnPosition = firePoint.position;
+        else
+            spawnPosition = weaponPosition + new Vector3(0.6f, 0.2f, 0f);
+
         // 탄약 소모 (무한 탄약이 아닌 경우)
         if (weaponData != null && !weaponData.infiniteAmmo)
         {
-            currentAmmo--;
+            // HG(권총)는 2발씩 소모, 나머지는 1발씩
+            int ammoToConsume = (weaponData.weaponType == WeaponType.HG) ? 2 : 1;
+            currentAmmo -= ammoToConsume;
             OnAmmoChanged?.Invoke(currentAmmo, weaponData.maxAmmo);
         }
-        
+
         // 무기 타입별 발사 처리
         switch (weaponData != null ? weaponData.weaponType : WeaponType.HG)
         {
@@ -183,12 +195,12 @@ public class Weapon : MonoBehaviour
                 FireSingleProjectile(direction, spawnPosition, isNewPress);
                 break;
         }
-        
+
         // 발사 후 처리
         UpdateFireState();
         SetCooldown();
         ApplyRecoil();
-        
+
         return true;
     }
 

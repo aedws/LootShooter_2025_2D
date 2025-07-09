@@ -98,6 +98,19 @@ public class WeaponData : ScriptableObject
     
     [Tooltip("조준 모드에서 조준선이 표시되는 거리")]
     public float aimingRange = 15f;
+
+    [Header("쌍권총 설정 - Dual Pistol Settings (HG 타입 전용)")]
+    [Tooltip("쌍권총 사용 여부 (true시 양손에 권총 장착)")]
+    public bool isDualPistol = false;
+
+    [Tooltip("쌍권총 발사 간격 (초 단위, 낮을수록 빠름)")]
+    public float dualPistolFireInterval = 0.1f;
+
+    [Tooltip("쌍권총 좌우 발사 위치 오프셋")]
+    public float dualPistolOffset = 0.3f;
+
+    [Tooltip("쌍권총 좌우 탄 퍼짐 차이 (도 단위)")]
+    public float dualPistolSpreadDifference = 2f;
     
     [Header("이동속도 영향 - Movement Speed Effect")]
     [Tooltip("무기가 플레이어 이동속도에 미치는 영향 (1.0 = 기본속도, 0.8 = 20% 감소, 1.2 = 20% 증가)")]

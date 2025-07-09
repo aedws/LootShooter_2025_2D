@@ -510,6 +510,24 @@ public class PlayerController : MonoBehaviour
         if (currentWeapon == null)
             return;
 
+        // HG(권총)일 때만 분기, 그 외는 기존 방식
+        if (currentWeapon.GetWeaponData() != null && currentWeapon.GetWeaponData().weaponType == WeaponType.HG)
+        {
+            Weapon rightWeapon = playerInventory.GetRightWeapon();
+            Weapon leftWeapon = playerInventory.GetLeftWeapon();
+            bool rightFirst = facingRight;
+            if (rightFirst)
+            {
+                rightWeapon?.TryFire(GetFireDirection(), GetFirePosition(), isAuto, false);
+                leftWeapon?.TryFire(GetFireDirection(), GetFirePosition(), isAuto, false);
+            }
+            else
+            {
+                leftWeapon?.TryFire(GetFireDirection(), GetFirePosition(), isAuto, false);
+                rightWeapon?.TryFire(GetFireDirection(), GetFirePosition(), isAuto, false);
+            }
+            return;
+        }
         // AR 무기일 때만 분기, 그 외는 기존 방식
         if (currentWeapon.GetWeaponData() != null && currentWeapon.GetWeaponData().weaponType == WeaponType.AR)
         {

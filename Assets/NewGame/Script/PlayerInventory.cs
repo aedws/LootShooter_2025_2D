@@ -16,6 +16,8 @@ public class PlayerInventory : MonoBehaviour
     public Transform weaponHolder;
     
     private GameObject currentWeaponObj;
+    private GameObject rightWeaponObj;
+    private GameObject leftWeaponObj;
     
     [Header("🛡️ Armor Management")]
     [Tooltip("장착된 방어구들 (타입별로 관리)")]
@@ -162,26 +164,54 @@ public class PlayerInventory : MonoBehaviour
     {
         equippedWeapon = weaponData;
 
-        // 기존 무기 오브젝트 파괴
-        if (currentWeaponObj != null)
-            Destroy(currentWeaponObj);
+        // 기존 무기 오브젝트 파괴 (모든 자식 삭제)
+        foreach (Transform child in weaponHolder)
+            Destroy(child.gameObject);
+        rightWeaponObj = null;
+        leftWeaponObj = null;
+        // HG(권총) 타입이면 양손에 무기 생성
+        if (weaponData != null && weaponData.weaponPrefab != null && weaponData.weaponType == WeaponType.HG)
+        {
+            // 오른손(Weapon 컴포넌트 O, X=+0.7)
+            rightWeaponObj = Instantiate(weaponData.weaponPrefab, weaponHolder);
+            rightWeaponObj.transform.localPosition = new Vector3(0.7f, 0f, 0f);
+            rightWeaponObj.transform.localRotation = Quaternion.identity;
+            rightWeaponObj.transform.localScale = weaponData.weaponPrefab.transform.localScale;
+            var rightWeapon = rightWeaponObj.GetComponent<Weapon>();
+            rightWeapon.weaponData = weaponData;
+            rightWeapon.InitializeFromWeaponData();
+            var rightSprite = rightWeaponObj.GetComponent<SpriteRenderer>();
+            // flipX는 Update에서 동적으로 설정
 
-        // 새 무기 생성 및 장착
-        if (weaponData != null && weaponData.weaponPrefab != null)
+            // 왼손(Weapon 컴포넌트 O, X=-0.7)
+            leftWeaponObj = Instantiate(weaponData.weaponPrefab, weaponHolder);
+            leftWeaponObj.transform.localPosition = new Vector3(-0.7f, 0f, 0f);
+            leftWeaponObj.transform.localRotation = Quaternion.identity;
+            leftWeaponObj.transform.localScale = weaponData.weaponPrefab.transform.localScale;
+            var leftWeapon = leftWeaponObj.GetComponent<Weapon>();
+            leftWeapon.weaponData = weaponData;
+            leftWeapon.InitializeFromWeaponData();
+            var leftSprite = leftWeaponObj.GetComponent<SpriteRenderer>();
+            // flipX는 Update에서 동적으로 설정
+            // currentWeaponObj는 오른손 기준
+            currentWeaponObj = rightWeaponObj;
+        }
+        // 그 외 무기는 기존대로 1개만 생성
+        else if (weaponData != null && weaponData.weaponPrefab != null)
         {
             Vector3 prefabScale = weaponData.weaponPrefab.transform.localScale;
             currentWeaponObj = Instantiate(weaponData.weaponPrefab, weaponHolder);
             currentWeaponObj.transform.localPosition = Vector3.zero;
             currentWeaponObj.transform.localRotation = Quaternion.identity;
             currentWeaponObj.transform.localScale = prefabScale; // 프리팹 크기 유지
-
-            // ⭐ Weapon 컴포넌트에 WeaponData 할당
             Weapon weaponComponent = currentWeaponObj.GetComponent<Weapon>();
             if (weaponComponent != null)
+            {
                 weaponComponent.weaponData = weaponData;
+                weaponComponent.InitializeFromWeaponData();
+            }
             else
                 Debug.LogWarning("[PlayerInventory] Weapon 컴포넌트를 찾을 수 없습니다!");
-
             Debug.Log($"[PlayerInventory] 무기 장착 시도: weaponName={weaponData.weaponName}, prefab={weaponData.weaponPrefab}, holder={weaponHolder}, obj={currentWeaponObj}");
         }
         else
@@ -310,6 +340,15 @@ public class PlayerInventory : MonoBehaviour
         return currentWeaponObj != null ? currentWeaponObj.GetComponent<Weapon>() : null;
     }
     
+    public Weapon GetRightWeapon()
+    {
+        return rightWeaponObj != null ? rightWeaponObj.GetComponent<Weapon>() : null;
+    }
+    public Weapon GetLeftWeapon()
+    {
+        return leftWeaponObj != null ? leftWeaponObj.GetComponent<Weapon>() : null;
+    }
+
     // 인벤토리 매니저와의 연동 메소드들
     public List<WeaponData> GetWeapons()
     {
@@ -517,5 +556,49 @@ public class PlayerInventory : MonoBehaviour
     {
         float totalReduction = equippedArmors.Values.Sum(armor => armor.damageReduction);
         return Mathf.Clamp01(totalReduction); // 최대 100% 제한
+    }
+
+    // Update 함수에서 무기 위치/flip 동적 업데이트
+    void Update()
+    {
+        // HG(권총)일 때 무기 위치/flip 동적 업데이트
+        if (equippedWeapon != null && equippedWeapon.weaponType == WeaponType.HG && 
+            rightWeaponObj != null && leftWeaponObj != null)
+        {
+            UpdateDualPistolPosition();
+        }
+    }
+
+    private void UpdateDualPistolPosition()
+    {
+        var pc = FindAnyObjectByType<PlayerController>();
+        if (pc == null) return;
+        
+        bool facingRight = pc.IsFacingRight();
+        
+        if (facingRight)
+        {
+            // 오른쪽 바라볼 때: 오른손 총(0), 왼손 총(-0.7)
+            rightWeaponObj.transform.localPosition = new Vector3(0f, 0f, 0f);
+            leftWeaponObj.transform.localPosition = new Vector3(-0.7f, 0f, 0f);
+            
+            // flipX 해제
+            var rightSprite = rightWeaponObj.GetComponent<SpriteRenderer>();
+            if (rightSprite != null) rightSprite.flipX = false;
+            var leftSprite = leftWeaponObj.GetComponent<SpriteRenderer>();
+            if (leftSprite != null) leftSprite.flipX = false;
+        }
+        else
+        {
+            // 왼쪽 바라볼 때: 왼손 총(0), 오른손 총(+0.7)
+            leftWeaponObj.transform.localPosition = new Vector3(0f, 0f, 0f);
+            rightWeaponObj.transform.localPosition = new Vector3(0.7f, 0f, 0f);
+            
+            // flipX 적용
+            var rightSprite = rightWeaponObj.GetComponent<SpriteRenderer>();
+            if (rightSprite != null) rightSprite.flipX = true;
+            var leftSprite = leftWeaponObj.GetComponent<SpriteRenderer>();
+            if (leftSprite != null) leftSprite.flipX = true;
+        }
     }
 } 
