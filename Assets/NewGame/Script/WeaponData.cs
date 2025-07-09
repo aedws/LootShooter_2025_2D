@@ -117,6 +117,13 @@ public class WeaponData : ScriptableObject
     [Range(0.3f, 1.5f)]
     public float movementSpeedMultiplier = 1.0f;
     
+    [Header("SMG 대시 후 이동속도 증가 - SMG Dash Speed Boost")]
+    [Tooltip("SMG 대시 후 이동속도 증가량 (SMG 타입 전용)")]
+    public float smgDashSpeedBonus = 2f;
+    
+    [Tooltip("SMG 대시 후 이동속도 증가 지속시간 (초 단위)")]
+    public float smgDashSpeedDuration = 3f;
+    
     [Header("반동 설정 - Recoil Settings")]
     [Tooltip("발사시 카메라/무기에 가해지는 반동 강도 (0 = 반동 없음)")]
     public float recoilForce = 1f;

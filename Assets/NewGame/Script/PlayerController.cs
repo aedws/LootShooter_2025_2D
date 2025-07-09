@@ -17,6 +17,10 @@ public class PlayerController : MonoBehaviour
     public float dashCooldown = 1.2f; // 쿨다운
     public float dashInvincibleTime = 0.15f; // 무적시간
     
+    [Header("SMG 대시 후 이동속도 증가")]
+    public float smgDashSpeedBonus = 2f; // SMG 대시 후 이동속도 증가량
+    public float smgDashSpeedDuration = 3f; // SMG 대시 후 이동속도 증가 지속시간
+    
     [Header("대시 잔상 이펙트")]
     public float afterImageInterval = 0.05f; // 잔상 생성 간격
     public float afterImageDuration = 0.3f; // 잔상 지속 시간
@@ -60,6 +64,11 @@ public class PlayerController : MonoBehaviour
     private float jumpTimer;
     private float lastJumpX;
     private bool facingRight = true;
+    
+    // SMG 대시 후 이동속도 증가 관련
+    private bool isSmgDashSpeedActive = false;
+    private float smgDashSpeedTimer = 0f;
+    private float originalMoveSpeed = 5f;
     
     // 무기 반동 관련
     private Weapon currentSubscribedWeapon = null; // 현재 이벤트 구독 중인 무기
@@ -127,6 +136,19 @@ public class PlayerController : MonoBehaviour
 
         if (dashCooldownTimer > 0)
             dashCooldownTimer -= Time.deltaTime;
+
+        // SMG 대시 후 이동속도 증가 타이머 업데이트
+        if (isSmgDashSpeedActive)
+        {
+            smgDashSpeedTimer -= Time.deltaTime;
+            if (smgDashSpeedTimer <= 0f)
+            {
+                // 이동속도 증가 효과 종료
+                isSmgDashSpeedActive = false;
+                currentMoveSpeed = originalMoveSpeed;
+                // Debug.Log("🏃‍♂️ [PlayerController] SMG 대시 후 이동속도 증가 효과 종료");
+            }
+        }
 
         // 대시 쿨타임 UI 갱신 및 표시/숨김 제어
         var statusUI = FindAnyObjectByType<PlayerStatusUI>();
@@ -320,6 +342,29 @@ public class PlayerController : MonoBehaviour
 
         // 대시 종료: 무적 해제
         if (health != null) health.SetInvincible(false);
+        
+        // 🆕 SMG 대시 후 이동속도 증가 효과 적용
+        if (playerInventory != null)
+        {
+            Weapon currentWeapon = playerInventory.GetCurrentWeapon();
+            if (currentWeapon != null && currentWeapon.weaponData != null && 
+                currentWeapon.weaponData.weaponType == WeaponType.SMG)
+            {
+                // 현재 이동속도 저장
+                originalMoveSpeed = currentMoveSpeed;
+                
+                // 네트워크 데이터에서 받은 SMG 대시 효과 적용
+                float dashSpeedBonus = currentWeapon.weaponData.smgDashSpeedBonus;
+                float dashSpeedDuration = currentWeapon.weaponData.smgDashSpeedDuration;
+                
+                // 이동속도 증가 효과 적용
+                currentMoveSpeed += dashSpeedBonus;
+                isSmgDashSpeedActive = true;
+                smgDashSpeedTimer = dashSpeedDuration;
+                
+                // Debug.Log($"🏃‍♂️ [PlayerController] SMG 대시 후 이동속도 증가! 현재속도: {currentMoveSpeed:F1} (지속시간: {dashSpeedDuration}초)");
+            }
+        }
     }
 
     System.Collections.IEnumerator CreateAfterImages()
@@ -771,6 +816,29 @@ public class PlayerController : MonoBehaviour
         {
             float previousSpeed = currentMoveSpeed;
             currentMoveSpeed = baseMoveSpeed * weaponData.movementSpeedMultiplier;
+            
+            // 🆕 SMG 대시 후 이동속도 증가 효과가 활성화되어 있다면 추가
+            if (isSmgDashSpeedActive)
+            {
+                // 현재 무기에서 대시 효과 값 가져오기
+                float dashSpeedBonus = 0f;
+                if (playerInventory != null)
+                {
+                    Weapon currentWeapon = playerInventory.GetCurrentWeapon();
+                    if (currentWeapon != null && currentWeapon.weaponData != null)
+                    {
+                        dashSpeedBonus = currentWeapon.weaponData.smgDashSpeedBonus;
+                    }
+                }
+                
+                // 기본값이 0이면 하드코딩된 값 사용
+                if (dashSpeedBonus <= 0f)
+                {
+                    dashSpeedBonus = smgDashSpeedBonus;
+                }
+                
+                currentMoveSpeed += dashSpeedBonus;
+            }
             
             // Debug.Log($"🏃‍♂️ [PlayerController] 이동속도 업데이트: {weaponData.weaponName} 장착");
             // Debug.Log($"   기본속도: {baseMoveSpeed} → 현재속도: {currentMoveSpeed:F2} (배수: {weaponData.movementSpeedMultiplier:F2})");

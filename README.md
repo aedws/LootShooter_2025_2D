@@ -14,7 +14,7 @@
 - 이후 정리하여 추가 예정
 -----
 ### 스프레드시트(데이터 테이블)관리 형식
-#### 무기 데이터 (Weapons) - 28개 컬럼
+#### 무기 데이터 (Weapons) - 34개 컬럼
 | 컬럼 | 필드명 | 설명 | 예시 |
 |------|--------|------|------|
 | A | weaponName | 무기 이름 | M4A1 |
@@ -49,6 +49,8 @@
 | AD | hasMuzzleFlash | 화염 효과 | true |
 | AE | hasExplosiveKills | 폭발 효과 | false |
 | AF | explosionRadius | 폭발 반경 | 2.0 |
+| AG | smgDashSpeedBonus | SMG 대시 후 이동속도 증가량 | 2.0 |
+| AH | smgDashSpeedDuration | SMG 대시 후 이동속도 증가 지속시간 | 3.0 |
 
 
 #### 방어구 데이터 (Armors) - 14개 컬럼

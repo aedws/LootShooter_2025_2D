@@ -135,7 +135,7 @@ public class GoogleSheetsManager : MonoBehaviour
             for (int i = 3; i < response.values.Count; i++)
             {
                 var row = response.values[i];
-                if (row.Count >= 31) // 모든 필드가 있는지 확인
+                if (row.Count >= 33) // 모든 필드가 있는지 확인 (기본 필드 + SMG 대시 효과)
                 {
                     WeaponData weapon = ScriptableObject.CreateInstance<WeaponData>();
                     
@@ -158,27 +158,27 @@ public class GoogleSheetsManager : MonoBehaviour
                     weapon.flavorText = row[3];
                     
                     // 기본 스탯
-                    weapon.fireRate = float.Parse(row[4]);
-                    weapon.damage = int.Parse(row[5]);
-                    weapon.projectileSpeed = float.Parse(row[6]);
-                    weapon.maxAmmo = int.Parse(row[7]);
-                    weapon.currentAmmo = int.Parse(row[8]);
-                    weapon.reloadTime = float.Parse(row[9]);
-                    weapon.infiniteAmmo = bool.Parse(row[10]);
+                    weapon.fireRate = SafeParseFloat(row[4]);
+                    weapon.damage = SafeParseInt(row[5]);
+                    weapon.projectileSpeed = SafeParseFloat(row[6]);
+                    weapon.maxAmmo = SafeParseInt(row[7]);
+                    weapon.currentAmmo = SafeParseInt(row[8]);
+                    weapon.reloadTime = SafeParseFloat(row[9]);
+                    weapon.infiniteAmmo = SafeParseBool(row[10]);
                     
                     // 탄 퍼짐 설정
-                    weapon.baseSpread = float.Parse(row[11]);
-                    weapon.maxSpread = float.Parse(row[12]);
-                    weapon.spreadIncreaseRate = float.Parse(row[13]);
-                    weapon.spreadDecreaseRate = float.Parse(row[14]);
+                    weapon.baseSpread = SafeParseFloat(row[11]);
+                    weapon.maxSpread = SafeParseFloat(row[12]);
+                    weapon.spreadIncreaseRate = SafeParseFloat(row[13]);
+                    weapon.spreadDecreaseRate = SafeParseFloat(row[14]);
                     
                     // 샷건 설정
-                    weapon.pelletsPerShot = int.Parse(row[15]);
-                    weapon.shotgunSpreadAngle = float.Parse(row[16]);
+                    weapon.pelletsPerShot = SafeParseInt(row[15]);
+                    weapon.shotgunSpreadAngle = SafeParseFloat(row[16]);
                     
                     // 머신건 설정
-                    weapon.warmupTime = float.Parse(row[17]);
-                    weapon.maxWarmupFireRate = float.Parse(row[18]);
+                    weapon.warmupTime = SafeParseFloat(row[17]);
+                    weapon.maxWarmupFireRate = SafeParseFloat(row[18]);
                     
                     // MG 디버그 로그 추가
                     if (weapon.weaponType == WeaponType.MG)
@@ -187,34 +187,32 @@ public class GoogleSheetsManager : MonoBehaviour
                     }
                     
                     // 저격총 설정
-                    weapon.singleFireOnly = bool.Parse(row[19]);
-                    weapon.aimingRange = float.Parse(row[20]);
+                    weapon.singleFireOnly = SafeParseBool(row[19]);
+                    weapon.aimingRange = SafeParseFloat(row[20]);
                     
                     // 이동속도 영향
-                    weapon.movementSpeedMultiplier = float.Parse(row[21]);
+                    weapon.movementSpeedMultiplier = SafeParseFloat(row[21]);
                     
                     // 반동 설정
-                    weapon.recoilForce = float.Parse(row[22]);
-                    weapon.recoilDuration = float.Parse(row[23]);
-                    weapon.recoilRecoverySpeed = float.Parse(row[24]);
+                    weapon.recoilForce = SafeParseFloat(row[22]);
+                    weapon.recoilDuration = SafeParseFloat(row[23]);
+                    weapon.recoilRecoverySpeed = SafeParseFloat(row[24]);
                     
                     // 특수 효과
-                    weapon.criticalChance = float.Parse(row[25]);
-                    weapon.criticalMultiplier = float.Parse(row[26]);
-                    weapon.pierceCount = int.Parse(row[27]);
-                    weapon.pierceDamageReduction = float.Parse(row[28]);
-                    weapon.hasTracerRounds = bool.Parse(row[29]);
-                    weapon.hasMuzzleFlash = bool.Parse(row[30]);
-                    weapon.hasExplosiveKills = bool.Parse(row[31]);
-                    weapon.explosionRadius = float.Parse(row[32]);
+                    weapon.criticalChance = SafeParseFloat(row[25]);
+                    weapon.criticalMultiplier = SafeParseFloat(row[26]);
+                    weapon.pierceCount = SafeParseInt(row[27]);
+                    weapon.pierceDamageReduction = SafeParseFloat(row[28]);
+                    weapon.hasTracerRounds = SafeParseBool(row[29]);
+                    weapon.hasMuzzleFlash = SafeParseBool(row[30]);
+                    weapon.hasExplosiveKills = SafeParseBool(row[31]);
+                    weapon.explosionRadius = SafeParseFloat(row[32]);
                     
-                    // 쌍권총 설정 파싱 (새로 추가된 필드들)
-                    if (row.Count > 33)
+                    // SMG 대시 후 이동속도 증가 설정 파싱
+                    if (row.Count > 32)
                     {
-                        weapon.isDualPistol = bool.Parse(row[33]);
-                        weapon.dualPistolFireInterval = float.Parse(row[34]);
-                        weapon.dualPistolOffset = float.Parse(row[35]);
-                        weapon.dualPistolSpreadDifference = float.Parse(row[36]);
+                        weapon.smgDashSpeedBonus = SafeParseFloat(row[33]);
+                        weapon.smgDashSpeedDuration = SafeParseFloat(row[34]);
                     }
                     
                     // 무기 등급 설정
@@ -224,7 +222,7 @@ public class GoogleSheetsManager : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning($"무기 데이터 행 {i + 1}의 컬럼 수가 부족합니다. (필요: 32, 실제: {row.Count})");
+                    Debug.LogWarning($"무기 데이터 행 {i + 1}의 컬럼 수가 부족합니다. (필요: 33개 이상, 실제: {row.Count})");
                 }
             }
             
@@ -362,6 +360,25 @@ public class GoogleSheetsManager : MonoBehaviour
         {
             OnError?.Invoke($"방어구 데이터 파싱 오류: {e.Message}");
         }
+    }
+    
+    // 안전한 파싱 메서드들
+    private bool SafeParseBool(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return false;
+        return bool.TryParse(value, out bool result) ? result : false;
+    }
+    
+    private float SafeParseFloat(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return 0f;
+        return float.TryParse(value, out float result) ? result : 0f;
+    }
+    
+    private int SafeParseInt(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return 0;
+        return int.TryParse(value, out int result) ? result : 0;
     }
 }
 
