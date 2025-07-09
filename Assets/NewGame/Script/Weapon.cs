@@ -84,8 +84,9 @@ public class Weapon : MonoBehaviour
         // 발사 후 시간 추적
         timeSinceLastShot += Time.deltaTime;
         
-        // 발사 상태 리셋
-        if (timeSinceLastShot > 0.2f)
+        // 발사 상태 리셋 (MG는 더 긴 시간으로 조정)
+        float resetTime = (weaponData != null && weaponData.weaponType == WeaponType.MG) ? 0.5f : 0.2f;
+        if (timeSinceLastShot > resetTime)
         {
             isFiring = false;
         }
@@ -470,8 +471,8 @@ public class Weapon : MonoBehaviour
         }
         else
         {
-            // 예열 감소
-            warmupProgress -= Time.deltaTime * 2f; // 더 빠르게 감소
+            // 예열 감소 (더 천천히 감소하도록 조정)
+            warmupProgress -= Time.deltaTime * 1f; // 2f에서 1f로 변경
             warmupProgress = Mathf.Max(0f, warmupProgress);
             isWarmedUp = false;
         }
@@ -484,10 +485,13 @@ public class Weapon : MonoBehaviour
             return false;
         }
         
-        // 단발로 쏠 때 효율 감소
-        if (timeSinceLastShot > 0.5f)
+        // 발사 버튼을 누르고 있으면 강제로 isFiring = true로 설정
+        isFiring = true;
+        
+        // 단발로 쏠 때 효율 감소 (더 관대하게 조정)
+        if (timeSinceLastShot > 1f)
         {
-            warmupProgress *= 0.5f; // 예열 감소
+            warmupProgress *= 0.7f; // 0.5f에서 0.7f로 변경
         }
         
         return true;
@@ -514,13 +518,24 @@ public class Weapon : MonoBehaviour
         // 머신건 예열 시 연사속도 증가 (maxWarmupFireRate가 0보다 클 때만)
         if (weaponData.weaponType == WeaponType.MG && isWarmedUp && weaponData.maxWarmupFireRate > 0f)
         {
-            currentFireRate = Mathf.Lerp(weaponData.fireRate, weaponData.maxWarmupFireRate, warmupProgress);
+            // maxWarmupFireRate가 비정상적으로 큰 값이면 기본값으로 보정
+            float maxWarmupRate = weaponData.maxWarmupFireRate;
+            if (maxWarmupRate > 0.5f) // 0.5초 이상이면 비정상
+            {
+                maxWarmupRate = 0.05f; // 기본값으로 보정
+                Debug.LogWarning($"[MG WARNING] {weaponData.weaponName}: maxWarmupFireRate가 너무 큽니다 ({weaponData.maxWarmupFireRate}). 0.05로 보정합니다.");
+            }
+            
+            currentFireRate = Mathf.Lerp(weaponData.fireRate, maxWarmupRate, warmupProgress);
         }
         
         fireCooldown = currentFireRate;
         
-        // 디버그: 쿨다운 설정 확인
-        // Debug.Log($"🔫 [COOLDOWN] {weaponData.weaponName}: {currentFireRate}초 쿨다운 설정");
+        // 디버그: 쿨다운 설정 확인 (MG만 활성화)
+        if (weaponData.weaponType == WeaponType.MG)
+        {
+            Debug.Log($"[MG COOLDOWN] {weaponData.weaponName}: {currentFireRate}초 쿨다운 설정 (예열진행도: {warmupProgress:F2})");
+        }
     }
 
     private int GetCurrentDamage()
@@ -560,6 +575,13 @@ public class Weapon : MonoBehaviour
         if (weaponData != null)
         {
             Debug.Log($"[무기등급] {weaponData.weaponName} rarity: {weaponData.rarity}, color: {weaponData.GetRarityColor()}");
+            
+            // MG 디버그 로그 추가
+            if (weaponData.weaponType == WeaponType.MG)
+            {
+                Debug.Log($"[MG INIT] {weaponData.weaponName}: fireRate={weaponData.fireRate}, warmupTime={weaponData.warmupTime}, maxWarmupFireRate={weaponData.maxWarmupFireRate}");
+            }
+            
             currentSpread = weaponData.baseSpread;
             warmupProgress = 0f;
             isWarmedUp = false;

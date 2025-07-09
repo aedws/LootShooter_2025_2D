@@ -1208,6 +1208,12 @@ public class InventoryManager : MonoBehaviour
         RefreshInventory();
     }
 
+    public void ForceShowWeaponsTabAndRefresh()
+    {
+        currentTab = InventoryTab.Weapons;
+        RefreshInventory();
+    }
+
     void OnDestroy()
     {
         SaveInventoryState();

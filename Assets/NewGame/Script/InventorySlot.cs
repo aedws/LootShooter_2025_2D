@@ -844,7 +844,8 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     // 🆕 방어구 자동 장착 시도
     void TryEquipArmor()
     {
-        if (armorData == null || inventoryManager == null) return;
+        if (armorData == null) return;
+        if (inventoryManager == null) return;
         
         // ArmorSlotManager 찾기
         ArmorSlotManager armorSlotManager = FindFirstObjectByType<ArmorSlotManager>();

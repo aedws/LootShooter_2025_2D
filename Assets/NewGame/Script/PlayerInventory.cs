@@ -221,6 +221,20 @@ public class PlayerInventory : MonoBehaviour
         
         // 🏃‍♂️ 플레이어 이동속도 업데이트
         UpdatePlayerMovementSpeed(weaponData);
+        
+        // 장착된 무기 오브젝트의 Layer를 Weapon으로 변경 (E키 픽업 방지)
+        if (currentWeaponObj != null)
+        {
+            currentWeaponObj.layer = LayerMask.NameToLayer("Weapon");
+        }
+        if (rightWeaponObj != null)
+        {
+            rightWeaponObj.layer = LayerMask.NameToLayer("Weapon");
+        }
+        if (leftWeaponObj != null)
+        {
+            leftWeaponObj.layer = LayerMask.NameToLayer("Weapon");
+        }
     }
 
     public WeaponData GetEquippedWeapon()
@@ -325,6 +339,12 @@ public class PlayerInventory : MonoBehaviour
             // 레거시 방식
             if (currentWeaponObj != null)
                 Destroy(currentWeaponObj);
+        }
+        if (inventoryManager != null)
+        {
+            // 무기 인벤토리에 반환
+            inventoryManager.AddWeapon(equippedWeapon);
+            inventoryManager.ForceShowWeaponsTabAndRefresh();
         }
     }
 

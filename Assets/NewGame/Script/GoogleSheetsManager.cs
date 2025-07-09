@@ -180,6 +180,12 @@ public class GoogleSheetsManager : MonoBehaviour
                     weapon.warmupTime = float.Parse(row[17]);
                     weapon.maxWarmupFireRate = float.Parse(row[18]);
                     
+                    // MG 디버그 로그 추가
+                    if (weapon.weaponType == WeaponType.MG)
+                    {
+                        Debug.Log($"[MG DEBUG] {weapon.weaponName}: fireRate={weapon.fireRate}, warmupTime={weapon.warmupTime}, maxWarmupFireRate={weapon.maxWarmupFireRate}");
+                    }
+                    
                     // 저격총 설정
                     weapon.singleFireOnly = bool.Parse(row[19]);
                     weapon.aimingRange = float.Parse(row[20]);

@@ -510,5 +510,8 @@ public class GameDataRepository : MonoBehaviour
             googleSheetsManager.OnArmorsLoaded -= OnArmorsLoadedFromSheets;
             googleSheetsManager.OnError -= OnSheetsError;
         }
+        // 싱글톤 인스턴스 정리
+        if (_instance == this)
+            _instance = null;
     }
 } 
