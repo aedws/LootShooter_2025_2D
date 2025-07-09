@@ -65,7 +65,7 @@ public class TestArmorSystem : MonoBehaviour
     void CheckAndSetupLayers()
     {
         // Pickup 레이어 확인
-        if (LayerMask.NameToLayer("Pickup") == -1)
+        if (LayerMask.NameToLayer("PickupLayer") == -1)
         {
                     Debug.LogWarning("⚠️ [TestArmorSystem] 'Pickup' 레이어가 없습니다!");
         }

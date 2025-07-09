@@ -377,7 +377,7 @@ public class ArmorGenerator : MonoBehaviour
         collider.radius = 0.5f;
         
         // 레이어 설정 (안전하게 처리)
-        int pickupLayer = LayerMask.NameToLayer("Pickup");
+        int pickupLayer = LayerMask.NameToLayer("PickupLayer");
         if (pickupLayer != -1)
         {
             pickupObj.layer = pickupLayer;

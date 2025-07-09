@@ -19,18 +19,18 @@ public class LayerSetup : MonoBehaviour
     {
         Debug.Log("🔧 필요한 레이어들을 설정합니다...");
         
-        // Pickup 레이어 확인 및 설정
-        if (LayerMask.NameToLayer("Pickup") == -1)
+        // PickupLayer 레이어 확인 및 설정
+        if (LayerMask.NameToLayer("PickupLayer") == -1)
         {
-            Debug.LogWarning("⚠️ 'Pickup' 레이어가 없습니다. Unity의 Layer 설정에서 추가해주세요.");
+            Debug.LogWarning("⚠️ 'PickupLayer' 레이어가 없습니다. Unity의 Layer 설정에서 추가해주세요.");
             Debug.Log("📋 Layer 설정 방법:");
             Debug.Log("   1. Edit → Project Settings → Tags and Layers");
-            Debug.Log("   2. Layers 섹션에서 빈 슬롯에 'Pickup' 입력");
+            Debug.Log("   2. Layers 섹션에서 빈 슬롯에 'PickupLayer' 입력");
             Debug.Log("   3. Player 레이어도 확인 (기본값: 8)");
         }
         else
         {
-            Debug.Log("✅ Pickup 레이어가 설정되어 있습니다.");
+            Debug.Log("✅ PickupLayer 레이어가 설정되어 있습니다.");
         }
         
         // Player 레이어 확인
@@ -44,7 +44,7 @@ public class LayerSetup : MonoBehaviour
         }
         
         // 기본 레이어들 확인
-        string[] requiredLayers = { "Default", "Player", "Pickup" };
+        string[] requiredLayers = { "Default", "Player", "PickupLayer" };
         
         foreach (string layerName in requiredLayers)
         {
@@ -75,16 +75,16 @@ public class LayerSetup : MonoBehaviour
         }
     }
     
-    [ContextMenu("Pickup 레이어 테스트")]
+    [ContextMenu("PickupLayer 레이어 테스트")]
     public void TestPickupLayer()
     {
-        int pickupLayer = LayerMask.NameToLayer("Pickup");
+        int pickupLayer = LayerMask.NameToLayer("PickupLayer");
         if (pickupLayer != -1)
         {
-            Debug.Log($"✅ Pickup 레이어 테스트 성공: {pickupLayer}");
+            Debug.Log($"✅ PickupLayer 레이어 테스트 성공: {pickupLayer}");
             
             // 테스트 오브젝트 생성
-            GameObject testObj = new GameObject("PickupTest");
+            GameObject testObj = new GameObject("PickupLayerTest");
             testObj.layer = pickupLayer;
             Debug.Log($"✅ 테스트 오브젝트 생성됨: {testObj.name} (Layer: {testObj.layer})");
             
@@ -93,7 +93,7 @@ public class LayerSetup : MonoBehaviour
         }
         else
         {
-            Debug.LogError("❌ Pickup 레이어가 없습니다!");
+            Debug.LogError("❌ PickupLayer 레이어가 없습니다!");
         }
     }
 } 

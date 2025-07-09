@@ -43,8 +43,139 @@ public class NetworkWeaponPickup : MonoBehaviour, IItemPickup
             //     Debug.Log($"[NetworkWeaponPickup] 랜덤 등급 설정: {weaponTier} (범위: {minTier}-{maxTier})");
         }
         
+        // 🆕 Rigidbody2D 설정 (아이템이 바닥에 떨어지도록)
+        SetupRigidbody();
+        
         // GoogleSheets에서 로드된 무기 데이터를 찾아서 설정
         SetupWeaponData();
+    }
+    
+    /// <summary>
+    /// Rigidbody2D를 설정하여 아이템이 바닥에 떨어지도록 합니다.
+    /// </summary>
+    void SetupRigidbody()
+    {
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        if (rb == null)
+        {
+            rb = gameObject.AddComponent<Rigidbody2D>();
+        }
+        
+        // 물리 설정
+        rb.gravityScale = 1f; // 중력 적용
+        rb.linearDamping = 0.5f; // 공기 저항 (떨어질 때 속도 제한)
+        rb.angularDamping = 0.5f; // 회전 저항
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation; // 회전 방지
+        
+        // 🆕 바닥에 착 붙도록 설정
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        
+        // 초기 속도 설정 (약간의 랜덤성 추가)
+        float randomX = UnityEngine.Random.Range(-2f, 2f);
+        float randomY = UnityEngine.Random.Range(1f, 3f);
+        rb.linearVelocity = new Vector2(randomX, randomY);
+        
+        // 🆕 콜라이더 설정 (플레이어와 충돌하지 않도록)
+        SetupCollider();
+    }
+    
+    /// <summary>
+    /// 콜라이더를 설정하여 플레이어와 충돌하지 않도록 합니다.
+    /// </summary>
+    void SetupCollider()
+    {
+        // 기존 콜라이더 제거
+        Collider2D[] existingColliders = GetComponents<Collider2D>();
+        foreach (var collider in existingColliders)
+        {
+            if (collider.isTrigger == false) // 트리거가 아닌 물리 콜라이더만 제거
+            {
+                DestroyImmediate(collider);
+            }
+        }
+        
+        // 바닥과만 충돌하는 콜라이더 추가
+        BoxCollider2D groundCollider = gameObject.AddComponent<BoxCollider2D>();
+        groundCollider.size = new Vector2(0.8f, 0.8f); // 아이템 크기에 맞게 조정
+        groundCollider.isTrigger = false; // 물리 충돌 활성화
+        
+        // 🆕 픽업용 트리거 콜라이더 추가 (플레이어와 상호작용용)
+        CircleCollider2D pickupCollider = gameObject.AddComponent<CircleCollider2D>();
+        pickupCollider.isTrigger = true; // 트리거로 설정
+        pickupCollider.radius = 1.5f; // 픽업 범위
+        
+        // 🆕 플레이어와의 충돌을 무시하도록 레이어 설정
+        gameObject.layer = LayerMask.NameToLayer("PickupLayer");
+        
+        // 🆕 플레이어 레이어와의 충돌 무시 (더 확실한 방법)
+        int pickupLayer = LayerMask.NameToLayer("PickupLayer");
+        int playerLayer = LayerMask.NameToLayer("Player");
+        
+        if (pickupLayer != -1 && playerLayer != -1)
+        {
+            Physics2D.IgnoreLayerCollision(pickupLayer, playerLayer, true);
+            Debug.Log($"[NetworkWeaponPickup] 레이어 충돌 무시 설정: PickupLayer({pickupLayer}) ↔ Player({playerLayer})");
+        }
+        else
+        {
+            Debug.LogWarning("[NetworkWeaponPickup] 레이어를 찾을 수 없습니다! PickupLayer 또는 Player 레이어가 없습니다.");
+        }
+        
+        // 🆕 추가 보안: 플레이어 태그를 가진 오브젝트와의 충돌 무시
+        StartCoroutine(IgnorePlayerCollisions());
+    }
+    
+    /// <summary>
+    /// 플레이어와의 충돌을 무시하는 코루틴
+    /// </summary>
+    System.Collections.IEnumerator IgnorePlayerCollisions()
+    {
+        yield return new WaitForSeconds(0.1f); // 약간의 지연
+        
+        // 플레이어 찾기
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            Collider2D playerCollider = player.GetComponent<Collider2D>();
+            Collider2D[] itemColliders = GetComponents<Collider2D>();
+            
+            if (playerCollider != null)
+            {
+                foreach (var itemCollider in itemColliders)
+                {
+                    if (!itemCollider.isTrigger) // 물리 콜라이더만
+                    {
+                        Physics2D.IgnoreCollision(itemCollider, playerCollider, true);
+                        Debug.Log($"[NetworkWeaponPickup] 플레이어와의 충돌 무시: {itemCollider.name}");
+                    }
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 🆕 플레이어와 충돌 시 위치 조정 (최후의 수단)
+    /// </summary>
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        // 플레이어와 충돌했는지 확인
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            Debug.Log("[NetworkWeaponPickup] 플레이어와 충돌 감지! 위치 조정 중...");
+            
+            // 플레이어의 위치에서 약간 떨어진 위치로 이동
+            Vector2 playerPos = collision.transform.position;
+            Vector2 direction = (Vector2)transform.position - playerPos;
+            
+            if (direction.magnitude < 2f) // 너무 가까우면
+            {
+                // 플레이어에서 2f 거리만큼 떨어진 위치로 이동
+                Vector2 newPos = playerPos + direction.normalized * 2f;
+                transform.position = newPos;
+                
+                Debug.Log($"[NetworkWeaponPickup] 위치 조정 완료: {transform.position}");
+            }
+        }
     }
     
     /// <summary>

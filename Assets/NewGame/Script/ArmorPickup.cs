@@ -52,7 +52,7 @@ public class ArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
         }
         
         // 픽업 레이어 설정 (안전하게 처리)
-        int pickupLayer = LayerMask.NameToLayer("Pickup");
+        int pickupLayer = LayerMask.NameToLayer("PickupLayer");
         if (pickupLayer != -1)
         {
             gameObject.layer = pickupLayer;
