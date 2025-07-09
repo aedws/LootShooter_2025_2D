@@ -414,6 +414,9 @@ public class NetworkWeaponPickup : MonoBehaviour, IItemPickup
         PlayerInventory inventory = player.GetComponent<PlayerInventory>();
         if (inventory != null)
         {
+            // 🆕 무기 장착 전 물리 컴포넌트들 제거
+            RemovePhysicsComponents();
+            
             inventory.AddWeapon(weaponData);
             Destroy(gameObject);
         }
@@ -421,6 +424,35 @@ public class NetworkWeaponPickup : MonoBehaviour, IItemPickup
         {
             Debug.LogError("[NetworkWeaponPickup] PlayerInventory 컴포넌트를 찾을 수 없습니다!");
         }
+    }
+    
+    /// <summary>
+    /// 무기 장착 시 물리 컴포넌트들을 제거합니다.
+    /// </summary>
+    private void RemovePhysicsComponents()
+    {
+        // Rigidbody2D 제거
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            DestroyImmediate(rb);
+        }
+        
+        // 물리 콜라이더들 제거 (트리거는 유지)
+        Collider2D[] colliders = GetComponents<Collider2D>();
+        foreach (var collider in colliders)
+        {
+            if (!collider.isTrigger) // 물리 콜라이더만 제거
+            {
+                DestroyImmediate(collider);
+            }
+        }
+        
+        // 레이어를 Default로 변경
+        gameObject.layer = 0; // Default layer
+        
+        if (debugMode)
+            Debug.Log("[NetworkWeaponPickup] 물리 컴포넌트들이 제거되었습니다.");
     }
     
     void OnDestroy()

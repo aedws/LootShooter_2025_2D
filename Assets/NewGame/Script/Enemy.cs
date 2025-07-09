@@ -229,14 +229,23 @@ public class Enemy : MonoBehaviour
     
     void DropItems()
     {
-        if (dropItems.Length > 0 && Random.value <= dropChance)
+        // 새로운 ItemDropManager 사용
+        if (ItemDropManager.Instance != null)
         {
-            GameObject itemToDrop = dropItems[Random.Range(0, dropItems.Length)];
-            if (itemToDrop != null)
+            ItemDropManager.Instance.DropItemsFromEnemy(enemyName, transform.position);
+        }
+        else
+        {
+            // 기존 시스템 (백업)
+            if (dropItems.Length > 0 && Random.value <= dropChance)
             {
-                Vector3 dropPosition = transform.position + Random.insideUnitSphere * 0.5f;
-                dropPosition.z = 0;
-                Instantiate(itemToDrop, dropPosition, Quaternion.identity);
+                GameObject itemToDrop = dropItems[Random.Range(0, dropItems.Length)];
+                if (itemToDrop != null)
+                {
+                    Vector3 dropPosition = transform.position + Random.insideUnitSphere * 0.5f;
+                    dropPosition.z = 0;
+                    Instantiate(itemToDrop, dropPosition, Quaternion.identity);
+                }
             }
         }
     }

@@ -1496,7 +1496,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &450897187
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3645,6 +3645,8 @@ MonoBehaviour:
   dashDuration: 0.2
   dashCooldown: 0.1
   dashInvincibleTime: 0.15
+  smgDashSpeedBonus: 2
+  smgDashSpeedDuration: 3
   afterImageInterval: 0.05
   afterImageDuration: 0.3
   afterImageColor: {r: 0.5, g: 0.8, b: 1, a: 0.7}
@@ -8077,7 +8079,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1994813535
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8336,6 +8338,54 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 718c002974fdbb64daf9426aca21e4be, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &2038752593
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2038752595}
+  - component: {fileID: 2038752594}
+  m_Layer: 0
+  m_Name: ItemDropManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2038752594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2038752593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1beaeb4838274c845be41a3dea964211, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dropTables: []
+  dropRadius: 1.5
+  useNetworkPickup: 1
+  debugMode: 0
+--- !u!4 &2038752595
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2038752593}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -40.8625, y: -0.45588094, z: 0.07214685}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2091626276
 GameObject:
   m_ObjectHideFlags: 0
@@ -8761,7 +8811,6 @@ SceneRoots:
   - {fileID: 619394802}
   - {fileID: 1163192265}
   - {fileID: 1767698840}
-  - {fileID: 450897188}
   - {fileID: 2112165851}
   - {fileID: 1054296702}
   - {fileID: 1257193142}
@@ -8771,3 +8820,5 @@ SceneRoots:
   - {fileID: 1998346867}
   - {fileID: 1994813536}
   - {fileID: 1618091015}
+  - {fileID: 2038752595}
+  - {fileID: 450897188}

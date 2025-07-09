@@ -146,7 +146,7 @@ public class PlayerController : MonoBehaviour
                 // 이동속도 증가 효과 종료
                 isSmgDashSpeedActive = false;
                 currentMoveSpeed = originalMoveSpeed;
-                // Debug.Log("🏃‍♂️ [PlayerController] SMG 대시 후 이동속도 증가 효과 종료");
+                Debug.Log("🏃‍♂️ [PlayerController] SMG 대시 후 이동속도 증가 효과 종료");
             }
         }
 
@@ -350,7 +350,7 @@ public class PlayerController : MonoBehaviour
             if (currentWeapon != null && currentWeapon.weaponData != null && 
                 currentWeapon.weaponData.weaponType == WeaponType.SMG)
             {
-                // 현재 이동속도 저장
+                // 현재 이동속도 저장 (SMG 대시 효과 적용 전의 값)
                 originalMoveSpeed = currentMoveSpeed;
                 
                 // 네트워크 데이터에서 받은 SMG 대시 효과 적용
@@ -362,7 +362,7 @@ public class PlayerController : MonoBehaviour
                 isSmgDashSpeedActive = true;
                 smgDashSpeedTimer = dashSpeedDuration;
                 
-                // Debug.Log($"🏃‍♂️ [PlayerController] SMG 대시 후 이동속도 증가! 현재속도: {currentMoveSpeed:F1} (지속시간: {dashSpeedDuration}초)");
+                Debug.Log($"🏃‍♂️ [PlayerController] SMG 대시 후 이동속도 증가! 현재속도: {currentMoveSpeed:F1} (지속시간: {dashSpeedDuration}초)");
             }
         }
     }
@@ -815,6 +815,19 @@ public class PlayerController : MonoBehaviour
         if (weaponData != null)
         {
             float previousSpeed = currentMoveSpeed;
+            
+            // 🆕 무기가 바뀌면 SMG 대시 효과 초기화
+            if (isSmgDashSpeedActive)
+            {
+                // 현재 무기가 SMG가 아니면 대시 효과 종료
+                if (weaponData.weaponType != WeaponType.SMG)
+                {
+                    isSmgDashSpeedActive = false;
+                    smgDashSpeedTimer = 0f;
+                    Debug.Log("🏃‍♂️ [PlayerController] 무기 변경으로 SMG 대시 효과 초기화");
+                }
+            }
+            
             currentMoveSpeed = baseMoveSpeed * weaponData.movementSpeedMultiplier;
             
             // 🆕 SMG 대시 후 이동속도 증가 효과가 활성화되어 있다면 추가
@@ -840,18 +853,24 @@ public class PlayerController : MonoBehaviour
                 currentMoveSpeed += dashSpeedBonus;
             }
             
-            // Debug.Log($"🏃‍♂️ [PlayerController] 이동속도 업데이트: {weaponData.weaponName} 장착");
-            // Debug.Log($"   기본속도: {baseMoveSpeed} → 현재속도: {currentMoveSpeed:F2} (배수: {weaponData.movementSpeedMultiplier:F2})");
+            Debug.Log($"🏃‍♂️ [PlayerController] 이동속도 업데이트: {weaponData.weaponName} 장착");
+            Debug.Log($"   기본속도: {baseMoveSpeed} → 현재속도: {currentMoveSpeed:F2} (배수: {weaponData.movementSpeedMultiplier:F2})");
             
             // 무기 타입별 메시지 표시
             string speedEffect = GetSpeedEffectMessage(weaponData.movementSpeedMultiplier);
-            // Debug.Log($"   {GetWeaponTypeKorean(weaponData.weaponType)} 무기 효과: {speedEffect}");
+            Debug.Log($"   {GetWeaponTypeKorean(weaponData.weaponType)} 무기 효과: {speedEffect}");
         }
         else
         {
-            // 무기가 없을 때는 기본 속도로 복원
+            // 무기가 없을 때는 기본 속도로 복원하고 SMG 대시 효과도 초기화
             currentMoveSpeed = baseMoveSpeed;
-            // Debug.Log($"🏃‍♂️ [PlayerController] 무기 해제로 인한 이동속도 복원: {currentMoveSpeed}");
+            if (isSmgDashSpeedActive)
+            {
+                isSmgDashSpeedActive = false;
+                smgDashSpeedTimer = 0f;
+                Debug.Log("🏃‍♂️ [PlayerController] 무기 해제로 SMG 대시 효과 초기화");
+            }
+            Debug.Log($"🏃‍♂️ [PlayerController] 무기 해제로 인한 이동속도 복원: {currentMoveSpeed}");
         }
     }
     

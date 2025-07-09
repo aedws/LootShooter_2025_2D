@@ -477,6 +477,9 @@ public class NetworkArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
         if (debugMode)
             Debug.Log($"[NetworkArmorPickup] 방어구 픽업: {armorData.armorName} (등급: {armorData.rarity}, Tier: {armorTier})");
         
+        // 🆕 방어구 장착 전 물리 컴포넌트들 제거
+        RemovePhysicsComponents();
+        
         // 플레이어 인벤토리에 방어구 추가
         PlayerInventory playerInventory = player.GetComponent<PlayerInventory>();
         if (playerInventory != null)
@@ -519,6 +522,35 @@ public class NetworkArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
         
         // 아이템 제거 (사운드 재생 후)
         Destroy(gameObject, 0.1f);
+    }
+    
+    /// <summary>
+    /// 방어구 장착 시 물리 컴포넌트들을 제거합니다.
+    /// </summary>
+    private void RemovePhysicsComponents()
+    {
+        // Rigidbody2D 제거
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            DestroyImmediate(rb);
+        }
+        
+        // 물리 콜라이더들 제거 (트리거는 유지)
+        Collider2D[] colliders = GetComponents<Collider2D>();
+        foreach (var collider in colliders)
+        {
+            if (!collider.isTrigger) // 물리 콜라이더만 제거
+            {
+                DestroyImmediate(collider);
+            }
+        }
+        
+        // 레이어를 Default로 변경
+        gameObject.layer = 0; // Default layer
+        
+        if (debugMode)
+            Debug.Log("[NetworkArmorPickup] 물리 컴포넌트들이 제거되었습니다.");
     }
     
     // 픽업 안내 (플레이어가 범위에 들어왔을 때)

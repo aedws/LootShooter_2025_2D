@@ -691,28 +691,37 @@ public class BossEnemy : MonoBehaviour
     
     void GiveRewards()
     {
-        // 확정 드롭
-        foreach (GameObject drop in guaranteedDrops)
+        // 새로운 ItemDropManager 사용
+        if (ItemDropManager.Instance != null)
         {
-            if (drop != null)
-            {
-                Vector3 dropPosition = transform.position + Random.insideUnitSphere * 2f;
-                dropPosition.z = 0;
-                Instantiate(drop, dropPosition, Quaternion.identity);
-            }
+            ItemDropManager.Instance.DropItemsFromEnemy(bossName, transform.position);
         }
-        
-        // 희귀 드롭
-        if (Random.value <= rareDropChance)
+        else
         {
-            if (rareDrops.Length > 0)
+            // 기존 시스템 (백업)
+            // 확정 드롭
+            foreach (GameObject drop in guaranteedDrops)
             {
-                GameObject rareDrop = rareDrops[Random.Range(0, rareDrops.Length)];
-                if (rareDrop != null)
+                if (drop != null)
                 {
                     Vector3 dropPosition = transform.position + Random.insideUnitSphere * 2f;
                     dropPosition.z = 0;
-                    Instantiate(rareDrop, dropPosition, Quaternion.identity);
+                    Instantiate(drop, dropPosition, Quaternion.identity);
+                }
+            }
+            
+            // 희귀 드롭
+            if (Random.value <= rareDropChance)
+            {
+                if (rareDrops.Length > 0)
+                {
+                    GameObject rareDrop = rareDrops[Random.Range(0, rareDrops.Length)];
+                    if (rareDrop != null)
+                    {
+                        Vector3 dropPosition = transform.position + Random.insideUnitSphere * 2f;
+                        dropPosition.z = 0;
+                        Instantiate(rareDrop, dropPosition, Quaternion.identity);
+                    }
                 }
             }
         }

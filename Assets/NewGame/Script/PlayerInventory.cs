@@ -177,6 +177,10 @@ public class PlayerInventory : MonoBehaviour
             rightWeaponObj.transform.localPosition = new Vector3(0.7f, 0f, 0f);
             rightWeaponObj.transform.localRotation = Quaternion.identity;
             rightWeaponObj.transform.localScale = weaponData.weaponPrefab.transform.localScale;
+            
+            // 🆕 무기 장착 시 물리 컴포넌트들 제거
+            RemovePhysicsComponentsFromWeapon(rightWeaponObj);
+            
             var rightWeapon = rightWeaponObj.GetComponent<Weapon>();
             rightWeapon.weaponData = weaponData;
             rightWeapon.InitializeFromWeaponData();
@@ -188,6 +192,10 @@ public class PlayerInventory : MonoBehaviour
             leftWeaponObj.transform.localPosition = new Vector3(-0.7f, 0f, 0f);
             leftWeaponObj.transform.localRotation = Quaternion.identity;
             leftWeaponObj.transform.localScale = weaponData.weaponPrefab.transform.localScale;
+            
+            // 🆕 무기 장착 시 물리 컴포넌트들 제거
+            RemovePhysicsComponentsFromWeapon(leftWeaponObj);
+            
             var leftWeapon = leftWeaponObj.GetComponent<Weapon>();
             leftWeapon.weaponData = weaponData;
             leftWeapon.InitializeFromWeaponData();
@@ -204,6 +212,10 @@ public class PlayerInventory : MonoBehaviour
             currentWeaponObj.transform.localPosition = Vector3.zero;
             currentWeaponObj.transform.localRotation = Quaternion.identity;
             currentWeaponObj.transform.localScale = prefabScale; // 프리팹 크기 유지
+            
+            // 🆕 무기 장착 시 물리 컴포넌트들 제거
+            RemovePhysicsComponentsFromWeapon(currentWeaponObj);
+            
             Weapon weaponComponent = currentWeaponObj.GetComponent<Weapon>();
             if (weaponComponent != null)
             {
@@ -234,6 +246,45 @@ public class PlayerInventory : MonoBehaviour
         if (leftWeaponObj != null)
         {
             leftWeaponObj.layer = LayerMask.NameToLayer("Weapon");
+        }
+    }
+    
+    /// <summary>
+    /// 무기 장착 시 물리 컴포넌트들을 제거합니다.
+    /// </summary>
+    private void RemovePhysicsComponentsFromWeapon(GameObject weaponObj)
+    {
+        if (weaponObj == null) return;
+        
+        // Rigidbody2D 제거
+        Rigidbody2D rb = weaponObj.GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            DestroyImmediate(rb);
+        }
+        
+        // 물리 콜라이더들 제거 (트리거는 유지)
+        Collider2D[] colliders = weaponObj.GetComponents<Collider2D>();
+        foreach (var collider in colliders)
+        {
+            if (!collider.isTrigger) // 물리 콜라이더만 제거
+            {
+                DestroyImmediate(collider);
+            }
+        }
+        
+        // NetworkWeaponPickup 컴포넌트 제거 (장착 시 불필요)
+        NetworkWeaponPickup networkPickup = weaponObj.GetComponent<NetworkWeaponPickup>();
+        if (networkPickup != null)
+        {
+            DestroyImmediate(networkPickup);
+        }
+        
+        // NetworkArmorPickup 컴포넌트 제거 (장착 시 불필요)
+        NetworkArmorPickup armorPickup = weaponObj.GetComponent<NetworkArmorPickup>();
+        if (armorPickup != null)
+        {
+            DestroyImmediate(armorPickup);
         }
     }
 

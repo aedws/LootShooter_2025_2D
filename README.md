@@ -70,4 +70,50 @@
 | K | hasRegeneration | 체력 재생 | false |
 | L | regenerationRate | 재생 속도 | 1.0 |
 | M | hasInvincibilityFrame | 무적 시간 증가 | false |
-| N | invincibilityBonus | 무적 시간 보너스 | 0.0 | 
+| N | invincibilityBonus | 무적 시간 보너스 | 0.0 |
+
+## 🎮 게임 시스템
+
+### 아이템 드랍 시스템
+
+몬스터가 죽을 때 아이템을 드랍하는 시스템입니다.
+
+#### 설정 방법
+
+1. **ItemDropManager 생성**
+   - 빈 GameObject를 생성하고 `ItemDropManager` 스크립트를 추가
+   - 또는 기존 GameObject에 `ItemDropManager` 스크립트를 추가
+
+2. **드랍 테이블 설정**
+   - Inspector에서 `Drop Tables` 배열 설정
+   - 각 몬스터 타입별로 드랍할 아이템과 확률 설정
+
+3. **드랍 아이템 설정**
+   ```csharp
+   DropItem {
+       itemPrefab: 드랍할 아이템 프리팹
+       dropChance: 드랍 확률 (0.0 ~ 1.0)
+       minQuantity: 최소 수량
+       maxQuantity: 최대 수량
+       isRare: 레어 아이템 여부
+   }
+   ```
+
+4. **몬스터 타입별 설정**
+   - 일반 몬스터: `enemyName = "Basic Enemy"`
+   - 보스 몬스터: `enemyName = "보스 몬스터"`
+
+#### 드랍 시스템 특징
+
+- **일반 아이템**: 기본 드랍 확률로 설정
+- **레어 아이템**: 별도 확률로 드랍 (보스는 30%, 일반은 5%)
+- **수량 랜덤**: minQuantity ~ maxQuantity 사이에서 랜덤
+- **최대 드랍 제한**: 한 번에 드랍할 수 있는 최대 아이템 수 제한
+- **네트워크 픽업**: 자동으로 NetworkWeaponPickup/NetworkArmorPickup 컴포넌트 추가
+
+#### 사용 예시
+
+```csharp
+// 몬스터가 죽을 때 자동으로 호출됨
+ItemDropManager.Instance.DropItemsFromEnemy("Basic Enemy", transform.position);
+``` 
