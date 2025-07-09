@@ -143,10 +143,22 @@ public class GoogleSheetsManager : MonoBehaviour
                     weapon.weaponName = row[0];
                     if (System.Enum.TryParse<WeaponType>(row[1], out WeaponType weaponType))
                         weapon.weaponType = weaponType;
-                    if (System.Enum.TryParse<WeaponRarity>(row[2], true, out WeaponRarity weaponRarity))
+                    
+                    // 무기 등급 파싱 디버그
+                    string weaponRarityString = row[2];
+                    Debug.Log($"[GoogleSheetsManager] 무기 등급 파싱 시도: '{weaponRarityString}' (행 {i + 1})");
+                    
+                    if (System.Enum.TryParse<WeaponRarity>(weaponRarityString, true, out WeaponRarity weaponRarity))
+                    {
                         weapon.rarity = weaponRarity;
+                        Debug.Log($"[GoogleSheetsManager] 무기 등급 파싱 성공: {weaponRarityString} -> {weaponRarity}");
+                    }
                     else
+                    {
+                        Debug.LogError($"[GoogleSheetsManager] 무기 등급 파싱 실패: '{weaponRarityString}' -> Common으로 설정됨");
                         weapon.rarity = WeaponRarity.Common;
+                    }
+                    
                     weapon.flavorText = row[3];
                     
                     // 기본 스탯
@@ -302,8 +314,22 @@ public class GoogleSheetsManager : MonoBehaviour
                     armor.armorName = row[0];
                     if (System.Enum.TryParse<ArmorType>(row[1], out ArmorType armorType))
                         armor.armorType = armorType;
-                    if (System.Enum.TryParse<ArmorRarity>(row[2], out ArmorRarity rarity))
+                    
+                    // 등급 파싱 디버그
+                    string rarityString = row[2];
+                    Debug.Log($"[GoogleSheetsManager] 방어구 등급 파싱 시도: '{rarityString}' (행 {i + 1})");
+                    
+                    if (System.Enum.TryParse<ArmorRarity>(rarityString, true, out ArmorRarity rarity))
+                    {
                         armor.rarity = rarity;
+                        Debug.Log($"[GoogleSheetsManager] 방어구 등급 파싱 성공: {rarityString} -> {rarity}");
+                    }
+                    else
+                    {
+                        Debug.LogError($"[GoogleSheetsManager] 방어구 등급 파싱 실패: '{rarityString}' -> Common으로 설정됨");
+                        armor.rarity = ArmorRarity.Common;
+                    }
+                    
                     armor.description = row[3];
                     
                     // 방어 능력

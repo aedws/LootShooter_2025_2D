@@ -666,9 +666,11 @@ public class InventoryManager : MonoBehaviour
         // 초기화가 완료되지 않았으면 새로고침 건너뛰기
         if (!isInitialized)
         {
-            // Debug.LogWarning("⚠️ [InventoryManager] 아직 초기화가 완료되지 않아 새로고침을 건너뜁니다.");
+            Debug.LogWarning("⚠️ [InventoryManager] 아직 초기화가 완료되지 않아 새로고침을 건너뜁니다.");
             return;
         }
+        
+        Debug.Log($"🔄 [InventoryManager] RefreshInventory 시작 - 현재 탭: {currentTab}, 방어구 개수: {armors.Count}");
         
         ApplyFiltersAndSort();
         UpdateSlots();
@@ -676,6 +678,8 @@ public class InventoryManager : MonoBehaviour
         
         // 🆕 스크롤바 가시성 업데이트
         UpdateScrollbarVisibility();
+        
+        Debug.Log($"✅ [InventoryManager] RefreshInventory 완료");
     }
     
     void ApplyFiltersAndSort()
@@ -786,19 +790,23 @@ public class InventoryManager : MonoBehaviour
         if (currentTab == InventoryTab.Weapons)
         {
             itemsToShow.AddRange(filteredWeapons.Cast<object>());
+            Debug.Log($"🔫 [InventoryManager] 무기 탭 - 표시할 무기: {filteredWeapons.Count}개");
         }
         else if (currentTab == InventoryTab.Armors)
         {
             itemsToShow.AddRange(filteredArmors.Cast<object>());
+            Debug.Log($"🛡️ [InventoryManager] 방어구 탭 - 표시할 방어구: {filteredArmors.Count}개");
         }
 
         int targetSlotCount = Mathf.Min(itemsToShow.Count + minEmptySlots, maxInventorySlots);
+        Debug.Log($"📦 [InventoryManager] 목표 슬롯 수: {targetSlotCount} (아이템: {itemsToShow.Count}, 최소 빈 슬롯: {minEmptySlots})");
 
         // 슬롯이 부족하면 새로 생성
         while (inventorySlots.Count < targetSlotCount)
         {
             CreateSingleSlot(inventorySlots.Count);
         }
+        
         // 남는 슬롯은 ClearSlot만 호출 (파괴하지 않음)
         for (int i = 0; i < inventorySlots.Count; i++)
         {
@@ -815,6 +823,7 @@ public class InventoryManager : MonoBehaviour
                     ArmorData armor = itemsToShow[i] as ArmorData;
                     inventorySlots[i].isArmorSlot = true;
                     inventorySlots[i].SetArmor(armor);
+                    Debug.Log($"🛡️ [InventoryManager] 슬롯 {i}에 방어구 설정: {armor.armorName} (등급: {armor.rarity})");
                 }
             }
             else
@@ -1130,6 +1139,11 @@ public class InventoryManager : MonoBehaviour
             armors.Add(armor);
             OnArmorAdded?.Invoke(armor);
             Debug.Log($"🛡️ 방어구 추가: {armor.armorName} (총 {armors.Count}개 보유)");
+            
+            // 🆕 방어구 추가 후 인벤토리 리프레시
+            Debug.Log($"🔄 [InventoryManager] 방어구 추가 후 인벤토리 리프레시 시작");
+            RefreshInventory();
+            Debug.Log($"✅ [InventoryManager] 방어구 추가 후 인벤토리 리프레시 완료");
         }
         else
         {

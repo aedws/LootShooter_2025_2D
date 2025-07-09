@@ -26,17 +26,37 @@ public class ArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
     
     void Start()
     {
+        Debug.Log($"🔍 [ArmorPickup] Start() 시작 - 오브젝트: {gameObject.name}");
+        
         // 컴포넌트 초기화
         audioSource = GetComponent<AudioSource>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         
+        Debug.Log($"🔍 [ArmorPickup] 컴포넌트 확인 - audioSource: {(audioSource != null ? "있음" : "없음")}, spriteRenderer: {(spriteRenderer != null ? "있음" : "없음")}");
+        
         // 방어구 아이콘 설정
         if (armorData != null && spriteRenderer != null)
         {
+            Debug.Log($"🔍 [ArmorPickup] 방어구 데이터 설정 시작: {armorData.armorName}, 등급: {armorData.rarity}");
+            
             if (armorData.icon != null)
+            {
                 spriteRenderer.sprite = armorData.icon;
-            // icon이 null이면 프리팹의 Sprite를 그대로 사용
-            spriteRenderer.color = armorData.GetRarityColor();
+                Debug.Log($"🔍 [ArmorPickup] 아이콘 설정: {armorData.icon.name}");
+            }
+            else
+            {
+                Debug.LogWarning("⚠️ [ArmorPickup] armorData.icon이 null입니다!");
+            }
+            
+            // 등급별 색상 설정
+            Color rarityColor = armorData.GetRarityColor();
+            spriteRenderer.color = rarityColor;
+            Debug.Log($"🔍 [ArmorPickup] 색상 설정: {rarityColor} (등급: {armorData.rarity})");
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ [ArmorPickup] armorData 또는 spriteRenderer가 null입니다! armorData: {(armorData != null ? "있음" : "없음")}, spriteRenderer: {(spriteRenderer != null ? "있음" : "없음")}");
         }
         
         // 픽업 레이어 설정 (안전하게 처리)
@@ -59,6 +79,8 @@ public class ArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
             collider.isTrigger = true;
             collider.radius = pickupRange;
         }
+        
+        Debug.Log($"🔍 [ArmorPickup] Start() 완료 - 최종 색상: {(spriteRenderer != null ? spriteRenderer.color.ToString() : "SpriteRenderer 없음")}");
     }
     
     void Update()

@@ -118,12 +118,42 @@ public class TestArmorSystem : MonoBehaviour
     
     void SpawnRandomArmor()
     {
+        Debug.Log("🔍 [TestArmorSystem] F11 랜덤 방어구 생성 시작");
+        
         if (armorGenerator != null && spawnPoint != null)
         {
+            Debug.Log($"🔍 [TestArmorSystem] ArmorGenerator: {(armorGenerator != null ? "찾음" : "없음")}, SpawnPoint: {spawnPoint.position}");
+            
             GameObject pickup = armorGenerator.CreateRandomArmorPickup(spawnPoint.position);
             if (pickup != null)
             {
-                Debug.Log($"🛡️ 랜덤 방어구 생성: {pickup.name}");
+                Debug.Log($"🛡️ [TestArmorSystem] 랜덤 방어구 생성 완료: {pickup.name}");
+                
+                // 생성된 픽업의 컴포넌트 확인
+                ArmorPickup armorPickup = pickup.GetComponent<ArmorPickup>();
+                if (armorPickup != null)
+                {
+                    Debug.Log($"🔍 [TestArmorSystem] ArmorPickup 컴포넌트 확인: armorData={(armorPickup.armorData != null ? "있음" : "없음")}");
+                    if (armorPickup.armorData != null)
+                    {
+                        Debug.Log($"🔍 [TestArmorSystem] 방어구 데이터: {armorPickup.armorData.armorName}, 등급: {armorPickup.armorData.rarity}, 색상: {armorPickup.armorData.GetRarityColor()}");
+                    }
+                }
+                
+                // SpriteRenderer 확인
+                SpriteRenderer sr = pickup.GetComponent<SpriteRenderer>();
+                if (sr != null)
+                {
+                    Debug.Log($"🔍 [TestArmorSystem] SpriteRenderer 확인: sprite={(sr.sprite != null ? "있음" : "없음")}, color={sr.color}");
+                }
+                else
+                {
+                    Debug.LogWarning("⚠️ [TestArmorSystem] SpriteRenderer가 없습니다!");
+                }
+            }
+            else
+            {
+                Debug.LogError("❌ [TestArmorSystem] 방어구 픽업 생성 실패!");
             }
         }
         else

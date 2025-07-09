@@ -108,14 +108,48 @@ public class RandomDropSystem : MonoBehaviour
 
         Vector3 dropPosition = position + Vector3.up * 1.5f;
         GameObject dropObject = Instantiate(prefab, dropPosition, Quaternion.identity);
-        WeaponPickup weaponPickup = dropObject.GetComponent<WeaponPickup>();
-        if (weaponPickup != null)
+        
+        // NetworkWeaponPickup 컴포넌트 확인
+        NetworkWeaponPickup networkWeaponPickup = dropObject.GetComponent<NetworkWeaponPickup>();
+        if (networkWeaponPickup != null)
         {
-            weaponPickup.weaponData = randomWeapon;
-            // 아이콘 즉시 적용
-            SpriteRenderer sr = dropObject.GetComponent<SpriteRenderer>();
-            if (sr != null && randomWeapon.icon != null)
-                sr.sprite = randomWeapon.icon;
+            // NetworkWeaponPickup을 사용하는 경우 - 타입과 등급만 설정
+            networkWeaponPickup.weaponType = randomWeapon.weaponType;
+            networkWeaponPickup.weaponTier = (int)randomWeapon.rarity;
+            networkWeaponPickup.useRandomTier = false; // 이미 결정된 등급 사용
+            
+            if (debugMode)
+            {
+                Debug.Log($"[RandomDropSystem] NetworkWeaponPickup 설정: {randomWeapon.weaponType} 타입, {randomWeapon.rarity} 등급");
+            }
+        }
+        else
+        {
+            // 기존 WeaponPickup을 NetworkWeaponPickup으로 자동 교체
+            WeaponPickup oldWeaponPickup = dropObject.GetComponent<WeaponPickup>();
+            if (oldWeaponPickup != null)
+            {
+                // 기존 WeaponPickup 제거
+                DestroyImmediate(oldWeaponPickup);
+                
+                // NetworkWeaponPickup 추가
+                NetworkWeaponPickup newWeaponPickup = dropObject.AddComponent<NetworkWeaponPickup>();
+                newWeaponPickup.weaponType = randomWeapon.weaponType;
+                newWeaponPickup.weaponTier = (int)randomWeapon.rarity;
+                newWeaponPickup.useRandomTier = false;
+                
+                if (debugMode)
+                {
+                    Debug.Log($"[RandomDropSystem] WeaponPickup을 NetworkWeaponPickup으로 자동 교체: {randomWeapon.weaponType} 타입, {randomWeapon.rarity} 등급");
+                }
+            }
+            else
+            {
+                // WeaponPickup도 없는 경우 - 아이콘만 설정
+                SpriteRenderer sr = dropObject.GetComponent<SpriteRenderer>();
+                if (sr != null && randomWeapon.icon != null)
+                    sr.sprite = randomWeapon.icon;
+            }
         }
     }
     
@@ -135,14 +169,48 @@ public class RandomDropSystem : MonoBehaviour
 
         Vector3 dropPosition = position + Vector3.up * 1.5f;
         GameObject dropObject = Instantiate(prefab, dropPosition, Quaternion.identity);
-        ArmorPickup armorPickup = dropObject.GetComponent<ArmorPickup>();
-        if (armorPickup != null)
+        
+        // NetworkArmorPickup 컴포넌트 확인
+        NetworkArmorPickup networkArmorPickup = dropObject.GetComponent<NetworkArmorPickup>();
+        if (networkArmorPickup != null)
         {
-            armorPickup.armorData = randomArmor;
-            // 아이콘 즉시 적용
-            SpriteRenderer sr = dropObject.GetComponent<SpriteRenderer>();
-            if (sr != null && randomArmor.icon != null)
-                sr.sprite = randomArmor.icon;
+            // NetworkArmorPickup을 사용하는 경우 - 타입과 등급만 설정
+            networkArmorPickup.armorType = randomArmor.armorType;
+            networkArmorPickup.armorTier = (int)randomArmor.rarity;
+            networkArmorPickup.useRandomTier = false; // 이미 결정된 등급 사용
+            
+            if (debugMode)
+            {
+                Debug.Log($"[RandomDropSystem] NetworkArmorPickup 설정: {randomArmor.armorType} 타입, {randomArmor.rarity} 등급");
+            }
+        }
+        else
+        {
+            // 기존 ArmorPickup을 NetworkArmorPickup으로 자동 교체
+            ArmorPickup oldArmorPickup = dropObject.GetComponent<ArmorPickup>();
+            if (oldArmorPickup != null)
+            {
+                // 기존 ArmorPickup 제거
+                DestroyImmediate(oldArmorPickup);
+                
+                // NetworkArmorPickup 추가
+                NetworkArmorPickup newArmorPickup = dropObject.AddComponent<NetworkArmorPickup>();
+                newArmorPickup.armorType = randomArmor.armorType;
+                newArmorPickup.armorTier = (int)randomArmor.rarity;
+                newArmorPickup.useRandomTier = false;
+                
+                if (debugMode)
+                {
+                    Debug.Log($"[RandomDropSystem] ArmorPickup을 NetworkArmorPickup으로 자동 교체: {randomArmor.armorType} 타입, {randomArmor.rarity} 등급");
+                }
+            }
+            else
+            {
+                // ArmorPickup도 없는 경우 - 아이콘만 설정
+                SpriteRenderer sr = dropObject.GetComponent<SpriteRenderer>();
+                if (sr != null && randomArmor.icon != null)
+                    sr.sprite = randomArmor.icon;
+            }
         }
     }
     
@@ -194,15 +262,40 @@ public class RandomDropSystem : MonoBehaviour
         if (weaponDropPrefab != null)
         {
             GameObject dropObject = Instantiate(weaponDropPrefab, dropPosition, Quaternion.identity);
-            WeaponPickup weaponPickup = dropObject.GetComponent<WeaponPickup>();
             
-            if (weaponPickup != null)
+            // NetworkWeaponPickup 컴포넌트 확인
+            NetworkWeaponPickup networkWeaponPickup = dropObject.GetComponent<NetworkWeaponPickup>();
+            if (networkWeaponPickup != null)
             {
-                weaponPickup.weaponData = weapon;
+                // NetworkWeaponPickup을 사용하는 경우
+                networkWeaponPickup.weaponType = weaponType;
+                networkWeaponPickup.weaponTier = (int)weapon.rarity;
+                networkWeaponPickup.useRandomTier = false;
                 
                 if (debugMode)
                 {
-                    Debug.Log($"[RandomDropSystem] {weaponType} 타입 무기 드롭: {weapon.weaponName}");
+                    Debug.Log($"[RandomDropSystem] NetworkWeaponPickup 설정: {weaponType} 타입, {weapon.rarity} 등급");
+                }
+            }
+            else
+            {
+                // 기존 WeaponPickup을 NetworkWeaponPickup으로 자동 교체
+                WeaponPickup oldWeaponPickup = dropObject.GetComponent<WeaponPickup>();
+                if (oldWeaponPickup != null)
+                {
+                    // 기존 WeaponPickup 제거
+                    DestroyImmediate(oldWeaponPickup);
+                    
+                    // NetworkWeaponPickup 추가
+                    NetworkWeaponPickup newWeaponPickup = dropObject.AddComponent<NetworkWeaponPickup>();
+                    newWeaponPickup.weaponType = weaponType;
+                    newWeaponPickup.weaponTier = (int)weapon.rarity;
+                    newWeaponPickup.useRandomTier = false;
+                    
+                    if (debugMode)
+                    {
+                        Debug.Log($"[RandomDropSystem] WeaponPickup을 NetworkWeaponPickup으로 자동 교체: {weaponType} 타입, {weapon.rarity} 등급");
+                    }
                 }
             }
         }
@@ -232,15 +325,47 @@ public class RandomDropSystem : MonoBehaviour
         if (armorDropPrefab != null)
         {
             GameObject dropObject = Instantiate(armorDropPrefab, dropPosition, Quaternion.identity);
-            ArmorPickup armorPickup = dropObject.GetComponent<ArmorPickup>();
             
-            if (armorPickup != null)
+            // NetworkArmorPickup 컴포넌트 확인
+            NetworkArmorPickup networkArmorPickup = dropObject.GetComponent<NetworkArmorPickup>();
+            if (networkArmorPickup != null)
             {
-                armorPickup.armorData = armor;
+                // NetworkArmorPickup을 사용하는 경우
+                networkArmorPickup.armorType = armorType;
+                networkArmorPickup.armorTier = (int)armor.rarity;
+                networkArmorPickup.useRandomTier = false;
                 
                 if (debugMode)
                 {
-                    Debug.Log($"[RandomDropSystem] {armorType} 타입 방어구 드롭: {armor.armorName} ({armor.rarity})");
+                    Debug.Log($"[RandomDropSystem] NetworkArmorPickup {armorType} 타입 방어구 드롭: {armor.armorName} ({armor.rarity})");
+                }
+            }
+            else
+            {
+                // 기존 ArmorPickup을 NetworkArmorPickup으로 자동 교체
+                ArmorPickup oldArmorPickup = dropObject.GetComponent<ArmorPickup>();
+                if (oldArmorPickup != null)
+                {
+                    // 기존 ArmorPickup 제거
+                    DestroyImmediate(oldArmorPickup);
+                    
+                    // NetworkArmorPickup 추가
+                    NetworkArmorPickup newArmorPickup = dropObject.AddComponent<NetworkArmorPickup>();
+                    newArmorPickup.armorType = armorType;
+                    newArmorPickup.armorTier = (int)armor.rarity;
+                    newArmorPickup.useRandomTier = false;
+                    
+                    if (debugMode)
+                    {
+                        Debug.Log($"[RandomDropSystem] ArmorPickup을 NetworkArmorPickup으로 자동 교체: {armorType} 타입, {armor.rarity} 등급");
+                    }
+                }
+                else
+                {
+                    // ArmorPickup도 없는 경우 - 아이콘만 설정
+                    SpriteRenderer sr = dropObject.GetComponent<SpriteRenderer>();
+                    if (sr != null && armor.icon != null)
+                        sr.sprite = armor.icon;
                 }
             }
         }
@@ -306,15 +431,47 @@ public class RandomDropSystem : MonoBehaviour
         if (armorDropPrefab != null)
         {
             GameObject dropObject = Instantiate(armorDropPrefab, dropPosition, Quaternion.identity);
-            ArmorPickup armorPickup = dropObject.GetComponent<ArmorPickup>();
             
-            if (armorPickup != null)
+            // NetworkArmorPickup 컴포넌트 확인
+            NetworkArmorPickup networkArmorPickup = dropObject.GetComponent<NetworkArmorPickup>();
+            if (networkArmorPickup != null)
             {
-                armorPickup.armorData = armor;
+                // NetworkArmorPickup을 사용하는 경우
+                networkArmorPickup.armorType = armor.armorType;
+                networkArmorPickup.armorTier = (int)armor.rarity;
+                networkArmorPickup.useRandomTier = false;
                 
                 if (debugMode)
                 {
-                    Debug.Log($"[RandomDropSystem] 보스 드롭 - {armor.rarity} 방어구: {armor.armorName}");
+                    Debug.Log($"[RandomDropSystem] NetworkArmorPickup 보스 드롭 - {armor.rarity} 방어구: {armor.armorName}");
+                }
+            }
+            else
+            {
+                // 기존 ArmorPickup을 NetworkArmorPickup으로 자동 교체
+                ArmorPickup oldArmorPickup = dropObject.GetComponent<ArmorPickup>();
+                if (oldArmorPickup != null)
+                {
+                    // 기존 ArmorPickup 제거
+                    DestroyImmediate(oldArmorPickup);
+                    
+                    // NetworkArmorPickup 추가
+                    NetworkArmorPickup newArmorPickup = dropObject.AddComponent<NetworkArmorPickup>();
+                    newArmorPickup.armorType = armor.armorType;
+                    newArmorPickup.armorTier = (int)armor.rarity;
+                    newArmorPickup.useRandomTier = false;
+                    
+                    if (debugMode)
+                    {
+                        Debug.Log($"[RandomDropSystem] ArmorPickup을 NetworkArmorPickup으로 자동 교체: {armor.armorType} 타입, {armor.rarity} 등급");
+                    }
+                }
+                else
+                {
+                    // ArmorPickup도 없는 경우 - 아이콘만 설정
+                    SpriteRenderer sr = dropObject.GetComponent<SpriteRenderer>();
+                    if (sr != null && armor.icon != null)
+                        sr.sprite = armor.icon;
                 }
             }
         }

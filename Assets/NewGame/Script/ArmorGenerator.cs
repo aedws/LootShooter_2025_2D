@@ -9,7 +9,10 @@ public class ArmorGenerator : MonoBehaviour
     
     [Header("📊 레어리티 확률")]
     [Range(0f, 1f)]
-    public float commonChance = 0.6f;      // 60%
+    public float primordialChance = 0.01f; // 1%
+    
+    [Range(0f, 1f)]
+    public float commonChance = 0.59f;     // 59%
     
     [Range(0f, 1f)]
     public float rareChance = 0.25f;       // 25%
@@ -135,15 +138,40 @@ public class ArmorGenerator : MonoBehaviour
         float random = Random.Range(0f, 1f);
         float cumulative = 0f;
         
+        // Primordial (1%)
+        cumulative += primordialChance;
+        if (random <= cumulative) 
+        {
+            Debug.Log($"🎲 [ArmorGenerator] Primordial 등급 결정! (random: {random:F3}, cumulative: {cumulative:F3})");
+            return ArmorRarity.Primordial;
+        }
+        
+        // Common (59%)
         cumulative += commonChance;
-        if (random <= cumulative) return ArmorRarity.Common;
+        if (random <= cumulative) 
+        {
+            Debug.Log($"🎲 [ArmorGenerator] Common 등급 결정! (random: {random:F3}, cumulative: {cumulative:F3})");
+            return ArmorRarity.Common;
+        }
         
+        // Rare (25%)
         cumulative += rareChance;
-        if (random <= cumulative) return ArmorRarity.Rare;
+        if (random <= cumulative) 
+        {
+            Debug.Log($"🎲 [ArmorGenerator] Rare 등급 결정! (random: {random:F3}, cumulative: {cumulative:F3})");
+            return ArmorRarity.Rare;
+        }
         
+        // Epic (12%)
         cumulative += epicChance;
-        if (random <= cumulative) return ArmorRarity.Epic;
+        if (random <= cumulative) 
+        {
+            Debug.Log($"🎲 [ArmorGenerator] Epic 등급 결정! (random: {random:F3}, cumulative: {cumulative:F3})");
+            return ArmorRarity.Epic;
+        }
         
+        // Legendary (3%)
+        Debug.Log($"🎲 [ArmorGenerator] Legendary 등급 결정! (random: {random:F3}, cumulative: {cumulative:F3})");
         return ArmorRarity.Legendary;
     }
     
@@ -208,10 +236,11 @@ public class ArmorGenerator : MonoBehaviour
     {
         switch (rarity)
         {
-            case ArmorRarity.Common: return 0.1f;   // 10%
-            case ArmorRarity.Rare: return 0.3f;     // 30%
-            case ArmorRarity.Epic: return 0.6f;     // 60%
-            case ArmorRarity.Legendary: return 1f;  // 100%
+            case ArmorRarity.Primordial: return 1f;   // 100% (항상 특수 효과)
+            case ArmorRarity.Common: return 0.1f;     // 10%
+            case ArmorRarity.Rare: return 0.3f;       // 30%
+            case ArmorRarity.Epic: return 0.6f;       // 60%
+            case ArmorRarity.Legendary: return 1f;    // 100%
             default: return 0.1f;
         }
     }
@@ -261,6 +290,9 @@ public class ArmorGenerator : MonoBehaviour
     {
         switch (armor.rarity)
         {
+            case ArmorRarity.Primordial:
+                armor.rarityColor = new Color(0f, 1f, 1f); // 청록색
+                break;
             case ArmorRarity.Common:
                 armor.rarityColor = Color.white;
                 break;
@@ -274,6 +306,8 @@ public class ArmorGenerator : MonoBehaviour
                 armor.rarityColor = new Color(1f, 0.5f, 0f); // 주황색
                 break;
         }
+        
+        Debug.Log($"🎨 [ArmorGenerator] 방어구 색상 설정: {armor.armorName} -> {armor.rarity} -> {armor.rarityColor}");
     }
     
     // 특정 위치에 방어구 생성
@@ -322,21 +356,21 @@ public class ArmorGenerator : MonoBehaviour
     {
         if (armor == null) return null;
         
-        // ArmorPickup 프리팹 생성 (필요시 프리팹 참조 추가)
+        // ArmorPickup 프리팹 생성 (ArmorGenerator는 기존 ArmorPickup 사용)
         GameObject pickupObj = new GameObject($"ArmorPickup_{armor.armorName}");
         
         // 🆕 바닥에 붙어서 나오도록 Y 위치 조정
         Vector3 groundPosition = new Vector3(position.x, position.y + 0.1f, position.z);
         pickupObj.transform.position = groundPosition;
         
-        // ArmorPickup 컴포넌트 추가
+        // ArmorPickup 컴포넌트 추가 (기존 방식)
         ArmorPickup pickup = pickupObj.AddComponent<ArmorPickup>();
-        pickup.armorData = armor;
+        pickup.armorData = armor; // 직접 방어구 데이터 설정
         
         // SpriteRenderer 추가
         SpriteRenderer spriteRenderer = pickupObj.AddComponent<SpriteRenderer>();
         spriteRenderer.sprite = armor.icon;
-        spriteRenderer.color = armor.GetRarityColor();
+        spriteRenderer.color = armor.GetRarityColor(); // 등급별 색상 적용
         spriteRenderer.sortingOrder = 10; // 다른 오브젝트 위에 표시
         
         // 🆕 방어구 픽업 스케일을 0.25로 설정
@@ -360,13 +394,30 @@ public class ArmorGenerator : MonoBehaviour
             Debug.LogWarning("⚠️ [ArmorGenerator] 'Pickup' 레이어가 없습니다. Default 레이어를 사용합니다.");
         }
         
+        Debug.Log($"🛡️ [ArmorGenerator] 방어구 픽업 생성: {armor.armorName} (등급: {armor.rarity}, 색상: {armor.GetRarityColor()})");
+        
         return pickupObj;
     }
     
     // 랜덤 방어구 픽업 생성
     public GameObject CreateRandomArmorPickup(Vector3 position, ArmorType? specificType = null)
     {
+        Debug.Log($"🔍 [ArmorGenerator] CreateRandomArmorPickup 시작 - 위치: {position}, 타입: {specificType}");
+        
         ArmorData armor = GenerateArmorAtPosition(position, specificType);
-        return CreateArmorPickup(armor, position);
+        if (armor != null)
+        {
+            Debug.Log($"🔍 [ArmorGenerator] 방어구 데이터 생성 완료: {armor.armorName}, 등급: {armor.rarity}, 색상: {armor.GetRarityColor()}");
+        }
+        else
+        {
+            Debug.LogError("❌ [ArmorGenerator] 방어구 데이터 생성 실패!");
+            return null;
+        }
+        
+        GameObject pickup = CreateArmorPickup(armor, position);
+        Debug.Log($"🔍 [ArmorGenerator] CreateRandomArmorPickup 완료 - 픽업: {(pickup != null ? "성공" : "실패")}");
+        
+        return pickup;
     }
 } 

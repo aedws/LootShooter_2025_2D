@@ -203,6 +203,18 @@ public class NetworkWeaponPickup : MonoBehaviour, IItemPickup
         
         weaponData = selectedWeapon;
         
+        // 🎨 무기 아이콘 및 색상 설정
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+        if (weaponData != null && spriteRenderer != null)
+        {
+            if (weaponData.icon != null)
+                spriteRenderer.sprite = weaponData.icon;
+            spriteRenderer.color = weaponData.GetRarityColor();
+            
+            if (debugMode)
+                Debug.Log($"[NetworkWeaponPickup] 무기 시각적 설정 완료: {weaponData.weaponName} -> 색상: {weaponData.GetRarityColor()}");
+        }
+        
         if (debugMode)
             Debug.Log($"[NetworkWeaponPickup] 최종 선택된 무기: {weaponData.weaponName} (등급: {weaponData.rarity})");
     }

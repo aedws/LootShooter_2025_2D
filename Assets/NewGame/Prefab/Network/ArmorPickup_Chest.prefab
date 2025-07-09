@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5341644896821435020}
   - component: {fileID: 9155178214534259596}
-  - component: {fileID: 4638620158795078486}
+  - component: {fileID: -5107611862820676324}
   - component: {fileID: 7051889334747168767}
   m_Layer: 9
   m_Name: ArmorPickup_Chest
@@ -89,7 +89,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &4638620158795078486
+--- !u!114 &-5107611862820676324
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -98,14 +98,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 60777462988403338}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c25e3891a748b84abb11e3b136682c9, type: 3}
+  m_Script: {fileID: 11500000, guid: a4a33b7370765df4fb118fb51147f923, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  armorData: {fileID: 0}
+  armorType: 1
+  armorTier: 1
+  useRandomTier: 1
+  minTier: 1
+  maxTier: 5
   pickupEffect: {fileID: 0}
   pickupSound: {fileID: 0}
-  pickupRange: 0.5
+  pickupRange: 1.5
   autoPickup: 0
+  debugMode: 0
 --- !u!61 &7051889334747168767
 BoxCollider2D:
   m_ObjectHideFlags: 0

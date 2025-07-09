@@ -8097,6 +8097,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 9bc8ac738a6db574898ea1803a468a65, type: 2}
   - {fileID: 11400000, guid: c979562cac52c1a44a84e5393a98c581, type: 2}
   - {fileID: 11400000, guid: d7712585398e3be4bb4af195511ac78f, type: 2}
+  primordialChance: 0.01
   commonChance: 0.6
   rareChance: 0.25
   epicChance: 0.12
@@ -8169,7 +8170,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1998346866
 MonoBehaviour:
   m_ObjectHideFlags: 0
