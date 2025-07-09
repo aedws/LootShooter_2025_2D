@@ -19,38 +19,39 @@
 |------|--------|------|------|
 | A | weaponName | 무기 이름 | M4A1 |
 | B | weaponType | 무기 타입 | AR, HG, MG, SG, SMG, SR |
-| C | flavorText | 무기 설명 | 강력한 돌격소총입니다. |
-| D | fireRate | 발사 속도 | 0.1 |
-| E | damage | 데미지 | 25 |
-| F | projectileSpeed | 총알 속도 | 10.0 |
-| G | maxAmmo | 최대 탄약 | 30 |
-| H | currentAmmo | 현재 탄약 | 30 |
-| I | reloadTime | 재장전 시간 | 2.0 |
-| J | infiniteAmmo | 무한 탄약 | false |
-| K | baseSpread | 기본 탄퍼짐 | 0.0 |
-| L | maxSpread | 최대 탄퍼짐 | 5.0 |
-| M | spreadIncreaseRate | 탄퍼짐 증가율 | 1.0 |
-| N | spreadDecreaseRate | 탄퍼짐 감소율 | 2.0 |
-| O | pelletsPerShot | 샷건 탄환 수 | 6 |
-| P | shotgunSpreadAngle | 샷건 퍼짐 각도 | 30.0 |
-| Q | warmupTime | 머신건 예열 시간 | 1.0 |
-| R | maxWarmupFireRate | 최대 예열 발사속도 | 0.05 |
-| S | singleFireOnly | 단발 전용 | true |
-| T | aimingRange | 조준 거리 | 15.0 |
-| U | movementSpeedMultiplier | 이동속도 배율 | 1.0 |
-| V | recoilForce | 반동 강도 | 1.0 |
-| W | recoilDuration | 반동 지속시간 | 0.1 |
-| X | recoilRecoverySpeed | 반동 회복속도 | 5.0 |
-| Y | criticalChance | 크리티컬 확률 | 0.1 |
-| Z | criticalMultiplier | 크리티컬 배율 | 2.0 |
-| AA | pierceCount | 관통 개수 | 0 |
-| AB | pierceDamageReduction | 관통 데미지 감소 | 0.1 |
-| AC | hasTracerRounds | 예광탄 효과 | false |
-| AD | hasMuzzleFlash | 화염 효과 | true |
-| AE | hasExplosiveKills | 폭발 효과 | false |
-| AF | explosionRadius | 폭발 반경 | 2.0 |
-| AG | smgDashSpeedBonus | SMG 대시 후 이동속도 증가량 | 2.0 |
-| AH | smgDashSpeedDuration | SMG 대시 후 이동속도 증가 지속시간 | 3.0 |
+| C | rarity | 희귀도 | Common, Rare, Epic, Legendary, Primordial |
+| D | flavorText | 무기 설명 | 강력한 돌격소총입니다. |
+| E | fireRate | 발사 속도 | 0.1 |
+| F | damage | 데미지 | 25 |
+| G | projectileSpeed | 총알 속도 | 10.0 |
+| H | maxAmmo | 최대 탄약 | 30 |
+| I | currentAmmo | 현재 탄약 | 30 |
+| J | reloadTime | 재장전 시간 | 2.0 |
+| K | infiniteAmmo | 무한 탄약 | false |
+| L | baseSpread | 기본 탄퍼짐 | 0.0 |
+| M | maxSpread | 최대 탄퍼짐 | 5.0 |
+| N | spreadIncreaseRate | 탄퍼짐 증가율 | 1.0 |
+| O | spreadDecreaseRate | 탄퍼짐 감소율 | 2.0 |
+| P | pelletsPerShot | 샷건 탄환 수 | 6 |
+| Q | shotgunSpreadAngle | 샷건 퍼짐 각도 | 30.0 |
+| R | warmupTime | 머신건 예열 시간 | 1.0 |
+| S | maxWarmupFireRate | 최대 예열 발사속도 | 0.05 |
+| T | singleFireOnly | 단발 전용 | true |
+| U | aimingRange | 조준 거리 | 15.0 |
+| V | movementSpeedMultiplier | 이동속도 배율 | 1.0 |
+| W | recoilForce | 반동 강도 | 1.0 |
+| X | recoilDuration | 반동 지속시간 | 0.1 |
+| Y | recoilRecoverySpeed | 반동 회복속도 | 5.0 |
+| Z | criticalChance | 크리티컬 확률 | 0.1 |
+| AA | criticalMultiplier | 크리티컬 배율 | 2.0 |
+| AB | pierceCount | 관통 개수 | 0 |
+| AC | pierceDamageReduction | 관통 데미지 감소 | 0.1 |
+| AD | hasTracerRounds | 예광탄 효과 | false |
+| AE | hasMuzzleFlash | 화염 효과 | true |
+| AF | hasExplosiveKills | 폭발 효과 | false |
+| AG | explosionRadius | 폭발 반경 | 2.0 |
+| AH | smgDashSpeedBonus | SMG 대시 후 이동속도 증가량 | 2.0 |
+| AI | smgDashSpeedDuration | SMG 대시 후 이동속도 증가 지속시간 | 3.0 |
 
 
 #### 방어구 데이터 (Armors) - 14개 컬럼
