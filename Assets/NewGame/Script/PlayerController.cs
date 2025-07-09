@@ -12,10 +12,10 @@ public class PlayerController : MonoBehaviour
     public float maxJumpTime = 0.15f; // 점프 최대 지속 시간(초) - 미묘한 차이용
 
     [Header("대시")]
-    public float dashForce = 20f; // 더 빠른 대시
-    public float dashDuration = 0.15f; // 짧고 강력한 대시
-    public float dashCooldown = 1.2f; // 조금 더 긴 쿨다운
-    public float dashInvincibleTime = 0.1f; // 짧은 무적시간
+    public float dashForce = 25f; // 더 빠른 대시
+    public float dashDuration = 0.25f; // 대시 지속시간
+    public float dashCooldown = 1.2f; // 쿨다운
+    public float dashInvincibleTime = 0.15f; // 무적시간
     
     [Header("대시 잔상 이펙트")]
     public float afterImageInterval = 0.05f; // 잔상 생성 간격
@@ -300,16 +300,20 @@ public class PlayerController : MonoBehaviour
         }
         float totalInvincibleTime = dashInvincibleTime + bonusInvincible;
 
-        // 무적 시간
-        float invincibleTimer = totalInvincibleTime;
+        // 무적 시간 (대시 지속시간 내에서만)
+        float invincibleTimer = Mathf.Min(totalInvincibleTime, dashDuration);
         while (invincibleTimer > 0)
         {
             invincibleTimer -= Time.deltaTime;
             yield return null;
         }
 
-        // 대시 지속 시간
-        yield return new WaitForSeconds(dashDuration - totalInvincibleTime);
+        // 대시 지속시간의 나머지 부분
+        float remainingDashTime = dashDuration - Mathf.Min(totalInvincibleTime, dashDuration);
+        if (remainingDashTime > 0)
+        {
+            yield return new WaitForSeconds(remainingDashTime);
+        }
 
         rb.gravityScale = originalGravity;
         isDashing = false;
@@ -326,6 +330,16 @@ public class PlayerController : MonoBehaviour
             CreateAfterImage();
             yield return new WaitForSeconds(afterImageInterval);
             timer += afterImageInterval;
+        }
+        
+        // 대시가 끝난 후에도 잔상을 조금 더 생성 (자연스러운 페이드아웃)
+        float extraTimer = 0f;
+        float extraDuration = 0.1f; // 추가 잔상 시간
+        while (extraTimer < extraDuration)
+        {
+            CreateAfterImage();
+            yield return new WaitForSeconds(afterImageInterval);
+            extraTimer += afterImageInterval;
         }
     }
 
