@@ -645,7 +645,24 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         // Image 컴포넌트 추가
         Image dragImage = draggedItemImage.AddComponent<Image>();
         dragImage.sprite = iconSprite;
-        dragImage.color = new Color(1f, 1f, 1f, 0.9f); // 더 선명하게 (0.8f → 0.9f)
+        
+        // 🆕 등급 색상 적용
+        Color rarityColor;
+        if (isArmor && draggedArmorData != null)
+        {
+            rarityColor = draggedArmorData.GetRarityColor();
+        }
+        else if (!isArmor && draggedWeaponData != null)
+        {
+            rarityColor = draggedWeaponData.GetRarityColor();
+        }
+        else
+        {
+            rarityColor = Color.white; // 기본값
+        }
+        
+        // 등급 색상에 알파값 적용
+        dragImage.color = new Color(rarityColor.r, rarityColor.g, rarityColor.b, 0.9f);
         dragImage.raycastTarget = false; // 레이캐스트 차단 안함
         
         // Canvas Group 추가 (드래그 중 우선순위)
