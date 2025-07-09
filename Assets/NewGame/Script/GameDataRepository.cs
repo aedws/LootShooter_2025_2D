@@ -268,12 +268,153 @@ public class GameDataRepository : MonoBehaviour
     }
 
     /// <summary>
-    /// 랜덤 무기를 반환합니다
+    /// 랜덤 무기를 반환합니다 (가중치 기반)
     /// </summary>
     public WeaponData GetRandomWeapon()
     {
         if (_weapons.Count == 0) return null;
-        return _weapons[UnityEngine.Random.Range(0, _weapons.Count)];
+        
+        // 디버그: 모든 무기 출력
+        Debug.Log($"[GameDataRepository] 총 무기 수: {_weapons.Count}");
+        foreach (var weapon in _weapons)
+        {
+            Debug.Log($"[GameDataRepository] 무기: {weapon.weaponName}");
+        }
+        
+        // 가중치 기반 선택을 위해 무기 그룹별로 분류
+        var weaponGroups = new Dictionary<string, List<WeaponData>>();
+        
+        foreach (var weapon in _weapons)
+        {
+            string baseName = GetBaseWeaponName(weapon.weaponName);
+            if (!weaponGroups.ContainsKey(baseName))
+            {
+                weaponGroups[baseName] = new List<WeaponData>();
+            }
+            weaponGroups[baseName].Add(weapon);
+        }
+        
+        Debug.Log($"[GameDataRepository] 무기 그룹 수: {weaponGroups.Count}");
+        foreach (var group in weaponGroups)
+        {
+            Debug.Log($"[GameDataRepository] 그룹 '{group.Key}': {group.Value.Count}개 무기");
+            foreach (var weapon in group.Value)
+            {
+                Debug.Log($"[GameDataRepository]   - {weapon.weaponName}");
+            }
+        }
+        
+        // 각 그룹에서 하나씩 선택하여 후보 목록 생성
+        var candidates = new List<WeaponData>();
+        foreach (var group in weaponGroups.Values)
+        {
+            if (group.Count > 0)
+            {
+                // 그룹 내에서 가중치 기반 선택
+                WeaponData selected = SelectWeaponByWeight(group);
+                candidates.Add(selected);
+                Debug.Log($"[GameDataRepository] 그룹에서 선택된 무기: {selected.weaponName}");
+            }
+        }
+        
+        // 후보 목록에서 최종 선택
+        if (candidates.Count > 0)
+        {
+            WeaponData finalSelected = candidates[UnityEngine.Random.Range(0, candidates.Count)];
+            Debug.Log($"[GameDataRepository] 최종 선택된 무기: {finalSelected.weaponName}");
+            return finalSelected;
+        }
+        
+        // 폴백: 기존 방식
+        WeaponData fallbackSelected = _weapons[UnityEngine.Random.Range(0, _weapons.Count)];
+        Debug.Log($"[GameDataRepository] 폴백 선택된 무기: {fallbackSelected.weaponName}");
+        return fallbackSelected;
+    }
+    
+    /// <summary>
+    /// 무기 이름에서 기본 이름을 추출합니다 (등급 제거)
+    /// </summary>
+    private string GetBaseWeaponName(string weaponName)
+    {
+        // 등급 접미사 제거
+        string[] raritySuffixes = { " (Common)", " (Rare)", " (Epic)", " (Legendary)", " (Primordial)" };
+        string baseName = weaponName;
+        
+        foreach (string suffix in raritySuffixes)
+        {
+            if (baseName.EndsWith(suffix))
+            {
+                baseName = baseName.Substring(0, baseName.Length - suffix.Length);
+                break;
+            }
+        }
+        
+        return baseName;
+    }
+    
+    /// <summary>
+    /// 가중치 기반으로 무기를 선택합니다
+    /// </summary>
+    private WeaponData SelectWeaponByWeight(List<WeaponData> weapons)
+    {
+        if (weapons.Count == 0) return null;
+        if (weapons.Count == 1) return weapons[0];
+        
+        // 등급별 가중치 설정 (더 균형잡힌 가중치로 조정)
+        var weights = new Dictionary<string, float>
+        {
+            { "Common", 1.0f },
+            { "Rare", 1.5f },
+            { "Epic", 2.0f },
+            { "Legendary", 3.0f },
+            { "Primordial", 4.0f }
+        };
+        
+        Debug.Log($"[GameDataRepository] 가중치 선택 시작 - 무기 수: {weapons.Count}");
+        
+        // 각 무기의 가중치 계산
+        var weaponWeights = new List<float>();
+        foreach (var weapon in weapons)
+        {
+            float weight = 1.0f; // 기본 가중치
+            foreach (var rarity in weights.Keys)
+            {
+                if (weapon.weaponName.Contains($"({rarity})"))
+                {
+                    weight = weights[rarity];
+                    break;
+                }
+            }
+            weaponWeights.Add(weight);
+            Debug.Log($"[GameDataRepository] 무기 '{weapon.weaponName}' 가중치: {weight}");
+        }
+        
+        // 가중치 기반 랜덤 선택
+        float totalWeight = 0f;
+        foreach (float weight in weaponWeights)
+        {
+            totalWeight += weight;
+        }
+        
+        float randomValue = UnityEngine.Random.Range(0f, totalWeight);
+        float currentWeight = 0f;
+        
+        Debug.Log($"[GameDataRepository] 총 가중치: {totalWeight}, 랜덤값: {randomValue}");
+        
+        for (int i = 0; i < weapons.Count; i++)
+        {
+            currentWeight += weaponWeights[i];
+            Debug.Log($"[GameDataRepository] 무기 {i}: {weapons[i].weaponName}, 누적가중치: {currentWeight}");
+            if (randomValue <= currentWeight)
+            {
+                Debug.Log($"[GameDataRepository] 선택됨: {weapons[i].weaponName}");
+                return weapons[i];
+            }
+        }
+        
+        // 폴백
+        Debug.Log($"[GameDataRepository] 폴백 선택: {weapons[weapons.Count - 1].weaponName}");
+        return weapons[weapons.Count - 1];
     }
 
     /// <summary>

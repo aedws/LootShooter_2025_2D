@@ -183,18 +183,18 @@ public class PlayerController : MonoBehaviour
                     if (weapon != null)
                     {
                         weapon.TryReload();
-                    }
                 }
             }
+        }
 
-            // X키로 3점사/연사 모드 토글
-            if (Input.GetKeyDown(KeyCode.X))
-            {
-                isBurstMode = !isBurstMode;
+        // X키로 3점사/연사 모드 토글
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            isBurstMode = !isBurstMode;
 
-                // UI 즉시 갱신
-                if (statusUI != null)
-                    statusUI.UpdateWeaponUI();
+            // UI 즉시 갱신
+            if (statusUI != null)
+                statusUI.UpdateWeaponUI();
             }
         }
 

@@ -11,9 +11,20 @@ public class NetworkWeaponPickup : MonoBehaviour, IItemPickup
     [Tooltip("이 픽업이 생성할 무기 타입")]
     public WeaponType weaponType;
     
-    [Tooltip("무기 등급 (1, 2, 3)")]
-    [Range(1, 3)]
+    [Tooltip("무기 등급 (1=Common, 2=Rare, 3=Epic, 4=Legendary, 5=Primordial)")]
+    [Range(1, 5)]
     public int weaponTier = 1;
+    
+    [Tooltip("런타임에 등급을 랜덤하게 설정할지 여부")]
+    public bool useRandomTier = true;
+    
+    [Tooltip("랜덤 등급 사용시 최소 등급")]
+    [Range(1, 5)]
+    public int minTier = 1;
+    
+    [Tooltip("랜덤 등급 사용시 최대 등급")]
+    [Range(1, 5)]
+    public int maxTier = 5;
     
     [Header("디버그")]
     [Tooltip("디버그 모드 활성화")]
@@ -24,6 +35,14 @@ public class NetworkWeaponPickup : MonoBehaviour, IItemPickup
     
     void Start()
     {
+        // 런타임에 랜덤 등급 설정
+        if (useRandomTier)
+        {
+            weaponTier = UnityEngine.Random.Range(minTier, maxTier + 1);
+            if (debugMode)
+                Debug.Log($"[NetworkWeaponPickup] 랜덤 등급 설정: {weaponTier} (범위: {minTier}-{maxTier})");
+        }
+        
         // GoogleSheets에서 로드된 무기 데이터를 찾아서 설정
         SetupWeaponData();
     }
@@ -83,33 +102,161 @@ public class NetworkWeaponPickup : MonoBehaviour, IItemPickup
             return;
         }
         
-        // 무기 타입과 등급에 맞는 무기 찾기
-        string targetWeaponName = $"{weaponType}_{weaponTier}";
+        if (debugMode)
+            Debug.Log($"[NetworkWeaponPickup] {weaponType} 타입, {weaponTier} 등급 무기 찾기 시작");
         
-        foreach (var weapon in gameDataRepo.Weapons)
+        // 해당 타입의 모든 무기 찾기
+        var weaponsOfType = gameDataRepo.GetWeaponsByType(weaponType);
+        
+        if (debugMode)
         {
-            if (weapon.weaponName == targetWeaponName)
+            Debug.Log($"[NetworkWeaponPickup] {weaponType} 타입 무기들:");
+            foreach (var weapon in weaponsOfType)
             {
-                weaponData = weapon;
-                if (debugMode)
-                    Debug.Log($"[NetworkWeaponPickup] 무기 데이터 설정 완료: {weaponData.weaponName}");
-                return;
+                Debug.Log($"[NetworkWeaponPickup]   - {weapon.weaponName} (등급: {weapon.rarity})");
             }
         }
         
-        // 정확한 이름을 찾지 못한 경우, 무기 타입만으로 찾기
-        foreach (var weapon in gameDataRepo.Weapons)
+        if (weaponsOfType.Count == 0)
         {
-            if (weapon.weaponType == weaponType)
+            Debug.LogError($"[NetworkWeaponPickup] {weaponType} 타입의 무기가 없습니다!");
+            return;
+        }
+        
+        // 등급에 따른 무기 선택
+        WeaponData selectedWeapon = null;
+        
+        // 등급별로 무기 분류
+        var weaponsByRarity = new Dictionary<WeaponRarity, List<WeaponData>>();
+        foreach (var weapon in weaponsOfType)
+        {
+            if (!weaponsByRarity.ContainsKey(weapon.rarity))
             {
-                weaponData = weapon;
+                weaponsByRarity[weapon.rarity] = new List<WeaponData>();
+            }
+            weaponsByRarity[weapon.rarity].Add(weapon);
+        }
+        
+        // 등급별 가중치 설정 (1=Common, 2=Rare, 3=Epic, 4=Legendary, 5=Primordial)
+        var rarityWeights = new Dictionary<WeaponRarity, float>
+        {
+            { WeaponRarity.Common, 1.0f },
+            { WeaponRarity.Rare, 1.5f },
+            { WeaponRarity.Epic, 2.0f },
+            { WeaponRarity.Legendary, 3.0f },
+            { WeaponRarity.Primordial, 4.0f }
+        };
+        
+        // weaponTier에 따른 등급 선택
+        WeaponRarity targetRarity = WeaponRarity.Common; // 기본값
+        
+        switch (weaponTier)
+        {
+            case 1: targetRarity = WeaponRarity.Common; break;
+            case 2: targetRarity = WeaponRarity.Rare; break;
+            case 3: targetRarity = WeaponRarity.Epic; break;
+            case 4: targetRarity = WeaponRarity.Legendary; break;
+            case 5: targetRarity = WeaponRarity.Primordial; break;
+            default: targetRarity = WeaponRarity.Common; break;
+        }
+        
+        if (debugMode)
+            Debug.Log($"[NetworkWeaponPickup] 목표 등급: {targetRarity} (Tier: {weaponTier})");
+        
+        // 목표 등급의 무기가 있으면 선택, 없으면 다른 등급에서 선택
+        if (weaponsByRarity.ContainsKey(targetRarity) && weaponsByRarity[targetRarity].Count > 0)
+        {
+            // 목표 등급에서 랜덤 선택
+            selectedWeapon = weaponsByRarity[targetRarity][UnityEngine.Random.Range(0, weaponsByRarity[targetRarity].Count)];
+            if (debugMode)
+                Debug.Log($"[NetworkWeaponPickup] 목표 등급에서 선택: {selectedWeapon.weaponName}");
+        }
+        else
+        {
+            // 목표 등급이 없으면 가중치 기반으로 선택
+            var candidates = new List<WeaponData>();
+            foreach (var rarity in weaponsByRarity.Keys)
+            {
+                if (weaponsByRarity[rarity].Count > 0)
+                {
+                    // 해당 등급에서 랜덤 선택
+                    var randomWeapon = weaponsByRarity[rarity][UnityEngine.Random.Range(0, weaponsByRarity[rarity].Count)];
+                    candidates.Add(randomWeapon);
+                }
+            }
+            
+            if (candidates.Count > 0)
+            {
+                // 가중치 기반 최종 선택
+                selectedWeapon = SelectWeaponByWeight(candidates);
                 if (debugMode)
-                    Debug.LogWarning($"[NetworkWeaponPickup] 정확한 등급을 찾지 못해 첫 번째 {weaponType} 무기를 사용: {weaponData.weaponName}");
-                return;
+                    Debug.Log($"[NetworkWeaponPickup] 가중치 기반 선택: {selectedWeapon.weaponName}");
+            }
+            else
+            {
+                // 폴백: 첫 번째 무기 선택
+                selectedWeapon = weaponsOfType[0];
+                if (debugMode)
+                    Debug.Log($"[NetworkWeaponPickup] 폴백 선택: {selectedWeapon.weaponName}");
             }
         }
         
-        Debug.LogError($"[NetworkWeaponPickup] {weaponType} 타입의 무기를 찾을 수 없습니다!");
+        weaponData = selectedWeapon;
+        
+        if (debugMode)
+            Debug.Log($"[NetworkWeaponPickup] 최종 선택된 무기: {weaponData.weaponName} (등급: {weaponData.rarity})");
+    }
+    
+    /// <summary>
+    /// 가중치 기반으로 무기를 선택합니다
+    /// </summary>
+    private WeaponData SelectWeaponByWeight(List<WeaponData> weapons)
+    {
+        if (weapons.Count == 0) return null;
+        if (weapons.Count == 1) return weapons[0];
+        
+        // 등급별 가중치 설정
+        var weights = new Dictionary<WeaponRarity, float>
+        {
+            { WeaponRarity.Common, 1.0f },
+            { WeaponRarity.Rare, 1.5f },
+            { WeaponRarity.Epic, 2.0f },
+            { WeaponRarity.Legendary, 3.0f },
+            { WeaponRarity.Primordial, 4.0f }
+        };
+        
+        // 각 무기의 가중치 계산
+        var weaponWeights = new List<float>();
+        foreach (var weapon in weapons)
+        {
+            float weight = weights.ContainsKey(weapon.rarity) ? weights[weapon.rarity] : 1.0f;
+            weaponWeights.Add(weight);
+            
+            if (debugMode)
+                Debug.Log($"[NetworkWeaponPickup] 무기 '{weapon.weaponName}' 가중치: {weight}");
+        }
+        
+        // 가중치 기반 랜덤 선택
+        float totalWeight = 0f;
+        foreach (float weight in weaponWeights)
+        {
+            totalWeight += weight;
+        }
+        
+        float randomValue = UnityEngine.Random.Range(0f, totalWeight);
+        float currentWeight = 0f;
+        
+        for (int i = 0; i < weapons.Count; i++)
+        {
+            currentWeight += weaponWeights[i];
+            if (randomValue <= currentWeight)
+            {
+                return weapons[i];
+            }
+        }
+        
+        // 폴백
+        return weapons[weapons.Count - 1];
     }
     
     public void OnPickup(GameObject player)
@@ -121,7 +268,7 @@ public class NetworkWeaponPickup : MonoBehaviour, IItemPickup
         }
         
         if (debugMode)
-            Debug.Log($"[NetworkWeaponPickup] 무기 픽업: {weaponData.weaponName}");
+            Debug.Log($"[NetworkWeaponPickup] 무기 픽업: {weaponData.weaponName} (등급: {weaponData.rarity}, Tier: {weaponTier})");
         
         PlayerInventory inventory = player.GetComponent<PlayerInventory>();
         if (inventory != null)
@@ -144,4 +291,4 @@ public class NetworkWeaponPickup : MonoBehaviour, IItemPickup
             gameDataRepo.OnWeaponsUpdated -= OnWeaponsLoaded;
         }
     }
-} 
+}

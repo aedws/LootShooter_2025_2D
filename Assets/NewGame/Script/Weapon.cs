@@ -65,7 +65,7 @@ public class Weapon : MonoBehaviour
         UpdateRecoil();
         
         // 탄 퍼짐 감소 (발사하지 않을 때)
-        if (!isFiring && currentSpread > weaponData.baseSpread)
+        if (weaponData != null && !isFiring && currentSpread > weaponData.baseSpread)
         {
             currentSpread -= weaponData.spreadDecreaseRate * Time.deltaTime;
             currentSpread = Mathf.Max(currentSpread, weaponData.baseSpread);
@@ -102,7 +102,7 @@ public class Weapon : MonoBehaviour
         if (fireCooldown > 0.01f) return false; // 0.01초 이하면 발사 허용
         
         // 탄약 확인 (무한 탄약이 아닌 경우)
-        if (!weaponData.infiniteAmmo && currentAmmo <= 0)
+        if (weaponData != null && !weaponData.infiniteAmmo && currentAmmo <= 0)
         {
             // 자동 재장전 시도
             TryReload();
@@ -114,7 +114,7 @@ public class Weapon : MonoBehaviour
         wasFireButtonPressed = isFireButtonPressed;
         
         // AR: 3점사/연사 분기
-        if (weaponData.weaponType == WeaponType.AR)
+        if (weaponData != null && weaponData.weaponType == WeaponType.AR)
         {
             if (isBurst)
             {
@@ -132,13 +132,13 @@ public class Weapon : MonoBehaviour
         }
         
         // 저격총: 단발만 가능
-        if (weaponData.weaponType == WeaponType.SR && weaponData.singleFireOnly)
+        if (weaponData != null && weaponData.weaponType == WeaponType.SR && weaponData.singleFireOnly)
         {
             if (!isNewPress) return false;
         }
         
         // 머신건: 예열 시스템
-        if (weaponData.weaponType == WeaponType.MG)
+        if (weaponData != null && weaponData.weaponType == WeaponType.MG)
         {
             if (!HandleMachineGunFiring(isFireButtonPressed)) return false;
         }
@@ -152,7 +152,7 @@ public class Weapon : MonoBehaviour
     {
         for (int i = 0; i < burstCount; i++)
         {
-            if (!weaponData.infiniteAmmo && currentAmmo <= 0)
+            if (weaponData != null && !weaponData.infiniteAmmo && currentAmmo <= 0)
             {
                 TryReload();
                 yield break;
@@ -167,14 +167,14 @@ public class Weapon : MonoBehaviour
         Vector3 spawnPosition = GetFirePosition(weaponPosition);
         
         // 탄약 소모 (무한 탄약이 아닌 경우)
-        if (!weaponData.infiniteAmmo)
+        if (weaponData != null && !weaponData.infiniteAmmo)
         {
             currentAmmo--;
             OnAmmoChanged?.Invoke(currentAmmo, weaponData.maxAmmo);
         }
         
         // 무기 타입별 발사 처리
-        switch (weaponData.weaponType)
+        switch (weaponData != null ? weaponData.weaponType : WeaponType.HG)
         {
             case WeaponType.SG:
                 FireShotgun(direction, spawnPosition);
@@ -198,7 +198,9 @@ public class Weapon : MonoBehaviour
         Vector2 finalDirection = ApplySpread(direction, isNewPress);
         
         // 투사체 생성
-        GameObject proj = Instantiate(weaponData.projectilePrefab, spawnPosition, Quaternion.identity);
+        GameObject proj = Instantiate(weaponData != null ? weaponData.projectilePrefab : null, spawnPosition, Quaternion.identity);
+        if (proj == null) return;
+        
         Projectile projectile = proj.GetComponent<Projectile>();
         
         if (projectile != null)
@@ -207,10 +209,10 @@ public class Weapon : MonoBehaviour
             int finalDamage = GetCurrentDamage();
             
             // 크리티컬 계산
-            bool isCritical = Random.Range(0f, 1f) < weaponData.criticalChance;
+            bool isCritical = Random.Range(0f, 1f) < (weaponData != null ? weaponData.criticalChance : 0.1f);
             if (isCritical)
             {
-                finalDamage = Mathf.RoundToInt(finalDamage * weaponData.criticalMultiplier);
+                finalDamage = Mathf.RoundToInt(finalDamage * (weaponData != null ? weaponData.criticalMultiplier : 2f));
                 // Debug.Log($"Critical Hit! Damage: {finalDamage}");
             }
             
@@ -233,21 +235,23 @@ public class Weapon : MonoBehaviour
     private void FireShotgun(Vector2 direction, Vector3 spawnPosition)
     {
         // 샷건: 여러 발 부채꼴로 발사
-        for (int i = 0; i < weaponData.pelletsPerShot; i++)
+        for (int i = 0; i < (weaponData != null ? weaponData.pelletsPerShot : 1); i++)
         {
             // 부채꼴 각도 계산
-            float angleOffset = Random.Range(-weaponData.shotgunSpreadAngle / 2f, weaponData.shotgunSpreadAngle / 2f);
+            float angleOffset = Random.Range(-(weaponData != null ? weaponData.shotgunSpreadAngle : 30f) / 2f, (weaponData != null ? weaponData.shotgunSpreadAngle : 30f) / 2f);
             Vector2 spreadDirection = RotateVector(direction, angleOffset);
             
             // 투사체 생성
-            GameObject proj = Instantiate(weaponData.projectilePrefab, spawnPosition, Quaternion.identity);
+            GameObject proj = Instantiate(weaponData != null ? weaponData.projectilePrefab : null, spawnPosition, Quaternion.identity);
+            if (proj == null) continue;
+            
             Projectile projectile = proj.GetComponent<Projectile>();
             
             if (projectile != null)
             {
-                // 샷건 펠릿별 개별 크리티컬 계산
-                int finalDamage = GetCurrentDamage();
-                bool isCritical = Random.Range(0f, 1f) < weaponData.criticalChance;
+                            // 샷건 펠릿별 개별 크리티컬 계산
+            int finalDamage = GetCurrentDamage();
+            bool isCritical = Random.Range(0f, 1f) < (weaponData != null ? weaponData.criticalChance : 0.1f);
                 if (isCritical)
                 {
                     finalDamage = Mathf.RoundToInt(finalDamage * weaponData.criticalMultiplier);
@@ -258,7 +262,7 @@ public class Weapon : MonoBehaviour
             }
         }
         // 샷건도 탄약 0이면 자동 재장전 예약
-        if (!weaponData.infiniteAmmo && currentAmmo == 0 && !isReloading)
+        if (weaponData != null && !weaponData.infiniteAmmo && currentAmmo == 0 && !isReloading)
         {
             if (autoReloadCoroutine != null)
                 StopCoroutine(autoReloadCoroutine);
