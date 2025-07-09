@@ -209,7 +209,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (weaponData != null)
         {
-            Debug.Log($"[무기등급] {weaponData.weaponName} rarity: {weaponData.rarity}, color: {weaponData.GetRarityColor()}");
+            // Debug.Log($"[무기등급] {weaponData.weaponName} rarity: {weaponData.rarity}, color: {weaponData.GetRarityColor()}");
         }
         if (iconImage != null)
         {
@@ -862,7 +862,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             bool success = armorSlotManager.EquipArmorToSlot(armorData, slotIndex);
             if (success)
             {
-                Debug.Log($"🛡️ {armorData.armorName}이(가) 슬롯 {slotIndex}에 자동 장착되었습니다!");
+                // Debug.Log($"🛡️ {armorData.armorName}이(가) 슬롯 {slotIndex}에 자동 장착되었습니다!");
                 
                 // 🆕 인벤토리 새로고침
                 if (inventoryManager != null)
@@ -872,7 +872,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
             }
             else
             {
-                Debug.Log($"⚠️ {armorData.armorName} 자동 장착 실패 (슬롯 {slotIndex}에 이미 방어구가 장착되어 있음)");
+                // Debug.Log($"⚠️ {armorData.armorName} 자동 장착 실패 (슬롯 {slotIndex}에 이미 방어구가 장착되어 있음)");
             }
         }
     }

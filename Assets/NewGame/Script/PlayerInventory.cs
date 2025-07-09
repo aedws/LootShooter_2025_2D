@@ -212,11 +212,11 @@ public class PlayerInventory : MonoBehaviour
             }
             else
                 Debug.LogWarning("[PlayerInventory] Weapon 컴포넌트를 찾을 수 없습니다!");
-            Debug.Log($"[PlayerInventory] 무기 장착 시도: weaponName={weaponData.weaponName}, prefab={weaponData.weaponPrefab}, holder={weaponHolder}, obj={currentWeaponObj}");
+            // Debug.Log($"[PlayerInventory] 무기 장착 시도: weaponName={weaponData.weaponName}, prefab={weaponData.weaponPrefab}, holder={weaponHolder}, obj={currentWeaponObj}");
         }
         else
         {
-            Debug.Log($"[PlayerInventory] 무기 장착 실패 또는 해제: weaponData={(weaponData != null ? weaponData.weaponName : "null")}, prefab={(weaponData != null ? weaponData.weaponPrefab : "null")}, holder={weaponHolder}");
+            // Debug.Log($"[PlayerInventory] 무기 장착 실패 또는 해제: weaponData={(weaponData != null ? weaponData.weaponName : "null")}, prefab={(weaponData != null ? weaponData.weaponPrefab : "null")}, holder={weaponHolder}");
         }
         
         // 🏃‍♂️ 플레이어 이동속도 업데이트

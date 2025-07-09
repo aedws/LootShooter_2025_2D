@@ -74,7 +74,7 @@ public class GoogleSheetsManager : MonoBehaviour
         }
         
         string url = $"https://sheets.googleapis.com/v4/spreadsheets/{config.WeaponsSpreadsheetId}/values/{config.WeaponsSheetName}?key={config.ApiKey}";
-        Debug.Log($"[GoogleSheetsManager] 무기 데이터 요청 URL: {url}");
+        // Debug.Log($"[GoogleSheetsManager] 무기 데이터 요청 URL: {url}");
         
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
@@ -101,7 +101,7 @@ public class GoogleSheetsManager : MonoBehaviour
         }
         
         string url = $"https://sheets.googleapis.com/v4/spreadsheets/{config.ArmorsSpreadsheetId}/values/{config.ArmorsSheetName}?key={config.ApiKey}";
-        Debug.Log($"[GoogleSheetsManager] 방어구 데이터 요청 URL: {url}");
+        // Debug.Log($"[GoogleSheetsManager] 방어구 데이터 요청 URL: {url}");
         
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
@@ -183,7 +183,7 @@ public class GoogleSheetsManager : MonoBehaviour
                     // MG 디버그 로그 추가
                     if (weapon.weaponType == WeaponType.MG)
                     {
-                        Debug.Log($"[MG DEBUG] {weapon.weaponName}: fireRate={weapon.fireRate}, warmupTime={weapon.warmupTime}, maxWarmupFireRate={weapon.maxWarmupFireRate}");
+                        // Debug.Log($"[MG DEBUG] {weapon.weaponName}: fireRate={weapon.fireRate}, warmupTime={weapon.warmupTime}, maxWarmupFireRate={weapon.maxWarmupFireRate}");
                     }
                     
                     // 저격총 설정
@@ -228,7 +228,7 @@ public class GoogleSheetsManager : MonoBehaviour
                 }
             }
             
-            Debug.Log($"무기 데이터 로드 완료: {weapons.Count}개");
+            // Debug.Log($"무기 데이터 로드 완료: {weapons.Count}개");
             OnWeaponsLoaded?.Invoke(weapons);
         }
         catch (Exception e)
@@ -355,7 +355,7 @@ public class GoogleSheetsManager : MonoBehaviour
                 }
             }
             
-            Debug.Log($"방어구 데이터 로드 완료: {armors.Count}개");
+            // Debug.Log($"방어구 데이터 로드 완료: {armors.Count}개");
             OnArmorsLoaded?.Invoke(armors);
         }
         catch (Exception e)

@@ -49,7 +49,7 @@ public class GameDataExample : MonoBehaviour
     /// </summary>
     private void OnAllDataLoaded()
     {
-        Debug.Log("[GameDataExample] 모든 데이터 로드 완료!");
+        // Debug.Log("[GameDataExample] 모든 데이터 로드 완료!");
         UpdateStatusText("모든 데이터 로드 완료!");
         
         // 데이터 요약 출력
@@ -61,7 +61,7 @@ public class GameDataExample : MonoBehaviour
     /// </summary>
     private void OnWeaponsUpdated(List<WeaponData> weapons)
     {
-        Debug.Log($"[GameDataExample] 무기 데이터 업데이트: {weapons.Count}개");
+        // Debug.Log($"[GameDataExample] 무기 데이터 업데이트: {weapons.Count}개");
         UpdateWeaponsText(weapons);
     }
     
@@ -70,7 +70,7 @@ public class GameDataExample : MonoBehaviour
     /// </summary>
     private void OnArmorsUpdated(List<ArmorData> armors)
     {
-        Debug.Log($"[GameDataExample] 방어구 데이터 업데이트: {armors.Count}개");
+        // Debug.Log($"[GameDataExample] 방어구 데이터 업데이트: {armors.Count}개");
         UpdateArmorsText(armors);
     }
     
@@ -90,30 +90,30 @@ public class GameDataExample : MonoBehaviour
     {
         var repo = GameDataRepository.Instance;
         
-        Debug.Log("=== 게임 데이터 요약 ===");
-        Debug.Log($"무기: {repo.Weapons.Count}개");
-        Debug.Log($"방어구: {repo.Armors.Count}개");
-        Debug.Log($"보스 패턴: {repo.BossPatterns.Count}개");
+        // Debug.Log("=== 게임 데이터 요약 ===");
+        // Debug.Log($"무기: {repo.Weapons.Count}개");
+        // Debug.Log($"방어구: {repo.Armors.Count}개");
+        // Debug.Log($"보스 패턴: {repo.BossPatterns.Count}개");
         
         // 무기 타입별 통계
         foreach (WeaponType type in System.Enum.GetValues(typeof(WeaponType)))
         {
             var weaponsOfType = repo.GetWeaponsByType(type);
-            Debug.Log($"  {type}: {weaponsOfType.Count}개");
+            // Debug.Log($"  {type}: {weaponsOfType.Count}개");
         }
         
         // 방어구 타입별 통계
         foreach (ArmorType type in System.Enum.GetValues(typeof(ArmorType)))
         {
             var armorsOfType = repo.GetArmorsByType(type);
-            Debug.Log($"  {type}: {armorsOfType.Count}개");
+            // Debug.Log($"  {type}: {armorsOfType.Count}개");
         }
         
         // 방어구 레어리티별 통계
         foreach (ArmorRarity rarity in System.Enum.GetValues(typeof(ArmorRarity)))
         {
             var armorsOfRarity = repo.GetArmorsByRarity(rarity);
-            Debug.Log($"  {rarity}: {armorsOfRarity.Count}개");
+            // Debug.Log($"  {rarity}: {armorsOfRarity.Count}개");
         }
     }
     
@@ -128,28 +128,28 @@ public class GameDataExample : MonoBehaviour
         WeaponData randomWeapon = repo.GetRandomWeapon();
         if (randomWeapon != null)
         {
-            Debug.Log($"[랜덤 드롭] 무기: {randomWeapon.weaponName} ({randomWeapon.weaponType})");
+            // Debug.Log($"[랜덤 드롭] 무기: {randomWeapon.weaponName} ({randomWeapon.weaponType})");
         }
         
         // 특정 타입 랜덤 무기
         WeaponData randomAR = repo.GetRandomWeaponByType(WeaponType.AR);
         if (randomAR != null)
         {
-            Debug.Log($"[랜덤 드롭] AR: {randomAR.weaponName}");
+            // Debug.Log($"[랜덤 드롭] AR: {randomAR.weaponName}");
         }
         
         // 랜덤 방어구 드롭
         ArmorData randomArmor = repo.GetRandomArmor();
         if (randomArmor != null)
         {
-            Debug.Log($"[랜덤 드롭] 방어구: {randomArmor.armorName} ({randomArmor.armorType}, {randomArmor.rarity})");
+            // Debug.Log($"[랜덤 드롭] 방어구: {randomArmor.armorName} ({randomArmor.armorType}, {randomArmor.rarity})");
         }
         
         // 특정 레어리티 랜덤 방어구
         ArmorData randomEpic = repo.GetRandomArmorByRarity(ArmorRarity.Epic);
         if (randomEpic != null)
         {
-            Debug.Log($"[랜덤 드롭] Epic 방어구: {randomEpic.armorName}");
+            // Debug.Log($"[랜덤 드롭] Epic 방어구: {randomEpic.armorName}");
         }
     }
     
@@ -165,16 +165,16 @@ public class GameDataExample : MonoBehaviour
         WeaponData ak47 = repo.GetWeaponByName("AK-47");
         if (ak47 != null)
         {
-            Debug.Log($"AK-47 찾음: 데미지 {ak47.damage}, 발사속도 {ak47.fireRate}");
+            // Debug.Log($"AK-47 찾음: 데미지 {ak47.damage}, 발사속도 {ak47.fireRate}");
         }
         
         // 타입별 무기 목록
         var assaultRifles = repo.GetWeaponsByType(WeaponType.AR);
-        Debug.Log($"돌격소총 {assaultRifles.Count}개:");
-        foreach (var weapon in assaultRifles)
-        {
-            Debug.Log($"  - {weapon.weaponName}");
-        }
+        // Debug.Log($"돌격소총 {assaultRifles.Count}개:");
+        // foreach (var weapon in assaultRifles)
+        // {
+        //     Debug.Log($"  - {weapon.weaponName}");
+        // }
     }
     
     /// <summary>
@@ -189,16 +189,16 @@ public class GameDataExample : MonoBehaviour
         ArmorData legendaryArmor = repo.GetArmorByName("전설의 갑옷");
         if (legendaryArmor != null)
         {
-            Debug.Log($"전설의 갑옷 찾음: 방어력 {legendaryArmor.defense}, 체력 +{legendaryArmor.maxHealth}");
+            // Debug.Log($"전설의 갑옷 찾음: 방어력 {legendaryArmor.defense}, 체력 +{legendaryArmor.maxHealth}");
         }
         
         // 레어리티별 방어구 목록
         var legendaryArmors = repo.GetArmorsByRarity(ArmorRarity.Legendary);
-        Debug.Log($"전설급 방어구 {legendaryArmors.Count}개:");
-        foreach (var armor in legendaryArmors)
-        {
-            Debug.Log($"  - {armor.armorName} ({armor.armorType})");
-        }
+        // Debug.Log($"전설급 방어구 {legendaryArmors.Count}개:");
+        // foreach (var armor in legendaryArmors)
+        // {
+        //     Debug.Log($"  - {armor.armorName} ({armor.armorType})");
+        // }
     }
     
     /// <summary>
@@ -213,15 +213,15 @@ public class GameDataExample : MonoBehaviour
         BossAttackPattern bossPattern = repo.GetBossPatternByName("기본 패턴");
         if (bossPattern != null)
         {
-            Debug.Log($"기본 패턴 찾음: 공격 시퀀스 {bossPattern.attackSequences.Count}개");
+            // Debug.Log($"기본 패턴 찾음: 공격 시퀀스 {bossPattern.attackSequences.Count}개");
         }
         
         // 모든 보스 패턴 출력
-        Debug.Log($"보스 패턴 {repo.BossPatterns.Count}개:");
-        foreach (var pattern in repo.BossPatterns)
-        {
-            Debug.Log($"  - {pattern.patternName}: {pattern.attackSequences.Count}개 시퀀스");
-        }
+        // Debug.Log($"보스 패턴 {repo.BossPatterns.Count}개:");
+        // foreach (var pattern in repo.BossPatterns)
+        // {
+        //     Debug.Log($"  - {pattern.patternName}: {pattern.attackSequences.Count}개 시퀀스");
+        // }
     }
     
     #region UI 업데이트 메서드

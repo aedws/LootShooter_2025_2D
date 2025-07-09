@@ -60,8 +60,8 @@ public class NetworkArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
         if (useRandomTier)
         {
             armorTier = UnityEngine.Random.Range(minTier, maxTier + 1);
-            if (debugMode)
-                Debug.Log($"[NetworkArmorPickup] 랜덤 등급 설정: {armorTier} (범위: {minTier}-{maxTier})");
+            // if (debugMode)
+            //     Debug.Log($"[NetworkArmorPickup] 랜덤 등급 설정: {armorTier} (범위: {minTier}-{maxTier})");
         }
         
         // GoogleSheets에서 로드된 방어구 데이터를 찾아서 설정
@@ -117,8 +117,8 @@ public class NetworkArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
     /// </summary>
     void OnArmorsLoaded(List<ArmorData> armors)
     {
-        if (debugMode)
-            Debug.Log($"[NetworkArmorPickup] 방어구 데이터 로드됨: {armors.Count}개");
+        // if (debugMode)
+        //     Debug.Log($"[NetworkArmorPickup] 방어구 데이터 로드됨: {armors.Count}개");
         
         FindAndSetArmorData();
         
@@ -142,16 +142,16 @@ public class NetworkArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
             return;
         }
         
-        Debug.Log($"[NetworkArmorPickup] {armorType} 타입, {armorTier} 등급 방어구 찾기 시작");
+        // Debug.Log($"[NetworkArmorPickup] {armorType} 타입, {armorTier} 등급 방어구 찾기 시작");
         
         // 해당 타입의 모든 방어구 찾기
         var armorsOfType = gameDataRepo.GetArmorsByType(armorType);
         
-        Debug.Log($"[NetworkArmorPickup] {armorType} 타입 방어구들 (총 {armorsOfType.Count}개):");
-        foreach (var armor in armorsOfType)
-        {
-            Debug.Log($"[NetworkArmorPickup]   - {armor.armorName} (등급: {armor.rarity}, 아이콘: {(armor.icon != null ? "있음" : "없음")})");
-        }
+        // Debug.Log($"[NetworkArmorPickup] {armorType} 타입 방어구들 (총 {armorsOfType.Count}개):");
+        // foreach (var armor in armorsOfType)
+        // {
+        //     Debug.Log($"[NetworkArmorPickup]   - {armor.armorName} (등급: {armor.rarity}, 아이콘: {(armor.icon != null ? "있음" : "없음")})");
+        // }
         
         if (armorsOfType.Count == 0)
         {
@@ -186,16 +186,16 @@ public class NetworkArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
             default: targetRarity = ArmorRarity.Common; break;
         }
         
-        if (debugMode)
-            Debug.Log($"[NetworkArmorPickup] 목표 등급: {targetRarity} (Tier: {armorTier})");
+        // if (debugMode)
+        //     Debug.Log($"[NetworkArmorPickup] 목표 등급: {targetRarity} (Tier: {armorTier})");
         
         // 목표 등급의 방어구가 있으면 선택, 없으면 다른 등급에서 선택
         if (armorsByRarity.ContainsKey(targetRarity) && armorsByRarity[targetRarity].Count > 0)
         {
             // 목표 등급에서 랜덤 선택
             selectedArmor = armorsByRarity[targetRarity][UnityEngine.Random.Range(0, armorsByRarity[targetRarity].Count)];
-            if (debugMode)
-                Debug.Log($"[NetworkArmorPickup] 목표 등급에서 선택: {selectedArmor.armorName}");
+            // if (debugMode)
+            //     Debug.Log($"[NetworkArmorPickup] 목표 등급에서 선택: {selectedArmor.armorName}");
         }
         else
         {
@@ -215,15 +215,15 @@ public class NetworkArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
             {
                 // 가중치 기반 최종 선택
                 selectedArmor = SelectArmorByWeight(candidates);
-                if (debugMode)
-                    Debug.Log($"[NetworkArmorPickup] 가중치 기반 선택: {selectedArmor.armorName}");
+                // if (debugMode)
+                //     Debug.Log($"[NetworkArmorPickup] 가중치 기반 선택: {selectedArmor.armorName}");
             }
             else
             {
                 // 폴백: 첫 번째 방어구 선택
                 selectedArmor = armorsOfType[0];
-                if (debugMode)
-                    Debug.Log($"[NetworkArmorPickup] 폴백 선택: {selectedArmor.armorName}");
+                // if (debugMode)
+                //     Debug.Log($"[NetworkArmorPickup] 폴백 선택: {selectedArmor.armorName}");
             }
         }
         

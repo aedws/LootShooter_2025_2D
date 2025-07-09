@@ -174,7 +174,7 @@ public class GameDataRepository : MonoBehaviour
         {
             _weapons = new List<WeaponData>(localWeaponData);
             _weaponsLoaded = true;
-            Debug.Log($"[GameDataRepository] 로컬 무기 데이터 로드: {_weapons.Count}개");
+            // Debug.Log($"[GameDataRepository] 로컬 무기 데이터 로드: {_weapons.Count}개");
             OnWeaponsUpdated?.Invoke(_weapons);
         }
 
@@ -183,7 +183,7 @@ public class GameDataRepository : MonoBehaviour
         {
             _armors = new List<ArmorData>(localArmorData);
             _armorsLoaded = true;
-            Debug.Log($"[GameDataRepository] 로컬 방어구 데이터 로드: {_armors.Count}개");
+            // Debug.Log($"[GameDataRepository] 로컬 방어구 데이터 로드: {_armors.Count}개");
             OnArmorsUpdated?.Invoke(_armors);
         }
 
@@ -200,7 +200,7 @@ public class GameDataRepository : MonoBehaviour
         _bossPatterns = new List<BossAttackPattern>(patterns);
         _bossPatternsLoaded = true;
         
-        Debug.Log($"[GameDataRepository] 보스 패턴 데이터 로드: {_bossPatterns.Count}개");
+        // Debug.Log($"[GameDataRepository] 보스 패턴 데이터 로드: {_bossPatterns.Count}개");
         OnBossPatternsUpdated?.Invoke(_bossPatterns);
         CheckAllDataLoaded();
     }
@@ -492,11 +492,11 @@ public class GameDataRepository : MonoBehaviour
     [ContextMenu("데이터 상태 출력")]
     public void PrintDataStatus()
     {
-        Debug.Log($"[GameDataRepository] 데이터 상태:");
-        Debug.Log($"  무기: {_weapons.Count}개 (로드됨: {_weaponsLoaded})");
-        Debug.Log($"  방어구: {_armors.Count}개 (로드됨: {_armorsLoaded})");
-        Debug.Log($"  보스 패턴: {_bossPatterns.Count}개 (로드됨: {_bossPatternsLoaded})");
-        Debug.Log($"  전체 로드 완료: {IsAllDataLoaded}");
+        // Debug.Log($"[GameDataRepository] 데이터 상태:");
+        // Debug.Log($"  무기: {_weapons.Count}개 (로드됨: {_weaponsLoaded})");
+        // Debug.Log($"  방어구: {_armors.Count}개 (로드됨: {_armorsLoaded})");
+        // Debug.Log($"  보스 패턴: {_bossPatterns.Count}개 (로드됨: {_bossPatternsLoaded})");
+        // Debug.Log($"  전체 로드 완료: {IsAllDataLoaded}");
     }
 
     #endregion

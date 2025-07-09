@@ -182,7 +182,7 @@ public class BossSpawner : MonoBehaviour
             // 이벤트 발생
             OnBossSpawned?.Invoke(currentBoss);
             
-            Debug.Log($"[BossSpawner] 보스 스폰: {currentBoss.bossName} at {spawnPosition}");
+            // Debug.Log($"[BossSpawner] 보스 스폰: {currentBoss.bossName} at {spawnPosition}");
         }
         else
         {
@@ -247,7 +247,7 @@ public class BossSpawner : MonoBehaviour
         // 이벤트 발생
         OnBossFightStarted?.Invoke();
         
-        Debug.Log("[BossSpawner] 보스 전투 시작!");
+        // Debug.Log("[BossSpawner] 보스 전투 시작!");
     }
     
     void PauseNormalSpawners()
@@ -344,7 +344,7 @@ public class BossSpawner : MonoBehaviour
             // 보스 사망 이벤트
             OnBossDefeated?.Invoke(currentBoss);
             
-            Debug.Log($"[BossSpawner] 보스 {currentBoss.bossName} 처치!");
+            // Debug.Log($"[BossSpawner] 보스 {currentBoss.bossName} 처치!");
         }
         
         EndBossFight();
@@ -373,7 +373,7 @@ public class BossSpawner : MonoBehaviour
         // 이벤트 발생
         OnBossFightEnded?.Invoke();
         
-        Debug.Log("[BossSpawner] 보스 전투 종료!");
+        // Debug.Log("[BossSpawner] 보스 전투 종료!");
     }
     
     void ForceEndBossFight()

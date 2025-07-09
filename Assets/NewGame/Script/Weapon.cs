@@ -532,10 +532,10 @@ public class Weapon : MonoBehaviour
         fireCooldown = currentFireRate;
         
         // 디버그: 쿨다운 설정 확인 (MG만 활성화)
-        if (weaponData.weaponType == WeaponType.MG)
-        {
-            Debug.Log($"[MG COOLDOWN] {weaponData.weaponName}: {currentFireRate}초 쿨다운 설정 (예열진행도: {warmupProgress:F2})");
-        }
+        // if (weaponData.weaponType == WeaponType.MG)
+        // {
+        //     Debug.Log($"[MG COOLDOWN] {weaponData.weaponName}: {currentFireRate}초 쿨다운 설정 (예열진행도: {warmupProgress:F2})");
+        // }
     }
 
     private int GetCurrentDamage()
@@ -579,7 +579,7 @@ public class Weapon : MonoBehaviour
             // MG 디버그 로그 추가
             if (weaponData.weaponType == WeaponType.MG)
             {
-                Debug.Log($"[MG INIT] {weaponData.weaponName}: fireRate={weaponData.fireRate}, warmupTime={weaponData.warmupTime}, maxWarmupFireRate={weaponData.maxWarmupFireRate}");
+                // Debug.Log($"[MG INIT] {weaponData.weaponName}: fireRate={weaponData.fireRate}, warmupTime={weaponData.warmupTime}, maxWarmupFireRate={weaponData.maxWarmupFireRate}");
             }
             
             currentSpread = weaponData.baseSpread;

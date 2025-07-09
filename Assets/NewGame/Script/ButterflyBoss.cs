@@ -218,7 +218,7 @@ public class ButterflyBoss : MonoBehaviour
         // 이벤트 발생
         OnPhaseChanged?.Invoke(newPhase);
         
-        Debug.Log($"[ButterflyBoss] 페이즈 전환: {oldPhase} → {newPhase}");
+        // Debug.Log($"[ButterflyBoss] 페이즈 전환: {oldPhase} → {newPhase}");
     }
     
     void UpdatePhasePatterns()
@@ -992,7 +992,7 @@ public class ButterflyBoss : MonoBehaviour
             phase5PatternIndex = 0;
             
             OnBossRevival?.Invoke();
-            Debug.Log("[ButterflyBoss] Phase 5 시작 - 부활 시퀀스");
+            // Debug.Log("[ButterflyBoss] Phase 5 시작 - 부활 시퀀스");
         }
         else
         {

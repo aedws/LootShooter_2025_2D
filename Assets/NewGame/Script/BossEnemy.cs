@@ -221,7 +221,7 @@ public class BossEnemy : MonoBehaviour
         // 이벤트 발생
         OnPhaseChanged?.Invoke(newPhase);
         
-        Debug.Log($"[Boss] {bossName} 페이즈 전환: {oldPhase} → {newPhase}");
+        // Debug.Log($"[Boss] {bossName} 페이즈 전환: {oldPhase} → {newPhase}");
     }
     
     void UpdatePhaseAttacks()
