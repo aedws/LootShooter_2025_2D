@@ -13,7 +13,7 @@ public class TestArmorSystem : MonoBehaviour
     public GameObject player;
     
     [Header("🎮 테스트 컨트롤")]
-    [Tooltip("R키: 랜덤 방어구 생성")]
+    [Tooltip("F키: 랜덤 방어구 생성")]
     public bool enableRandomSpawn = true;
     
     [Tooltip("T키: 특정 타입 방어구 생성")]
@@ -37,6 +37,9 @@ public class TestArmorSystem : MonoBehaviour
     
     void Start()
     {
+        // 개발 완료 후 테스트 시스템 비활성화
+        this.enabled = false;
+        
         // 레이어 설정 확인
         CheckAndSetupLayers();
         
@@ -79,7 +82,7 @@ public class TestArmorSystem : MonoBehaviour
     void Update()
     {
         // 테스트 컨트롤
-        if (enableRandomSpawn && Input.GetKeyDown(KeyCode.R))
+        if (enableRandomSpawn && Input.GetKeyDown(KeyCode.F))
         {
             SpawnRandomArmor();
         }

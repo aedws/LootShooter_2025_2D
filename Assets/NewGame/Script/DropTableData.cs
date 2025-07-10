@@ -11,6 +11,23 @@ public class MonsterInfo
     public int MinDropCount;
     public int MaxDropCount;
     public string MainRarity;
+    
+    // 몬스터 기본 스탯
+    public int MaxHealth = 100;
+    public int Defense = 0;
+    public float MoveSpeed = 3.5f;
+    public int ExpReward = 10;
+    
+    // 전투 관련 스탯
+    public int Damage = 10;
+    public float AttackRange = 1.5f;
+    public float AttackCooldown = 0.8f;
+    public float DetectionRange = 25f;
+    
+    // AI 관련 스탯
+    public float Acceleration = 8f;
+    public float MaxSpeed = 4f;
+    public float SeparationDistance = 2f;
 }
 
 [System.Serializable]

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Linq;
 
 public class Enemy : MonoBehaviour
 {
@@ -34,6 +35,8 @@ public class Enemy : MonoBehaviour
     
     [Header("디버그")]
     public bool showGizmos = true;
+    public bool useGoogleSheetsData = true; // 구글 시트 데이터 사용 여부
+    public bool debugMode = false; // 디버그 모드
     
     void Awake()
     {
@@ -51,6 +54,12 @@ public class Enemy : MonoBehaviour
     
     void Start()
     {
+        // 구글 시트 데이터 적용
+        if (useGoogleSheetsData)
+        {
+            ApplyGoogleSheetsData();
+        }
+        
         // Health 이벤트 연결
         if (health != null)
         {
@@ -82,6 +91,118 @@ public class Enemy : MonoBehaviour
         }
         
         // Debug.Log($"[Enemy DEBUG] {enemyName} 초기화 완료");
+    }
+    
+    /// <summary>
+    /// 구글 시트에서 몬스터 정보를 로드하고 적용합니다.
+    /// </summary>
+    private void ApplyGoogleSheetsData()
+    {
+        if (debugMode)
+            Debug.Log($"[Enemy] {enemyName} 구글 시트 데이터 적용 시작");
+        
+        // ItemDropManager를 통해 드랍 테이블 데이터 가져오기
+        if (ItemDropManager.Instance != null && ItemDropManager.Instance.IsDropTableLoaded())
+        {
+            if (debugMode)
+                Debug.Log($"[Enemy] {enemyName} ItemDropManager에서 몬스터 정보 검색 중...");
+            
+            // DropTableData에 GetMonsterInfo 메서드가 있다고 가정
+            // 실제로는 ItemDropManager에서 몬스터 정보를 가져오는 메서드를 추가해야 함
+            MonsterInfo monsterInfo = GetMonsterInfoFromDropManager(enemyName);
+            
+            if (monsterInfo != null)
+            {
+                if (debugMode)
+                    Debug.Log($"[Enemy] {enemyName} 몬스터 정보 찾음 - 체력: {monsterInfo.MaxHealth}, 공격력: {monsterInfo.Damage}");
+                
+                // 몬스터 스탯 적용
+                ApplyMonsterStats(monsterInfo);
+                
+                if (debugMode)
+                    Debug.Log($"[Enemy] {enemyName} 구글 시트 데이터 적용 완료");
+            }
+            else
+            {
+                if (debugMode)
+                {
+                    Debug.LogWarning($"[Enemy] {enemyName}의 구글 시트 데이터를 찾을 수 없습니다. (enemyName: {enemyName})");
+                    
+                    // 사용 가능한 몬스터 ID 목록 출력
+                    var allMonsterInfos = ItemDropManager.Instance.GetAllMonsterInfos();
+                    Debug.Log($"[Enemy] 사용 가능한 몬스터 ID 목록: {string.Join(", ", allMonsterInfos.Select(m => m.MonsterID))}");
+                }
+            }
+        }
+        else
+        {
+            if (debugMode)
+                Debug.LogWarning($"[Enemy] {enemyName} 구글 시트 데이터가 로드되지 않았습니다. 기본값을 사용합니다.");
+        }
+    }
+    
+    /// <summary>
+    /// ItemDropManager에서 몬스터 정보를 가져옵니다.
+    /// </summary>
+    private MonsterInfo GetMonsterInfoFromDropManager(string monsterID)
+    {
+        if (ItemDropManager.Instance != null)
+        {
+            return ItemDropManager.Instance.GetMonsterInfo(monsterID);
+        }
+        return null;
+    }
+    
+    /// <summary>
+    /// 몬스터 스탯을 적용합니다.
+    /// </summary>
+    private void ApplyMonsterStats(MonsterInfo monsterInfo)
+    {
+        if (debugMode)
+            Debug.Log($"[Enemy] {enemyName} 스탯 적용 시작 - 체력: {monsterInfo.MaxHealth}");
+        
+        // 기본 스탯 적용
+        if (health != null)
+        {
+            int oldHealth = health.maxHealth;
+            health.SetMaxHealth(monsterInfo.MaxHealth);
+            if (debugMode)
+                Debug.Log($"[Enemy] {enemyName} 체력 변경: {oldHealth} → {health.maxHealth}");
+        }
+        else
+        {
+            if (debugMode)
+                Debug.LogWarning($"[Enemy] {enemyName} Health 컴포넌트가 없습니다!");
+        }
+        
+        // 전투 스탯 적용
+        int oldDamage = damage;
+        damage = monsterInfo.Damage;
+        if (debugMode)
+            Debug.Log($"[Enemy] {enemyName} 공격력 변경: {oldDamage} → {damage}");
+        
+        float oldMoveSpeed = moveSpeed;
+        moveSpeed = monsterInfo.MoveSpeed;
+        if (debugMode)
+            Debug.Log($"[Enemy] {enemyName} 이동속도 변경: {oldMoveSpeed} → {moveSpeed}");
+        
+        attackRange = monsterInfo.AttackRange;
+        attackCooldown = monsterInfo.AttackCooldown;
+        detectionRange = monsterInfo.DetectionRange;
+        
+        // AI 스탯 적용
+        acceleration = monsterInfo.Acceleration;
+        maxSpeed = monsterInfo.MaxSpeed;
+        separationDistance = monsterInfo.SeparationDistance;
+        
+        // 경험치 보상 적용
+        int oldExpValue = expValue;
+        expValue = monsterInfo.ExpReward;
+        if (debugMode)
+            Debug.Log($"[Enemy] {enemyName} 경험치 보상 변경: {oldExpValue} → {expValue}");
+        
+        if (debugMode)
+            Debug.Log($"[Enemy] {enemyName} 스탯 적용 완료");
     }
     
     // Layer Collision Matrix로 몬스터끼리 충돌 방지하므로 분리 코드 불필요

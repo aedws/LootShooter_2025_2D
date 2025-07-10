@@ -194,19 +194,37 @@ public class GoogleSheetsManager : MonoBehaviour
             for (int i = 3; i < response.values.Count; i++)
             {
                 var row = response.values[i];
-                if (row.Count >= 6)
+                if (row.Count >= 7) // Level 칼럼이 추가되어 최소 7개 필요
                 {
                     MonsterInfo monsterInfo = new MonsterInfo
                     {
                         MonsterID = row[0],
                         MonsterName = row[1],
-                        DropChance = SafeParseFloat(row[2]),
-                        MinDropCount = SafeParseInt(row[3]),
-                        MaxDropCount = SafeParseInt(row[4]),
-                        MainRarity = row[5]
+                        // Level = row[2] (현재 MonsterInfo에 Level 필드가 없으므로 건너뛰기)
+                        DropChance = SafeParseFloat(row[3]),
+                        MinDropCount = SafeParseInt(row[4]),
+                        MaxDropCount = SafeParseInt(row[5]),
+                        MainRarity = row[6]
                     };
                     
+                    // 확장된 필드들 파싱 (8번째 칼럼부터, Level 칼럼 때문에 인덱스 +1)
+                    if (row.Count >= 8) monsterInfo.MaxHealth = SafeParseInt(row[7]);
+                    if (row.Count >= 9) monsterInfo.Defense = SafeParseInt(row[8]);
+                    if (row.Count >= 10) monsterInfo.MoveSpeed = SafeParseFloat(row[9]);
+                    if (row.Count >= 11) monsterInfo.ExpReward = SafeParseInt(row[10]);
+                    if (row.Count >= 12) monsterInfo.Damage = SafeParseInt(row[11]);
+                    if (row.Count >= 13) monsterInfo.AttackRange = SafeParseFloat(row[12]);
+                    if (row.Count >= 14) monsterInfo.AttackCooldown = SafeParseFloat(row[13]);
+                    if (row.Count >= 15) monsterInfo.DetectionRange = SafeParseFloat(row[14]);
+                    if (row.Count >= 16) monsterInfo.Acceleration = SafeParseFloat(row[15]);
+                    if (row.Count >= 17) monsterInfo.MaxSpeed = SafeParseFloat(row[16]);
+                    if (row.Count >= 18) monsterInfo.SeparationDistance = SafeParseFloat(row[17]);
+                    
                     dropTableData.MonsterInfos.Add(monsterInfo);
+                }
+                else
+                {
+                    Debug.LogWarning($"[GoogleSheetsManager] MonsterInfo 행 {i + 1}의 컬럼 수가 부족합니다. (필요: 7개 이상, 실제: {row.Count})");
                 }
             }
         }

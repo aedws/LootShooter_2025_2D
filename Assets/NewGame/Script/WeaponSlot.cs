@@ -243,8 +243,8 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
             DiagnoseCanvasLayerIssues();
         }
         
-        // 🆕 F9: UI 레이어 충돌 문제 자동 해결
-        if (Input.GetKeyDown(KeyCode.F9))
+        // 🆕 F4: UI 레이어 충돌 문제 자동 해결
+        if (Input.GetKeyDown(KeyCode.F4))
         {
             FixUILayerConflicts();
         }

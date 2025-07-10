@@ -1541,7 +1541,7 @@ Transform:
   m_GameObject: {fileID: 450897186}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 11.97, y: 0, z: 0}
+  m_LocalPosition: {x: -6.9, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4022,7 +4022,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1240913581
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8083,7 +8083,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1994813535
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8176,7 +8176,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1998346866
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8371,7 +8371,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1beaeb4838274c845be41a3dea964211, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dropTables: []
   dropRadius: 1.5
   useNetworkPickup: 1
   debugMode: 1
@@ -8808,21 +8807,21 @@ PrefabInstance:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 1210224242}
-  - {fileID: 1286497891}
-  - {fileID: 1356433551}
   - {fileID: 97404977}
-  - {fileID: 619394802}
-  - {fileID: 1163192265}
-  - {fileID: 1767698840}
-  - {fileID: 2112165851}
-  - {fileID: 1054296702}
-  - {fileID: 1257193142}
+  - {fileID: 1286497891}
+  - {fileID: 1210224242}
   - {fileID: 262997119}
-  - {fileID: 1240913582}
-  - {fileID: 1730143125}
+  - {fileID: 2038752595}
+  - {fileID: 2112165851}
+  - {fileID: 619394802}
   - {fileID: 1998346867}
   - {fileID: 1994813536}
+  - {fileID: 1240913582}
+  - {fileID: 1356433551}
+  - {fileID: 1163192265}
+  - {fileID: 1767698840}
+  - {fileID: 1054296702}
+  - {fileID: 1257193142}
+  - {fileID: 1730143125}
   - {fileID: 1618091015}
-  - {fileID: 2038752595}
   - {fileID: 450897188}

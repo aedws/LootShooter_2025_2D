@@ -8,7 +8,7 @@ public class ItemDropManager : MonoBehaviour
     public bool useNetworkPickup = true; // 네트워크 픽업 시스템 사용 여부
     
     [Header("디버그")]
-    public bool debugMode = true;
+    public bool debugMode = false;
     
     private static ItemDropManager instance;
     public static ItemDropManager Instance
@@ -460,5 +460,29 @@ public class ItemDropManager : MonoBehaviour
     {
         isDropTableLoaded = false;
         LoadDropTable();
+    }
+    
+    /// <summary>
+    /// 몬스터 정보를 가져옵니다.
+    /// </summary>
+    public MonsterInfo GetMonsterInfo(string monsterID)
+    {
+        if (dropTableData != null)
+        {
+            return dropTableData.GetMonsterInfo(monsterID);
+        }
+        return null;
+    }
+    
+    /// <summary>
+    /// 모든 몬스터 정보를 가져옵니다.
+    /// </summary>
+    public List<MonsterInfo> GetAllMonsterInfos()
+    {
+        if (dropTableData != null)
+        {
+            return dropTableData.MonsterInfos;
+        }
+        return new List<MonsterInfo>();
     }
 } 
