@@ -237,14 +237,14 @@ public class Enemy : MonoBehaviour
         else
         {
             // 기존 시스템 (백업)
-            if (dropItems.Length > 0 && Random.value <= dropChance)
+        if (dropItems.Length > 0 && Random.value <= dropChance)
+        {
+            GameObject itemToDrop = dropItems[Random.Range(0, dropItems.Length)];
+            if (itemToDrop != null)
             {
-                GameObject itemToDrop = dropItems[Random.Range(0, dropItems.Length)];
-                if (itemToDrop != null)
-                {
-                    Vector3 dropPosition = transform.position + Random.insideUnitSphere * 0.5f;
-                    dropPosition.z = 0;
-                    Instantiate(itemToDrop, dropPosition, Quaternion.identity);
+                Vector3 dropPosition = transform.position + Random.insideUnitSphere * 0.5f;
+                dropPosition.z = 0;
+                Instantiate(itemToDrop, dropPosition, Quaternion.identity);
                 }
             }
         }

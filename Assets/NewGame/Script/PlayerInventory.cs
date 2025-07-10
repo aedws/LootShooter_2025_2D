@@ -212,7 +212,7 @@ public class PlayerInventory : MonoBehaviour
             currentWeaponObj.transform.localPosition = Vector3.zero;
             currentWeaponObj.transform.localRotation = Quaternion.identity;
             currentWeaponObj.transform.localScale = prefabScale; // 프리팹 크기 유지
-            
+
             // 🆕 무기 장착 시 물리 컴포넌트들 제거
             RemovePhysicsComponentsFromWeapon(currentWeaponObj);
             
@@ -419,7 +419,7 @@ public class PlayerInventory : MonoBehaviour
     {
         return leftWeaponObj != null ? leftWeaponObj.GetComponent<Weapon>() : null;
     }
-
+    
     // 인벤토리 매니저와의 연동 메소드들
     public List<WeaponData> GetWeapons()
     {

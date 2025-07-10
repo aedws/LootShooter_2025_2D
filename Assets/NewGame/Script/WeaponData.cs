@@ -98,7 +98,7 @@ public class WeaponData : ScriptableObject
     
     [Tooltip("조준 모드에서 조준선이 표시되는 거리")]
     public float aimingRange = 15f;
-
+    
     [Header("쌍권총 설정 - Dual Pistol Settings (HG 타입 전용)")]
     [Tooltip("쌍권총 사용 여부 (true시 양손에 권총 장착)")]
     public bool isDualPistol = false;

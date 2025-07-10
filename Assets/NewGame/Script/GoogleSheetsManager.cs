@@ -16,6 +16,7 @@ public class GoogleSheetsManager : MonoBehaviour
     // 이벤트
     public event Action<List<WeaponData>> OnWeaponsLoaded;
     public event Action<List<ArmorData>> OnArmorsLoaded;
+    public event Action<DropTableData> OnDropTableLoaded;
     public event Action<string> OnError;
     
     private void Start()
@@ -55,6 +56,17 @@ public class GoogleSheetsManager : MonoBehaviour
         StartCoroutine(FetchArmorsData());
     }
     
+    public void LoadDropTable()
+    {
+        if (string.IsNullOrEmpty(config.DropTableSpreadsheetId))
+        {
+            OnError?.Invoke("드랍 테이블 스프레드시트 ID가 설정되지 않았습니다.");
+            return;
+        }
+        
+        StartCoroutine(FetchDropTableData());
+    }
+    
     /// <summary>
     /// 모든 데이터를 로드합니다 (GameDataRepository 호환용)
     /// </summary>
@@ -62,6 +74,7 @@ public class GoogleSheetsManager : MonoBehaviour
     {
         LoadWeapons();
         LoadArmors();
+        LoadDropTable();
     }
     
     private IEnumerator FetchWeaponsData()
@@ -115,6 +128,163 @@ public class GoogleSheetsManager : MonoBehaviour
             {
                 OnError?.Invoke($"방어구 데이터 로드 실패: {request.error}");
             }
+        }
+    }
+    
+    private IEnumerator FetchDropTableData()
+    {
+        string apiKey = config.GetApiKey();
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            OnError?.Invoke("API 키가 설정되지 않았습니다.");
+            yield break;
+        }
+        
+        DropTableData dropTableData = new DropTableData();
+        
+        // MonsterInfo 시트 로드
+        yield return StartCoroutine(FetchSheetData(config.MonsterInfoSheetName, (jsonData) => {
+            ParseMonsterInfoData(jsonData, dropTableData);
+        }));
+        
+        // ItemTypeDropRates 시트 로드
+        yield return StartCoroutine(FetchSheetData(config.ItemTypeDropRatesSheetName, (jsonData) => {
+            ParseItemTypeDropRatesData(jsonData, dropTableData);
+        }));
+        
+        // MonsterRarityDropRates 시트 로드
+        yield return StartCoroutine(FetchSheetData(config.MonsterRarityDropRatesSheetName, (jsonData) => {
+            ParseMonsterRarityDropRatesData(jsonData, dropTableData);
+        }));
+        
+        OnDropTableLoaded?.Invoke(dropTableData);
+    }
+    
+    private IEnumerator FetchSheetData(string sheetName, Action<string> onComplete)
+    {
+        string url = $"https://sheets.googleapis.com/v4/spreadsheets/{config.DropTableSpreadsheetId}/values/{sheetName}?key={config.GetApiKey()}";
+        
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+            
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                onComplete?.Invoke(request.downloadHandler.text);
+            }
+            else
+            {
+                OnError?.Invoke($"{sheetName} 데이터 로드 실패: {request.error}");
+            }
+        }
+    }
+    
+    private void ParseMonsterInfoData(string jsonData, DropTableData dropTableData)
+    {
+        try
+        {
+            var response = JsonConvert.DeserializeObject<GoogleSheetsResponse>(jsonData);
+            if (response?.values == null || response.values.Count < 4)
+            {
+                OnError?.Invoke("MonsterInfo 데이터가 비어있습니다. (최소 4행 필요: 헤더 3행 + 데이터 1행)");
+                return;
+            }
+            
+            // 상위 3행은 헤더이므로 건너뛰기 (4번째 행부터 데이터 시작)
+            for (int i = 3; i < response.values.Count; i++)
+            {
+                var row = response.values[i];
+                if (row.Count >= 6)
+                {
+                    MonsterInfo monsterInfo = new MonsterInfo
+                    {
+                        MonsterID = row[0],
+                        MonsterName = row[1],
+                        DropChance = SafeParseFloat(row[2]),
+                        MinDropCount = SafeParseInt(row[3]),
+                        MaxDropCount = SafeParseInt(row[4]),
+                        MainRarity = row[5]
+                    };
+                    
+                    dropTableData.MonsterInfos.Add(monsterInfo);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            OnError?.Invoke($"MonsterInfo 데이터 파싱 실패: {e.Message}");
+        }
+    }
+    
+    private void ParseItemTypeDropRatesData(string jsonData, DropTableData dropTableData)
+    {
+        try
+        {
+            var response = JsonConvert.DeserializeObject<GoogleSheetsResponse>(jsonData);
+            if (response?.values == null || response.values.Count < 4)
+            {
+                OnError?.Invoke("ItemTypeDropRates 데이터가 비어있습니다. (최소 4행 필요: 헤더 3행 + 데이터 1행)");
+                return;
+            }
+            
+            // 상위 3행은 헤더이므로 건너뛰기 (4번째 행부터 데이터 시작)
+            for (int i = 3; i < response.values.Count; i++)
+            {
+                var row = response.values[i];
+                if (row.Count >= 4)
+                {
+                    ItemTypeDropRate dropRate = new ItemTypeDropRate
+                    {
+                        MonsterID = row[0],
+                        WeaponDropRate = SafeParseFloat(row[1]),
+                        ArmorDropRate = SafeParseFloat(row[2]),
+                        AccessoryDropRate = SafeParseFloat(row[3])
+                    };
+                    
+                    dropTableData.ItemTypeDropRates.Add(dropRate);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            OnError?.Invoke($"ItemTypeDropRates 데이터 파싱 실패: {e.Message}");
+        }
+    }
+    
+    private void ParseMonsterRarityDropRatesData(string jsonData, DropTableData dropTableData)
+    {
+        try
+        {
+            var response = JsonConvert.DeserializeObject<GoogleSheetsResponse>(jsonData);
+            if (response?.values == null || response.values.Count < 4)
+            {
+                OnError?.Invoke("MonsterRarityDropRates 데이터가 비어있습니다. (최소 4행 필요: 헤더 3행 + 데이터 1행)");
+                return;
+            }
+            
+            // 상위 3행은 헤더이므로 건너뛰기 (4번째 행부터 데이터 시작)
+            for (int i = 3; i < response.values.Count; i++)
+            {
+                var row = response.values[i];
+                if (row.Count >= 6)
+                {
+                    MonsterRarityDropRate rarityDropRate = new MonsterRarityDropRate
+                    {
+                        MonsterID = row[0],
+                        CommonRate = SafeParseFloat(row[1]),
+                        RareRate = SafeParseFloat(row[2]),
+                        EpicRate = SafeParseFloat(row[3]),
+                        LegendaryRate = SafeParseFloat(row[4]),
+                        PrimordialRate = SafeParseFloat(row[5])
+                    };
+                    
+                    dropTableData.MonsterRarityDropRates.Add(rarityDropRate);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            OnError?.Invoke($"MonsterRarityDropRates 데이터 파싱 실패: {e.Message}");
         }
     }
     

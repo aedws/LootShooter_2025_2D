@@ -239,7 +239,7 @@ public class ArmorSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     public void OnPointerExit(PointerEventData eventData)
     {
         isHighlighted = false;
-
+        
         // 방어구가 있으면 등급색, 없으면 emptySlotColor로 복원
         if (backgroundImage != null)
         {

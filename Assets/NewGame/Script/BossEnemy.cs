@@ -699,28 +699,28 @@ public class BossEnemy : MonoBehaviour
         else
         {
             // 기존 시스템 (백업)
-            // 확정 드롭
-            foreach (GameObject drop in guaranteedDrops)
+        // 확정 드롭
+        foreach (GameObject drop in guaranteedDrops)
+        {
+            if (drop != null)
             {
-                if (drop != null)
+                Vector3 dropPosition = transform.position + Random.insideUnitSphere * 2f;
+                dropPosition.z = 0;
+                Instantiate(drop, dropPosition, Quaternion.identity);
+            }
+        }
+        
+        // 희귀 드롭
+        if (Random.value <= rareDropChance)
+        {
+            if (rareDrops.Length > 0)
+            {
+                GameObject rareDrop = rareDrops[Random.Range(0, rareDrops.Length)];
+                if (rareDrop != null)
                 {
                     Vector3 dropPosition = transform.position + Random.insideUnitSphere * 2f;
                     dropPosition.z = 0;
-                    Instantiate(drop, dropPosition, Quaternion.identity);
-                }
-            }
-            
-            // 희귀 드롭
-            if (Random.value <= rareDropChance)
-            {
-                if (rareDrops.Length > 0)
-                {
-                    GameObject rareDrop = rareDrops[Random.Range(0, rareDrops.Length)];
-                    if (rareDrop != null)
-                    {
-                        Vector3 dropPosition = transform.position + Random.insideUnitSphere * 2f;
-                        dropPosition.z = 0;
-                        Instantiate(rareDrop, dropPosition, Quaternion.identity);
+                    Instantiate(rareDrop, dropPosition, Quaternion.identity);
                     }
                 }
             }

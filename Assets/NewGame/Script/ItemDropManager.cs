@@ -1,37 +1,14 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-[System.Serializable]
-public class DropItem
-{
-    public GameObject itemPrefab;
-    public float dropChance = 0.1f; // 0.0 ~ 1.0
-    public int minQuantity = 1;
-    public int maxQuantity = 1;
-    public bool isRare = false; // 레어 아이템 여부
-}
-
-[System.Serializable]
-public class EnemyDropTable
-{
-    public string enemyType = "Basic Enemy";
-    public DropItem[] commonItems; // 일반 아이템들
-    public DropItem[] rareItems; // 레어 아이템들
-    public float rareItemChance = 0.05f; // 레어 아이템 드랍 확률
-    public int maxItemsPerDrop = 3; // 한 번에 드랍할 수 있는 최대 아이템 수
-}
-
 public class ItemDropManager : MonoBehaviour
 {
-    [Header("드랍 테이블 설정")]
-    public EnemyDropTable[] dropTables;
-    
     [Header("드랍 설정")]
     public float dropRadius = 1.5f; // 드랍 반경
     public bool useNetworkPickup = true; // 네트워크 픽업 시스템 사용 여부
     
     [Header("디버그")]
-    public bool debugMode = false;
+    public bool debugMode = true;
     
     private static ItemDropManager instance;
     public static ItemDropManager Instance
@@ -51,6 +28,14 @@ public class ItemDropManager : MonoBehaviour
         }
     }
     
+    // 드랍 테이블 데이터
+    private DropTableData dropTableData;
+    private bool isDropTableLoaded = false;
+    
+    // 무기/방어구 프리팹 캐시
+    private List<WeaponData> weaponDataList = new List<WeaponData>();
+    private List<ArmorData> armorDataList = new List<ArmorData>();
+    
     void Awake()
     {
         if (instance == null)
@@ -64,6 +49,86 @@ public class ItemDropManager : MonoBehaviour
         }
     }
     
+    void Start()
+    {
+        // 구글 시트 매니저 이벤트 구독
+        GoogleSheetsManager sheetsManager = FindFirstObjectByType<GoogleSheetsManager>();
+        if (sheetsManager != null)
+        {
+            sheetsManager.OnDropTableLoaded += OnDropTableLoaded;
+            sheetsManager.OnWeaponsLoaded += OnWeaponsLoaded;
+            sheetsManager.OnArmorsLoaded += OnArmorsLoaded;
+            sheetsManager.OnError += OnGoogleSheetsError;
+        }
+        
+        // 드랍 테이블 로드
+        LoadDropTable();
+    }
+    
+    void OnDestroy()
+    {
+        // 이벤트 구독 해제
+        GoogleSheetsManager sheetsManager = FindFirstObjectByType<GoogleSheetsManager>();
+        if (sheetsManager != null)
+        {
+            sheetsManager.OnDropTableLoaded -= OnDropTableLoaded;
+            sheetsManager.OnWeaponsLoaded -= OnWeaponsLoaded;
+            sheetsManager.OnArmorsLoaded -= OnArmorsLoaded;
+            sheetsManager.OnError -= OnGoogleSheetsError;
+        }
+    }
+    
+    private void LoadDropTable()
+    {
+        GoogleSheetsManager sheetsManager = FindFirstObjectByType<GoogleSheetsManager>();
+        if (sheetsManager != null)
+        {
+            sheetsManager.LoadDropTable();
+            sheetsManager.LoadWeapons();
+            sheetsManager.LoadArmors();
+        }
+        else
+        {
+            Debug.LogError("[ItemDropManager] GoogleSheetsManager를 찾을 수 없습니다!");
+        }
+    }
+    
+    private void OnDropTableLoaded(DropTableData data)
+    {
+        dropTableData = data;
+        isDropTableLoaded = true;
+        
+        if (debugMode)
+        {
+            Debug.Log($"[ItemDropManager] 드랍 테이블 로드 완료: {data.MonsterInfos.Count}개 몬스터, {data.ItemTypeDropRates.Count}개 아이템 타입, {data.MonsterRarityDropRates.Count}개 등급 드랍률");
+        }
+    }
+    
+    private void OnWeaponsLoaded(List<WeaponData> weapons)
+    {
+        weaponDataList = weapons;
+        
+        if (debugMode)
+        {
+            Debug.Log($"[ItemDropManager] 무기 데이터 로드 완료: {weapons.Count}개");
+        }
+    }
+    
+    private void OnArmorsLoaded(List<ArmorData> armors)
+    {
+        armorDataList = armors;
+        
+        if (debugMode)
+        {
+            Debug.Log($"[ItemDropManager] 방어구 데이터 로드 완료: {armors.Count}개");
+        }
+    }
+    
+    private void OnGoogleSheetsError(string error)
+    {
+        Debug.LogError($"[ItemDropManager] 구글 시트 오류: {error}");
+    }
+    
     /// <summary>
     /// 몬스터가 죽었을 때 아이템을 드랍합니다.
     /// </summary>
@@ -72,64 +137,222 @@ public class ItemDropManager : MonoBehaviour
         if (debugMode)
             Debug.Log($"[ItemDropManager] {enemyType}에서 아이템 드랍 시도: {position}");
         
-        // 해당 몬스터 타입의 드랍 테이블 찾기
-        EnemyDropTable dropTable = FindDropTable(enemyType);
-        if (dropTable == null)
+        // 구글 시트 데이터가 로드되지 않았으면 드랍하지 않음
+        if (!isDropTableLoaded)
         {
             if (debugMode)
-                Debug.LogWarning($"[ItemDropManager] {enemyType}의 드랍 테이블을 찾을 수 없습니다.");
+                Debug.LogWarning("[ItemDropManager] 드랍 테이블이 아직 로드되지 않았습니다.");
             return;
         }
         
-        List<GameObject> itemsToDrop = new List<GameObject>();
-        
-        // 레어 아이템 드랍 시도
-        if (Random.value <= dropTable.rareItemChance && dropTable.rareItems.Length > 0)
+        // 해당 몬스터의 정보 찾기
+        MonsterInfo monsterInfo = dropTableData.GetMonsterInfo(enemyType);
+        if (monsterInfo == null)
         {
-            DropItem rareItem = GetRandomDropItem(dropTable.rareItems);
-            if (rareItem != null)
-            {
-                int quantity = Random.Range(rareItem.minQuantity, rareItem.maxQuantity + 1);
-                for (int i = 0; i < quantity; i++)
-                {
-                    itemsToDrop.Add(rareItem.itemPrefab);
-                }
-                
-                if (debugMode)
-                    Debug.Log($"[ItemDropManager] 레어 아이템 드랍: {rareItem.itemPrefab.name} x{quantity}");
-            }
+            if (debugMode)
+                Debug.LogWarning($"[ItemDropManager] {enemyType}의 몬스터 정보를 찾을 수 없습니다.");
+            return;
         }
         
-        // 일반 아이템 드랍 시도
-        foreach (DropItem item in dropTable.commonItems)
+        // 드랍 확률 체크
+        if (Random.value > monsterInfo.DropChance)
         {
-            if (Random.value <= item.dropChance)
-            {
-                int quantity = Random.Range(item.minQuantity, item.maxQuantity + 1);
-                for (int i = 0; i < quantity; i++)
-                {
-                    itemsToDrop.Add(item.itemPrefab);
-                }
-                
-                if (debugMode)
-                    Debug.Log($"[ItemDropManager] 일반 아이템 드랍: {item.itemPrefab.name} x{quantity}");
-            }
+            if (debugMode)
+                Debug.Log($"[ItemDropManager] {enemyType} 드랍 실패 (확률: {monsterInfo.DropChance})");
+            return;
         }
         
-        // 최대 드랍 개수 제한
-        if (itemsToDrop.Count > dropTable.maxItemsPerDrop)
+        // 드랍할 아이템 수 결정
+        int dropCount = Random.Range(monsterInfo.MinDropCount, monsterInfo.MaxDropCount + 1);
+        
+        if (debugMode)
+            Debug.Log($"[ItemDropManager] {enemyType} 드랍 성공: {dropCount}개 아이템");
+        
+        // 아이템 타입별 드랍 확률 가져오기
+        ItemTypeDropRate itemTypeRate = dropTableData.GetItemTypeDropRate(enemyType);
+        MonsterRarityDropRate rarityRate = dropTableData.GetMonsterRarityDropRate(enemyType);
+        
+        if (itemTypeRate == null || rarityRate == null)
         {
-            itemsToDrop.RemoveRange(dropTable.maxItemsPerDrop, itemsToDrop.Count - dropTable.maxItemsPerDrop);
+            if (debugMode)
+                Debug.LogWarning($"[ItemDropManager] {enemyType}의 드랍 확률 정보를 찾을 수 없습니다.");
+            return;
         }
         
-        // 아이템들을 실제로 생성
-        foreach (GameObject itemPrefab in itemsToDrop)
+        // 아이템 드랍
+        for (int i = 0; i < dropCount; i++)
+        {
+            DropRandomItem(position, itemTypeRate, rarityRate);
+        }
+    }
+    
+    /// <summary>
+    /// 랜덤 아이템을 드랍합니다.
+    /// </summary>
+    private void DropRandomItem(Vector3 position, ItemTypeDropRate itemTypeRate, MonsterRarityDropRate rarityRate)
+    {
+        // 아이템 타입 결정
+        float typeRoll = Random.value;
+        string itemType;
+        
+        if (typeRoll < itemTypeRate.WeaponDropRate)
+        {
+            itemType = "Weapon";
+        }
+        else if (typeRoll < itemTypeRate.WeaponDropRate + itemTypeRate.ArmorDropRate)
+        {
+            itemType = "Armor";
+        }
+        else
+        {
+            itemType = "Accessory";
+        }
+        
+        // 등급 결정
+        float rarityRoll = Random.value;
+        string rarity;
+        
+        if (rarityRoll < rarityRate.CommonRate)
+        {
+            rarity = "Common";
+        }
+        else if (rarityRoll < rarityRate.CommonRate + rarityRate.RareRate)
+        {
+            rarity = "Rare";
+        }
+        else if (rarityRoll < rarityRate.CommonRate + rarityRate.RareRate + rarityRate.EpicRate)
+        {
+            rarity = "Epic";
+        }
+        else if (rarityRoll < rarityRate.CommonRate + rarityRate.RareRate + rarityRate.EpicRate + rarityRate.LegendaryRate)
+        {
+            rarity = "Legendary";
+        }
+        else
+        {
+            rarity = "Primordial";
+        }
+        
+        // 해당 타입과 등급의 아이템 찾기
+        GameObject itemPrefab = GetRandomItemPrefab(itemType, rarity);
+        if (itemPrefab != null)
         {
             DropItemAtPosition(itemPrefab, position);
+            
+            if (debugMode)
+                Debug.Log($"[ItemDropManager] 아이템 드랍: {itemType} {rarity} - {itemPrefab.name}");
+        }
+        else
+        {
+            if (debugMode)
+                Debug.LogWarning($"[ItemDropManager] {itemType} {rarity} 등급의 아이템을 찾을 수 없습니다.");
+        }
+    }
+    
+    /// <summary>
+    /// 해당 타입과 등급의 랜덤 아이템 프리팹을 반환합니다.
+    /// </summary>
+    private GameObject GetRandomItemPrefab(string itemType, string rarity)
+    {
+        List<GameObject> candidates = new List<GameObject>();
+        
+        if (itemType == "Weapon")
+        {
+            // 무기 프리팹에서 해당 등급 찾기
+            foreach (WeaponData weaponData in weaponDataList)
+            {
+                if (weaponData.rarity.ToString() == rarity)
+                {
+                    // Network 폴더의 무기 픽업 프리팹 사용
+                    string prefabPath = $"Assets/NewGame/Prefab/Network/WeaponPickup_{weaponData.weaponType}.prefab";
+                    
+                    #if UNITY_EDITOR
+                    GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                    #else
+                    GameObject prefab = Resources.Load<GameObject>(prefabPath);
+                    #endif
+                    
+                    if (prefab != null)
+                    {
+                        candidates.Add(prefab);
+                        if (debugMode)
+                            Debug.Log($"[ItemDropManager] 무기 프리팹 로드 성공: {prefabPath}");
+                    }
+                    else
+                    {
+                        if (debugMode)
+                            Debug.LogWarning($"[ItemDropManager] 무기 프리팹 로드 실패: {prefabPath}");
+                    }
+                }
+            }
+        }
+        else if (itemType == "Armor")
+        {
+            // 방어구 프리팹에서 해당 등급 찾기
+            foreach (ArmorData armorData in armorDataList)
+            {
+                if (armorData.rarity.ToString() == rarity)
+                {
+                    // Network 폴더의 방어구 픽업 프리팹 사용
+                    string prefabPath = $"Assets/NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}.prefab";
+                    
+                    #if UNITY_EDITOR
+                    GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                    #else
+                    GameObject prefab = Resources.Load<GameObject>(prefabPath);
+                    #endif
+                    
+                    if (prefab != null)
+                    {
+                        candidates.Add(prefab);
+                        if (debugMode)
+                            Debug.Log($"[ItemDropManager] 방어구 프리팹 로드 성공: {prefabPath}");
+                    }
+                    else
+                    {
+                        if (debugMode)
+                            Debug.LogWarning($"[ItemDropManager] 방어구 프리팹 로드 실패: {prefabPath}");
+                    }
+                }
+            }
+        }
+        else if (itemType == "Accessory")
+        {
+            // 장신구는 별도 처리 (현재는 간단히 방어구로 처리)
+            foreach (ArmorData armorData in armorDataList)
+            {
+                if (armorData.rarity.ToString() == rarity && 
+                    (armorData.armorType == ArmorType.Accessory || armorData.armorType == ArmorType.Shoulder))
+                {
+                    // Network 폴더의 장신구 픽업 프리팹 사용
+                    string prefabPath = $"Assets/NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}.prefab";
+                    
+                    #if UNITY_EDITOR
+                    GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                    #else
+                    GameObject prefab = Resources.Load<GameObject>(prefabPath);
+                    #endif
+                    
+                    if (prefab != null)
+                    {
+                        candidates.Add(prefab);
+                        if (debugMode)
+                            Debug.Log($"[ItemDropManager] 장신구 프리팹 로드 성공: {prefabPath}");
+                    }
+                }
+            }
+        }
+        
+        // 랜덤 선택
+        if (candidates.Count > 0)
+        {
+            return candidates[Random.Range(0, candidates.Count)];
         }
         
         if (debugMode)
-            Debug.Log($"[ItemDropManager] 총 {itemsToDrop.Count}개의 아이템을 드랍했습니다.");
+            Debug.LogWarning($"[ItemDropManager] {itemType} {rarity} 등급의 아이템을 찾을 수 없습니다. (후보: {candidates.Count}개)");
+        
+        return null;
     }
     
     /// <summary>
@@ -223,148 +446,19 @@ public class ItemDropManager : MonoBehaviour
     }
     
     /// <summary>
-    /// 드랍 테이블에서 해당 몬스터 타입을 찾습니다.
+    /// 드랍 테이블이 로드되었는지 확인합니다.
     /// </summary>
-    private EnemyDropTable FindDropTable(string enemyType)
+    public bool IsDropTableLoaded()
     {
-        foreach (EnemyDropTable table in dropTables)
-        {
-            if (table.enemyType == enemyType)
-                return table;
-        }
-        return null;
+        return isDropTableLoaded;
     }
     
     /// <summary>
-    /// 드랍 아이템 배열에서 랜덤하게 하나를 선택합니다.
+    /// 드랍 테이블을 다시 로드합니다.
     /// </summary>
-    private DropItem GetRandomDropItem(DropItem[] items)
+    public void ReloadDropTable()
     {
-        if (items.Length == 0) return null;
-        return items[Random.Range(0, items.Length)];
-    }
-    
-    /// <summary>
-    /// 기본 드랍 테이블을 생성합니다 (에디터에서 사용).
-    /// </summary>
-    [ContextMenu("기본 드랍 테이블 생성")]
-    public void CreateDefaultDropTable()
-    {
-        if (dropTables == null || dropTables.Length == 0)
-        {
-            dropTables = new EnemyDropTable[2];
-            
-            // 일반 몬스터 드랍 테이블
-            dropTables[0] = new EnemyDropTable();
-            dropTables[0].enemyType = "Basic Enemy";
-            dropTables[0].commonItems = new DropItem[0];
-            dropTables[0].rareItems = new DropItem[0];
-            dropTables[0].rareItemChance = 0.05f;
-            dropTables[0].maxItemsPerDrop = 3;
-            
-            // 보스 몬스터 드랍 테이블
-            dropTables[1] = new EnemyDropTable();
-            dropTables[1].enemyType = "보스 몬스터";
-            dropTables[1].commonItems = new DropItem[0];
-            dropTables[1].rareItems = new DropItem[0];
-            dropTables[1].rareItemChance = 0.3f; // 보스는 레어 아이템 확률이 높음
-            dropTables[1].maxItemsPerDrop = 5; // 보스는 더 많은 아이템 드랍
-            
-            Debug.Log("[ItemDropManager] 기본 드랍 테이블이 생성되었습니다.");
-        }
-    }
-    
-    /// <summary>
-    /// 보스 전용 드랍 테이블을 생성합니다.
-    /// </summary>
-    [ContextMenu("보스 드랍 테이블 생성")]
-    public void CreateBossDropTable()
-    {
-        // 기존 테이블에 보스 테이블 추가
-        System.Array.Resize(ref dropTables, dropTables.Length + 1);
-        
-        int newIndex = dropTables.Length - 1;
-        dropTables[newIndex] = new EnemyDropTable();
-        dropTables[newIndex].enemyType = "보스 몬스터";
-        dropTables[newIndex].commonItems = new DropItem[0];
-        dropTables[newIndex].rareItems = new DropItem[0];
-        dropTables[newIndex].rareItemChance = 0.3f;
-        dropTables[newIndex].maxItemsPerDrop = 5;
-        
-        Debug.Log("[ItemDropManager] 보스 드랍 테이블이 생성되었습니다.");
-    }
-    
-    /// <summary>
-    /// 예시 드랍 테이블을 생성합니다 (테스트용).
-    /// </summary>
-    [ContextMenu("예시 드랍 테이블 생성")]
-    public void CreateExampleDropTable()
-    {
-        if (dropTables == null || dropTables.Length == 0)
-        {
-            CreateDefaultDropTable();
-        }
-        
-        // 일반 몬스터 테이블에 예시 아이템 추가
-        if (dropTables.Length > 0)
-        {
-            // 일반 아이템 예시 (무기)
-            dropTables[0].commonItems = new DropItem[3];
-            
-            // HG_1 (권총)
-            dropTables[0].commonItems[0] = new DropItem();
-            dropTables[0].commonItems[0].dropChance = 0.3f;
-            dropTables[0].commonItems[0].minQuantity = 1;
-            dropTables[0].commonItems[0].maxQuantity = 1;
-            
-            // AR_1 (돌격소총)
-            dropTables[0].commonItems[1] = new DropItem();
-            dropTables[0].commonItems[1].dropChance = 0.2f;
-            dropTables[0].commonItems[1].minQuantity = 1;
-            dropTables[0].commonItems[1].maxQuantity = 1;
-            
-            // SMG_1 (기관단총)
-            dropTables[0].commonItems[2] = new DropItem();
-            dropTables[0].commonItems[2].dropChance = 0.15f;
-            dropTables[0].commonItems[2].minQuantity = 1;
-            dropTables[0].commonItems[2].maxQuantity = 1;
-            
-            // 레어 아이템 예시 (스나이퍼)
-            dropTables[0].rareItems = new DropItem[1];
-            dropTables[0].rareItems[0] = new DropItem();
-            dropTables[0].rareItems[0].dropChance = 0.1f;
-            dropTables[0].rareItems[0].minQuantity = 1;
-            dropTables[0].rareItems[0].maxQuantity = 1;
-        }
-        
-        // 보스 테이블에 예시 아이템 추가
-        if (dropTables.Length > 1)
-        {
-            // 보스 일반 아이템 (고급 무기)
-            dropTables[1].commonItems = new DropItem[2];
-            
-            // MG_1 (기관총)
-            dropTables[1].commonItems[0] = new DropItem();
-            dropTables[1].commonItems[0].dropChance = 0.4f;
-            dropTables[1].commonItems[0].minQuantity = 1;
-            dropTables[1].commonItems[0].maxQuantity = 1;
-            
-            // SR_1 (스나이퍼)
-            dropTables[1].commonItems[1] = new DropItem();
-            dropTables[1].commonItems[1].dropChance = 0.3f;
-            dropTables[1].commonItems[1].minQuantity = 1;
-            dropTables[1].commonItems[1].maxQuantity = 1;
-            
-            // 보스 레어 아이템 (최고급 무기)
-            dropTables[1].rareItems = new DropItem[1];
-            dropTables[1].rareItems[0] = new DropItem();
-            dropTables[1].rareItems[0].dropChance = 0.2f;
-            dropTables[1].rareItems[0].minQuantity = 1;
-            dropTables[1].rareItems[0].maxQuantity = 1;
-        }
-        
-        Debug.Log("[ItemDropManager] 예시 드랍 테이블이 생성되었습니다. 프리팹을 직접 할당해주세요!");
-        Debug.Log("[ItemDropManager] 일반 몬스터: HG_1, AR_1, SMG_1 (레어: SR_1)");
-        Debug.Log("[ItemDropManager] 보스 몬스터: MG_1, SR_1 (레어: 최고급 무기)");
+        isDropTableLoaded = false;
+        LoadDropTable();
     }
 } 

@@ -1510,7 +1510,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyPrefabs:
-  - {fileID: 8975057456887269572, guid: a59787dabda6a0f43af16f7d991a0736, type: 3}
+  - {fileID: 8975057456887269572, guid: 9854cdb76dae81c4b8a3623a196d028c, type: 3}
+  - {fileID: 8975057456887269572, guid: f0faf670c4d2eb64ca5a28ac54c2e99b, type: 3}
+  - {fileID: 8975057456887269572, guid: 0729855007a117e45aeb5fd72444b6d4, type: 3}
+  - {fileID: 8975057456887269572, guid: 26dd052f83917934fa1ba95645f5e415, type: 3}
+  - {fileID: 8975057456887269572, guid: a4a3b52e0efc3bd4588b81187b5eee7f, type: 3}
   spawnInterval: 2
   maxEnemies: 10
   useWaveSystem: 1
@@ -8370,7 +8374,7 @@ MonoBehaviour:
   dropTables: []
   dropRadius: 1.5
   useNetworkPickup: 1
-  debugMode: 0
+  debugMode: 1
 --- !u!4 &2038752595
 Transform:
   m_ObjectHideFlags: 0

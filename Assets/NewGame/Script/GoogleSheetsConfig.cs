@@ -7,10 +7,14 @@ public class GoogleSheetsConfig : ScriptableObject
     [SerializeField] private string apiKey = "";
     [SerializeField] private string weaponsSpreadsheetId = "";
     [SerializeField] private string armorsSpreadsheetId = "";
+    [SerializeField] private string dropTableSpreadsheetId = "";
     
     [Header("시트 이름 (탭 이름)")]
     [SerializeField] public string WeaponsSheetName = "Weapons";
     [SerializeField] public string ArmorsSheetName = "Armors";
+    [SerializeField] public string MonsterInfoSheetName = "MonsterInfo";
+    [SerializeField] public string ItemTypeDropRatesSheetName = "ItemTypeDropRates";
+    [SerializeField] public string MonsterRarityDropRatesSheetName = "MonsterRarityDropRates";
     
     // 싱글톤 인스턴스
     private static GoogleSheetsConfig _instance;
@@ -33,6 +37,7 @@ public class GoogleSheetsConfig : ScriptableObject
     public string ApiKey => apiKey;
     public string WeaponsSpreadsheetId => weaponsSpreadsheetId;
     public string ArmorsSpreadsheetId => armorsSpreadsheetId;
+    public string DropTableSpreadsheetId => dropTableSpreadsheetId;
     
     // 환경 변수에서 API 키를 가져오는 메서드 (개발 환경용)
     public string GetApiKey()

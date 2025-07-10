@@ -27,7 +27,7 @@ public class Weapon : MonoBehaviour
     [Header("발사 상태 추적")]
     private bool wasFireButtonPressed = false;
     private float timeSinceLastShot = 0f;
-
+    
     // 쌍권총 번갈아 발사용 변수
     // private bool isLeftTurn = true; // 삭제
     private const float dualPistolOffset = 0.25f;
@@ -176,7 +176,7 @@ public class Weapon : MonoBehaviour
             spawnPosition = firePoint.position;
         else
             spawnPosition = weaponPosition + new Vector3(0.6f, 0.2f, 0f);
-
+        
         // 탄약 소모 (무한 탄약이 아닌 경우)
         if (weaponData != null && !weaponData.infiniteAmmo)
         {
@@ -185,7 +185,7 @@ public class Weapon : MonoBehaviour
             currentAmmo -= ammoToConsume;
             OnAmmoChanged?.Invoke(currentAmmo, weaponData.maxAmmo);
         }
-
+        
         // 무기 타입별 발사 처리
         switch (weaponData != null ? weaponData.weaponType : WeaponType.HG)
         {
@@ -196,12 +196,12 @@ public class Weapon : MonoBehaviour
                 FireSingleProjectile(direction, spawnPosition, isNewPress);
                 break;
         }
-
+        
         // 발사 후 처리
         UpdateFireState();
         SetCooldown();
         ApplyRecoil();
-
+        
         return true;
     }
 

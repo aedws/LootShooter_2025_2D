@@ -70,7 +70,7 @@
 | K | hasRegeneration | 체력 재생 | false |
 | L | regenerationRate | 재생 속도 | 1.0 |
 | M | hasInvincibilityFrame | 무적 시간 증가 | false |
-| N | invincibilityBonus | 무적 시간 보너스 | 0.0 |
+| N | invincibilityBonus | 무적 시간 보너스 | 0.0 | 
 
 ## 🎮 게임 시스템
 

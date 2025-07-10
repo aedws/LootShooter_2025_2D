@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 7782578433159490194}
   - component: {fileID: 4089382159293167928}
   m_Layer: 10
-  m_Name: BasicEnemy
+  m_Name: Monster_004
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -192,7 +192,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db72e5d0a5bca24448234f5c78f62e2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyName: BasicEnemy
+  enemyName: Monster_004
   damage: 10
   moveSpeed: 3.5
   detectionRange: 25
