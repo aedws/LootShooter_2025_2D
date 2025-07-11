@@ -315,6 +315,9 @@ public class Enemy : MonoBehaviour
         // 시각적 피격 피드백 - 색깔 변화
         StartCoroutine(HitFlash());
         
+        // 데미지 텍스트 표시
+        ShowDamageText(damage);
+        
         // 넉백 제거 - 몬스터가 너무 쉽게 밀려나지 않도록 함
         // (필요시 매우 약한 넉백을 적용할 수 있음)
         /*
@@ -324,6 +327,17 @@ public class Enemy : MonoBehaviour
             rb.AddForce(knockbackDirection * 0.5f, ForceMode2D.Impulse);
         }
         */
+    }
+    
+    void ShowDamageText(int damage)
+    {
+        // 데미지 텍스트 생성 (몬스터 스프라이트 위쪽)
+        Vector3 textPosition = transform.position + Vector3.up * 1f;
+        
+        // 크리티컬 히트 판정 (데미지가 기본 데미지의 1.5배 이상이면 크리티컬로 간주)
+        bool isCritical = damage >= GetComponent<Health>()?.maxHealth * 0.15f;
+        
+        DamageTextManager.ShowDamage(textPosition, damage, isCritical, false, false);
     }
     
     void OnDeath()

@@ -652,6 +652,16 @@ public class BossEnemy : MonoBehaviour
         
         // 피격 시각 효과
         StartCoroutine(HitFlash());
+        
+        // 데미지 텍스트 표시
+        ShowDamageText(damage);
+    }
+    
+    void ShowDamageText(int damage)
+    {
+        // 보스 데미지 텍스트 생성 (보스 스프라이트 위쪽)
+        Vector3 textPosition = transform.position + Vector3.up * 1.5f;
+        DamageTextManager.ShowDamage(textPosition, damage, false, false, false);
     }
     
     void OnDeath()

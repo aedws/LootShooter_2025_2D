@@ -319,11 +319,27 @@ public class Projectile : MonoBehaviour
                 return false; // 이미 맞춘 적은 다시 맞추지 않음
             }
             
+            // 크리티컬 히트 계산 (10% 확률)
+            bool isCritical = Random.value < 0.1f;
+            int finalDamage = isCritical ? Mathf.RoundToInt(currentDamage * 1.5f) : currentDamage;
+            
             // 적 피격 처리
-            enemy.TakeDamage(currentDamage);
+            enemy.TakeDamage(finalDamage);
             hitTargets.Add(other);
             
-            // Debug.Log($"⚔️ [PROJECTILE] 적 {enemy.enemyName}에게 {currentDamage} 데미지!");
+            // 크리티컬 히트 정보를 Enemy에 전달 (데미지 텍스트 표시용)
+            if (isCritical)
+            {
+                // Enemy의 OnDamaged 이벤트에 크리티컬 정보 전달
+                var enemyHealth = enemy.GetComponent<Health>();
+                if (enemyHealth != null)
+                {
+                    // 크리티컬 히트 표시를 위해 별도 처리
+                    ShowCriticalDamageText(enemy.transform.position, finalDamage);
+                }
+            }
+            
+            // Debug.Log($"⚔️ [PROJECTILE] 적 {enemy.enemyName}에게 {finalDamage} 데미지! {(isCritical ? "(크리티컬!)" : "")}");
             
             // 폭발 효과 처리 (적 사망 시)
             if (isExplosive && !enemy.IsAlive())
@@ -490,6 +506,13 @@ public class Projectile : MonoBehaviour
         }
         
         Destroy(gameObject);
+    }
+    
+    private void ShowCriticalDamageText(Vector3 position, int damage)
+    {
+        // 크리티컬 데미지 텍스트 생성
+        Vector3 textPosition = position + Vector3.up * 1f;
+        DamageTextManager.ShowDamage(textPosition, damage, true, false, false);
     }
 
     void OnDrawGizmosSelected()

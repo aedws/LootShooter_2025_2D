@@ -87,6 +87,9 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
+        // DamageTextManager 초기화
+        DamageTextManager.GetInstance();
+        
         // PlayerInventory의 WeaponHolder 원본 위치 저장
         if (playerInventory != null && playerInventory.weaponHolder != null)
         {
@@ -510,6 +513,16 @@ public class PlayerController : MonoBehaviour
         
         // 피격 시 화면 흔들림이나 이펙트 추가 가능
         // CameraShake.Instance?.Shake(0.1f, 0.5f);
+        
+        // 플레이어 데미지 텍스트 표시
+        ShowPlayerDamageText(damage);
+    }
+    
+    void ShowPlayerDamageText(int damage)
+    {
+        // 플레이어 데미지 텍스트 생성 (플레이어 스프라이트 위쪽)
+        Vector3 textPosition = transform.position + Vector3.up * 1.2f;
+        DamageTextManager.ShowDamage(textPosition, damage, false, false, true);
     }
     
     void OnPlayerDeath()
