@@ -173,6 +173,13 @@ public class WeaponData : ScriptableObject
     [Header("등급(레어리티)")]
     public WeaponRarity rarity = WeaponRarity.Common;
 
+    [Header("칩셋 시스템 - Chipset System")]
+    [Tooltip("무기에 장착 가능한 최대 칩셋 코스트")]
+    public int maxChipsetCost = 25;
+    
+    [Tooltip("현재 장착된 칩셋 ID 목록 (쉼표로 구분)")]
+    public string equippedChipsets = "";
+
     void OnValidate()
     {
         // This method is kept empty as the existing code handles validation
@@ -189,5 +196,24 @@ public class WeaponData : ScriptableObject
             case WeaponRarity.Legendary: return new Color(1f, 0.5f, 0f); // 주황색
             default: return Color.white;
         }
+    }
+    
+    /// <summary>
+    /// 장착된 칩셋 ID 목록을 배열로 반환
+    /// </summary>
+    public string[] GetEquippedChipsetIds()
+    {
+        if (string.IsNullOrEmpty(equippedChipsets))
+            return new string[0];
+        
+        return equippedChipsets.Split(',');
+    }
+    
+    /// <summary>
+    /// 칩셋 ID 목록을 문자열로 설정
+    /// </summary>
+    public void SetEquippedChipsetIds(string[] chipsetIds)
+    {
+        equippedChipsets = string.Join(",", chipsetIds);
     }
 } 

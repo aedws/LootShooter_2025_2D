@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using System;
 
@@ -41,28 +42,44 @@ public class GameDataRepository : MonoBehaviour
     private List<WeaponData> _weapons = new List<WeaponData>();
     private List<ArmorData> _armors = new List<ArmorData>();
     private List<BossAttackPattern> _bossPatterns = new List<BossAttackPattern>();
+    private List<WeaponChipsetData> _weaponChipsets = new List<WeaponChipsetData>();
+    private List<ArmorChipsetData> _armorChipsets = new List<ArmorChipsetData>();
+    private List<PlayerChipsetData> _playerChipsets = new List<PlayerChipsetData>();
 
     // 데이터 로드 상태
     private bool _weaponsLoaded = false;
     private bool _armorsLoaded = false;
     private bool _bossPatternsLoaded = false;
+    private bool _weaponChipsetsLoaded = false;
+    private bool _armorChipsetsLoaded = false;
+    private bool _playerChipsetsLoaded = false;
 
     // 이벤트
     public event Action OnAllDataLoaded;
     public event Action<List<WeaponData>> OnWeaponsUpdated;
     public event Action<List<ArmorData>> OnArmorsUpdated;
     public event Action<List<BossAttackPattern>> OnBossPatternsUpdated;
+    public event Action<List<WeaponChipsetData>> OnWeaponChipsetsUpdated;
+    public event Action<List<ArmorChipsetData>> OnArmorChipsetsUpdated;
+    public event Action<List<PlayerChipsetData>> OnPlayerChipsetsUpdated;
     public event Action<string> OnDataLoadError;
 
     // 프로퍼티
     public List<WeaponData> Weapons => _weapons;
     public List<ArmorData> Armors => _armors;
     public List<BossAttackPattern> BossPatterns => _bossPatterns;
+    public List<WeaponChipsetData> WeaponChipsets => _weaponChipsets;
+    public List<ArmorChipsetData> ArmorChipsets => _armorChipsets;
+    public List<PlayerChipsetData> PlayerChipsets => _playerChipsets;
     
     public bool IsWeaponsLoaded => _weaponsLoaded;
     public bool IsArmorsLoaded => _armorsLoaded;
     public bool IsBossPatternsLoaded => _bossPatternsLoaded;
-    public bool IsAllDataLoaded => _weaponsLoaded && _armorsLoaded && _bossPatternsLoaded;
+    public bool IsWeaponChipsetsLoaded => _weaponChipsetsLoaded;
+    public bool IsArmorChipsetsLoaded => _armorChipsetsLoaded;
+    public bool IsPlayerChipsetsLoaded => _playerChipsetsLoaded;
+    public bool IsAllDataLoaded => _weaponsLoaded && _armorsLoaded && _bossPatternsLoaded && 
+                                   _weaponChipsetsLoaded && _armorChipsetsLoaded && _playerChipsetsLoaded;
 
     private void Awake()
     {
@@ -106,11 +123,17 @@ public class GameDataRepository : MonoBehaviour
             // 이벤트 구독
             googleSheetsManager.OnWeaponsLoaded += OnWeaponsLoadedFromSheets;
             googleSheetsManager.OnArmorsLoaded += OnArmorsLoadedFromSheets;
+            googleSheetsManager.OnWeaponChipsetsLoaded += OnWeaponChipsetsLoadedFromSheets;
+            googleSheetsManager.OnArmorChipsetsLoaded += OnArmorChipsetsLoadedFromSheets;
+            googleSheetsManager.OnPlayerChipsetsLoaded += OnPlayerChipsetsLoadedFromSheets;
             googleSheetsManager.OnError += OnSheetsError;
 
             // 데이터 로드 시작
             googleSheetsManager.LoadWeapons();
             googleSheetsManager.LoadArmors();
+            googleSheetsManager.LoadWeaponChipsets();
+            googleSheetsManager.LoadArmorChipsets();
+            googleSheetsManager.LoadPlayerChipsets();
         }
         else
         {
@@ -145,6 +168,45 @@ public class GameDataRepository : MonoBehaviour
                     // 방어구 데이터 로드 완료
         
         OnArmorsUpdated?.Invoke(_armors);
+        CheckAllDataLoaded();
+    }
+    
+    /// <summary>
+    /// Google Sheets에서 무기 칩셋 데이터가 로드되었을 때 호출
+    /// </summary>
+    private void OnWeaponChipsetsLoadedFromSheets(List<WeaponChipsetData> chipsets)
+    {
+        _weaponChipsets = chipsets;
+        _weaponChipsetsLoaded = true;
+        Debug.Log($"[GameDataRepository] 무기 칩셋 데이터 로드: {_weaponChipsets.Count}개");
+        
+        OnWeaponChipsetsUpdated?.Invoke(_weaponChipsets);
+        CheckAllDataLoaded();
+    }
+    
+    /// <summary>
+    /// Google Sheets에서 방어구 칩셋 데이터가 로드되었을 때 호출
+    /// </summary>
+    private void OnArmorChipsetsLoadedFromSheets(List<ArmorChipsetData> chipsets)
+    {
+        _armorChipsets = chipsets;
+        _armorChipsetsLoaded = true;
+        Debug.Log($"[GameDataRepository] 방어구 칩셋 데이터 로드: {_armorChipsets.Count}개");
+        
+        OnArmorChipsetsUpdated?.Invoke(_armorChipsets);
+        CheckAllDataLoaded();
+    }
+    
+    /// <summary>
+    /// Google Sheets에서 플레이어 칩셋 데이터가 로드되었을 때 호출
+    /// </summary>
+    private void OnPlayerChipsetsLoadedFromSheets(List<PlayerChipsetData> chipsets)
+    {
+        _playerChipsets = chipsets;
+        _playerChipsetsLoaded = true;
+        Debug.Log($"[GameDataRepository] 플레이어 칩셋 데이터 로드: {_playerChipsets.Count}개");
+        
+        OnPlayerChipsetsUpdated?.Invoke(_playerChipsets);
         CheckAllDataLoaded();
     }
 
@@ -480,6 +542,68 @@ public class GameDataRepository : MonoBehaviour
             _bossPatterns.Add(pattern);
             OnBossPatternsUpdated?.Invoke(_bossPatterns);
         }
+    }
+    
+    // 칩셋 관련 유틸리티 메서드들
+    public WeaponChipsetData GetWeaponChipsetById(string chipsetId)
+    {
+        return _weaponChipsets.Find(c => c.chipsetId == chipsetId);
+    }
+    
+    public ArmorChipsetData GetArmorChipsetById(string chipsetId)
+    {
+        return _armorChipsets.Find(c => c.chipsetId == chipsetId);
+    }
+    
+    public PlayerChipsetData GetPlayerChipsetById(string chipsetId)
+    {
+        return _playerChipsets.Find(c => c.chipsetId == chipsetId);
+    }
+    
+    public List<WeaponChipsetData> GetWeaponChipsetsByType(WeaponChipsetType type)
+    {
+        return _weaponChipsets.Where(c => c.chipsetType == type).ToList();
+    }
+    
+    public List<ArmorChipsetData> GetArmorChipsetsByType(ArmorChipsetType type)
+    {
+        return _armorChipsets.Where(c => c.chipsetType == type).ToList();
+    }
+    
+    public List<PlayerChipsetData> GetPlayerChipsetsByType(PlayerChipsetType type)
+    {
+        return _playerChipsets.Where(c => c.chipsetType == type).ToList();
+    }
+    
+    public List<WeaponChipsetData> GetWeaponChipsetsByRarity(ChipsetRarity rarity)
+    {
+        return _weaponChipsets.Where(c => c.rarity == rarity).ToList();
+    }
+    
+    public List<ArmorChipsetData> GetArmorChipsetsByRarity(ChipsetRarity rarity)
+    {
+        return _armorChipsets.Where(c => c.rarity == rarity).ToList();
+    }
+    
+    public List<PlayerChipsetData> GetPlayerChipsetsByRarity(ChipsetRarity rarity)
+    {
+        return _playerChipsets.Where(c => c.rarity == rarity).ToList();
+    }
+    
+    // 모든 칩셋 데이터 반환 메서드들
+    public List<WeaponChipsetData> GetAllWeaponChipsets()
+    {
+        return _weaponChipsets;
+    }
+    
+    public List<ArmorChipsetData> GetAllArmorChipsets()
+    {
+        return _armorChipsets;
+    }
+    
+    public List<PlayerChipsetData> GetAllPlayerChipsets()
+    {
+        return _playerChipsets;
     }
 
     #endregion

@@ -54,6 +54,13 @@ public class ArmorData : ScriptableObject
     public Color rarityColor = Color.white;
     public GameObject visualEffect; // 장착 시 시각 효과
     
+    [Header("칩셋 시스템 - Chipset System")]
+    [Tooltip("방어구에 장착 가능한 최대 칩셋 코스트")]
+    public int maxChipsetCost = 20;
+    
+    [Tooltip("현재 장착된 칩셋 ID 목록 (쉼표로 구분)")]
+    public string equippedChipsets = "";
+    
     void OnValidate()
     {
         // 레어리티에 따른 색상 자동 설정
@@ -118,5 +125,24 @@ public class ArmorData : ScriptableObject
             case ArmorType.Accessory: return "악세사리";
             default: return "알 수 없음";
         }
+    }
+    
+    /// <summary>
+    /// 장착된 칩셋 ID 목록을 배열로 반환
+    /// </summary>
+    public string[] GetEquippedChipsetIds()
+    {
+        if (string.IsNullOrEmpty(equippedChipsets))
+            return new string[0];
+        
+        return equippedChipsets.Split(',');
+    }
+    
+    /// <summary>
+    /// 칩셋 ID 목록을 문자열로 설정
+    /// </summary>
+    public void SetEquippedChipsetIds(string[] chipsetIds)
+    {
+        equippedChipsets = string.Join(",", chipsetIds);
     }
 } 

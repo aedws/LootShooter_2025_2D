@@ -17,6 +17,9 @@ public class GoogleSheetsManager : MonoBehaviour
     public event Action<List<WeaponData>> OnWeaponsLoaded;
     public event Action<List<ArmorData>> OnArmorsLoaded;
     public event Action<DropTableData> OnDropTableLoaded;
+    public event Action<List<WeaponChipsetData>> OnWeaponChipsetsLoaded;
+    public event Action<List<ArmorChipsetData>> OnArmorChipsetsLoaded;
+    public event Action<List<PlayerChipsetData>> OnPlayerChipsetsLoaded;
     public event Action<string> OnError;
     
     private void Start()
@@ -75,6 +78,9 @@ public class GoogleSheetsManager : MonoBehaviour
         LoadWeapons();
         LoadArmors();
         LoadDropTable();
+        LoadWeaponChipsets();
+        LoadArmorChipsets();
+        LoadPlayerChipsets();
     }
     
     private IEnumerator FetchWeaponsData()
@@ -131,6 +137,84 @@ public class GoogleSheetsManager : MonoBehaviour
         }
     }
     
+    private IEnumerator FetchWeaponChipsetsData()
+    {
+        string apiKey = config.GetApiKey();
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            OnError?.Invoke("API 키가 설정되지 않았습니다.");
+            yield break;
+        }
+        
+        string url = $"https://sheets.googleapis.com/v4/spreadsheets/{config.WeaponChipsetsSpreadsheetId}/values/{config.WeaponChipsetsSheetName}?key={config.ApiKey}";
+        
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+            
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                ParseWeaponChipsetsData(request.downloadHandler.text);
+            }
+            else
+            {
+                OnError?.Invoke($"무기 칩셋 데이터 로드 실패: {request.error}");
+            }
+        }
+    }
+    
+    private IEnumerator FetchArmorChipsetsData()
+    {
+        string apiKey = config.GetApiKey();
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            OnError?.Invoke("API 키가 설정되지 않았습니다.");
+            yield break;
+        }
+        
+        string url = $"https://sheets.googleapis.com/v4/spreadsheets/{config.ArmorChipsetsSpreadsheetId}/values/{config.ArmorChipsetsSheetName}?key={config.ApiKey}";
+        
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+            
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                ParseArmorChipsetsData(request.downloadHandler.text);
+            }
+            else
+            {
+                OnError?.Invoke($"방어구 칩셋 데이터 로드 실패: {request.error}");
+            }
+        }
+    }
+    
+    private IEnumerator FetchPlayerChipsetsData()
+    {
+        string apiKey = config.GetApiKey();
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            OnError?.Invoke("API 키가 설정되지 않았습니다.");
+            yield break;
+        }
+        
+        string url = $"https://sheets.googleapis.com/v4/spreadsheets/{config.PlayerChipsetsSpreadsheetId}/values/{config.PlayerChipsetsSheetName}?key={config.ApiKey}";
+        
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+            
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                ParsePlayerChipsetsData(request.downloadHandler.text);
+            }
+            else
+            {
+                OnError?.Invoke($"플레이어 칩셋 데이터 로드 실패: {request.error}");
+            }
+        }
+    }
+    
     private IEnumerator FetchDropTableData()
     {
         string apiKey = config.GetApiKey();
@@ -158,6 +242,39 @@ public class GoogleSheetsManager : MonoBehaviour
         }));
         
         OnDropTableLoaded?.Invoke(dropTableData);
+    }
+    
+    public void LoadWeaponChipsets()
+    {
+        if (string.IsNullOrEmpty(config.WeaponChipsetsSpreadsheetId))
+        {
+            OnError?.Invoke("무기 칩셋 스프레드시트 ID가 설정되지 않았습니다.");
+            return;
+        }
+        
+        StartCoroutine(FetchWeaponChipsetsData());
+    }
+    
+    public void LoadArmorChipsets()
+    {
+        if (string.IsNullOrEmpty(config.ArmorChipsetsSpreadsheetId))
+        {
+            OnError?.Invoke("방어구 칩셋 스프레드시트 ID가 설정되지 않았습니다.");
+            return;
+        }
+        
+        StartCoroutine(FetchArmorChipsetsData());
+    }
+    
+    public void LoadPlayerChipsets()
+    {
+        if (string.IsNullOrEmpty(config.PlayerChipsetsSpreadsheetId))
+        {
+            OnError?.Invoke("플레이어 칩셋 스프레드시트 ID가 설정되지 않았습니다.");
+            return;
+        }
+        
+        StartCoroutine(FetchPlayerChipsetsData());
     }
     
     private IEnumerator FetchSheetData(string sheetName, Action<string> onComplete)
@@ -567,6 +684,220 @@ public class GoogleSheetsManager : MonoBehaviour
     {
         if (string.IsNullOrEmpty(value)) return 0;
         return int.TryParse(value, out int result) ? result : 0;
+    }
+    
+    private void ParseWeaponChipsetsData(string jsonData)
+    {
+        try
+        {
+            var response = JsonConvert.DeserializeObject<GoogleSheetsResponse>(jsonData);
+            if (response?.values == null || response.values.Count < 4)
+            {
+                OnError?.Invoke("무기 칩셋 데이터가 비어있습니다. (최소 4행 필요: 헤더 3행 + 데이터 1행)");
+                return;
+            }
+            
+            List<WeaponChipsetData> chipsets = new List<WeaponChipsetData>();
+            
+            // 상위 3행은 헤더이므로 건너뛰기 (4번째 행부터 데이터 시작)
+            for (int i = 3; i < response.values.Count; i++)
+            {
+                var row = response.values[i];
+                if (row.Count >= 17) // 모든 필드가 있는지 확인
+                {
+                    WeaponChipsetData chipset = new WeaponChipsetData();
+                    
+                    // 기본 정보
+                    chipset.chipsetId = row[0];
+                    chipset.chipsetName = row[1];
+                    if (System.Enum.TryParse<WeaponChipsetType>(row[2], out WeaponChipsetType chipsetType))
+                        chipset.chipsetType = chipsetType;
+                    
+                    if (System.Enum.TryParse<ChipsetRarity>(row[3], out ChipsetRarity rarity))
+                        chipset.rarity = rarity;
+                    
+                    chipset.cost = SafeParseInt(row[4]);
+                    chipset.description = row[5];
+                    
+                    // 무기 효과
+                    chipset.damageBonus = SafeParseFloat(row[6]);
+                    chipset.fireRateBonus = SafeParseFloat(row[7]);
+                    chipset.accuracyBonus = SafeParseFloat(row[8]);
+                    chipset.recoilReduction = SafeParseFloat(row[9]);
+                    chipset.reloadSpeedBonus = SafeParseFloat(row[10]);
+                    chipset.ammoCapacityBonus = SafeParseInt(row[11]);
+                    chipset.criticalChanceBonus = SafeParseFloat(row[12]);
+                    chipset.criticalMultiplierBonus = SafeParseFloat(row[13]);
+                    
+                    // 칩셋 효과
+                    chipset.effectValue = SafeParseFloat(row[14]);
+                    
+                    // 특수 효과
+                    chipset.hasSpecialEffect = SafeParseBool(row[15]);
+                    chipset.specialEffectType = row[16];
+                    chipset.specialEffectValue = row.Count > 17 ? SafeParseFloat(row[17]) : 0f;
+                    
+                    chipsets.Add(chipset);
+                }
+                else
+                {
+                    Debug.LogWarning($"무기 칩셋 데이터 행 {i + 1}의 컬럼 수가 부족합니다. (필요: 17, 실제: {row.Count})");
+                }
+            }
+            
+            Debug.Log($"무기 칩셋 데이터 로드 완료: {chipsets.Count}개");
+            OnWeaponChipsetsLoaded?.Invoke(chipsets);
+        }
+        catch (Exception e)
+        {
+            OnError?.Invoke($"무기 칩셋 데이터 파싱 오류: {e.Message}");
+        }
+    }
+    
+    private void ParseArmorChipsetsData(string jsonData)
+    {
+        try
+        {
+            var response = JsonConvert.DeserializeObject<GoogleSheetsResponse>(jsonData);
+            if (response?.values == null || response.values.Count < 4)
+            {
+                OnError?.Invoke("방어구 칩셋 데이터가 비어있습니다. (최소 4행 필요: 헤더 3행 + 데이터 1행)");
+                return;
+            }
+            
+            List<ArmorChipsetData> chipsets = new List<ArmorChipsetData>();
+            
+            // 상위 3행은 헤더이므로 건너뛰기 (4번째 행부터 데이터 시작)
+            for (int i = 3; i < response.values.Count; i++)
+            {
+                var row = response.values[i];
+                if (row.Count >= 19) // 모든 필드가 있는지 확인
+                {
+                    ArmorChipsetData chipset = new ArmorChipsetData();
+                    
+                    // 기본 정보
+                    chipset.chipsetId = row[0];
+                    chipset.chipsetName = row[1];
+                    if (System.Enum.TryParse<ArmorChipsetType>(row[2], out ArmorChipsetType chipsetType))
+                        chipset.chipsetType = chipsetType;
+                    
+                    if (System.Enum.TryParse<ChipsetRarity>(row[3], out ChipsetRarity rarity))
+                        chipset.rarity = rarity;
+                    
+                    chipset.cost = SafeParseInt(row[4]);
+                    chipset.description = row[5];
+                    
+                    // 방어구 효과
+                    chipset.defenseBonus = SafeParseFloat(row[6]);
+                    chipset.healthBonus = SafeParseFloat(row[7]);
+                    chipset.speedBonus = SafeParseFloat(row[8]);
+                    chipset.jumpForceBonus = SafeParseFloat(row[9]);
+                    chipset.dashCooldownReduction = SafeParseFloat(row[10]);
+                    chipset.hasRegeneration = SafeParseBool(row[11]);
+                    chipset.regenerationRate = SafeParseFloat(row[12]);
+                    chipset.hasInvincibilityFrame = SafeParseBool(row[13]);
+                    chipset.invincibilityBonus = SafeParseFloat(row[14]);
+                    
+                    // 칩셋 효과
+                    chipset.effectValue = SafeParseFloat(row[15]);
+                    
+                    // 특수 효과
+                    chipset.hasSpecialEffect = SafeParseBool(row[16]);
+                    chipset.specialEffectType = row[17];
+                    chipset.specialEffectValue = row.Count > 18 ? SafeParseFloat(row[18]) : 0f;
+                    
+                    chipsets.Add(chipset);
+                }
+                else
+                {
+                    Debug.LogWarning($"방어구 칩셋 데이터 행 {i + 1}의 컬럼 수가 부족합니다. (필요: 19, 실제: {row.Count})");
+                }
+            }
+            
+            Debug.Log($"방어구 칩셋 데이터 로드 완료: {chipsets.Count}개");
+            OnArmorChipsetsLoaded?.Invoke(chipsets);
+        }
+        catch (Exception e)
+        {
+            OnError?.Invoke($"방어구 칩셋 데이터 파싱 오류: {e.Message}");
+        }
+    }
+    
+    private void ParsePlayerChipsetsData(string jsonData)
+    {
+        try
+        {
+            var response = JsonConvert.DeserializeObject<GoogleSheetsResponse>(jsonData);
+            if (response?.values == null || response.values.Count < 4)
+            {
+                OnError?.Invoke("플레이어 칩셋 데이터가 비어있습니다. (최소 4행 필요: 헤더 3행 + 데이터 1행)");
+                return;
+            }
+            
+            List<PlayerChipsetData> chipsets = new List<PlayerChipsetData>();
+            
+            // 상위 3행은 헤더이므로 건너뛰기 (4번째 행부터 데이터 시작)
+            for (int i = 3; i < response.values.Count; i++)
+            {
+                var row = response.values[i];
+                if (row.Count >= 26) // 모든 필드가 있는지 확인
+                {
+                    PlayerChipsetData chipset = new PlayerChipsetData();
+                    
+                    // 기본 정보
+                    chipset.chipsetId = row[0];
+                    chipset.chipsetName = row[1];
+                    if (System.Enum.TryParse<PlayerChipsetType>(row[2], out PlayerChipsetType chipsetType))
+                        chipset.chipsetType = chipsetType;
+                    
+                    if (System.Enum.TryParse<ChipsetRarity>(row[3], out ChipsetRarity rarity))
+                        chipset.rarity = rarity;
+                    
+                    chipset.cost = SafeParseInt(row[4]);
+                    chipset.description = row[5];
+                    
+                    // 플레이어 기본 스탯 효과
+                    chipset.moveSpeedBonus = SafeParseFloat(row[6]);
+                    chipset.jumpForceBonus = SafeParseFloat(row[7]);
+                    chipset.dashForceBonus = SafeParseFloat(row[8]);
+                    chipset.dashCooldownReduction = SafeParseFloat(row[9]);
+                    chipset.maxHealthBonus = SafeParseFloat(row[10]);
+                    chipset.damageReduction = SafeParseFloat(row[11]);
+                    chipset.pickupRangeBonus = SafeParseFloat(row[12]);
+                    
+                    // 무기 스탯 효과
+                    chipset.weaponDamageBonus = SafeParseFloat(row[13]);
+                    chipset.weaponFireRateBonus = SafeParseFloat(row[14]);
+                    chipset.weaponAccuracyBonus = SafeParseFloat(row[15]);
+                    chipset.weaponRecoilReduction = SafeParseFloat(row[16]);
+                    chipset.weaponReloadSpeedBonus = SafeParseFloat(row[17]);
+                    chipset.weaponAmmoCapacityBonus = SafeParseInt(row[18]);
+                    chipset.weaponCriticalChanceBonus = SafeParseFloat(row[19]);
+                    chipset.weaponCriticalMultiplierBonus = SafeParseFloat(row[20]);
+                    
+                    // 칩셋 효과
+                    chipset.effectValue = SafeParseFloat(row[21]);
+                    
+                    // 특수 효과
+                    chipset.hasSpecialEffect = SafeParseBool(row[22]);
+                    chipset.specialEffectType = row[23];
+                    chipset.specialEffectValue = row.Count > 24 ? SafeParseFloat(row[24]) : 0f;
+                    
+                    chipsets.Add(chipset);
+                }
+                else
+                {
+                    Debug.LogWarning($"플레이어 칩셋 데이터 행 {i + 1}의 컬럼 수가 부족합니다. (필요: 26, 실제: {row.Count})");
+                }
+            }
+            
+            Debug.Log($"플레이어 칩셋 데이터 로드 완료: {chipsets.Count}개");
+            OnPlayerChipsetsLoaded?.Invoke(chipsets);
+        }
+        catch (Exception e)
+        {
+            OnError?.Invoke($"플레이어 칩셋 데이터 파싱 오류: {e.Message}");
+        }
     }
 }
 

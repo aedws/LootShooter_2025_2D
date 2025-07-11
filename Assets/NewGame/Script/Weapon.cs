@@ -28,6 +28,16 @@ public class Weapon : MonoBehaviour
     private bool wasFireButtonPressed = false;
     private float timeSinceLastShot = 0f;
     
+    [Header("칩셋 효과 멀티플라이어")]
+    private float damageMultiplier = 1f;
+    private float fireRateMultiplier = 1f;
+    private float rangeMultiplier = 1f;
+    private float accuracyMultiplier = 1f;
+    private float reloadSpeedMultiplier = 1f;
+    private int magazineSizeBonus = 0;
+    private float penetrationBonus = 0f;
+    private float explosiveEffect = 0f;
+    
     // 쌍권총 번갈아 발사용 변수
     // private bool isLeftTurn = true; // 삭제
     private const float dualPistolOffset = 0.25f;
@@ -329,7 +339,8 @@ public class Weapon : MonoBehaviour
     private void StartReload()
     {
         isReloading = true;
-        reloadTimeRemaining = weaponData.reloadTime;
+        // 칩셋 효과 적용
+        reloadTimeRemaining = weaponData.reloadTime / reloadSpeedMultiplier;
         OnReloadStart?.Invoke();
         // Debug.Log($"Reloading {weaponData.weaponName}... ({weaponData.reloadTime}s)");
     }
@@ -349,8 +360,10 @@ public class Weapon : MonoBehaviour
     private void CompleteReload()
     {
         isReloading = false;
-        currentAmmo = weaponData.maxAmmo;
-        OnAmmoChanged?.Invoke(currentAmmo, weaponData.maxAmmo);
+        // 칩셋 효과 적용된 탄창 크기
+        int modifiedMaxAmmo = weaponData.maxAmmo + magazineSizeBonus;
+        currentAmmo = modifiedMaxAmmo;
+        OnAmmoChanged?.Invoke(currentAmmo, modifiedMaxAmmo);
         OnReloadComplete?.Invoke();
         // Debug.Log($"Reload complete! {currentAmmo}/{weaponData.maxAmmo}");
     }
@@ -529,7 +542,8 @@ public class Weapon : MonoBehaviour
             currentFireRate = Mathf.Lerp(weaponData.fireRate, maxWarmupRate, warmupProgress);
         }
         
-        fireCooldown = currentFireRate;
+        // 칩셋 효과 적용
+        fireCooldown = currentFireRate / fireRateMultiplier;
         
         // 디버그: 쿨다운 설정 확인 (MG만 활성화)
         // if (weaponData.weaponType == WeaponType.MG)
@@ -540,6 +554,8 @@ public class Weapon : MonoBehaviour
 
     private int GetCurrentDamage()
     {
+        if (weaponData == null) return 0;
+        
         int damage = weaponData.damage;
         
         // HG: 근거리 데미지 보너스 (거리 계산은 실제 구현시 추가 가능)
@@ -547,6 +563,9 @@ public class Weapon : MonoBehaviour
         {
             damage = Mathf.RoundToInt(damage * 1.2f); // 20% 보너스
         }
+        
+        // 칩셋 효과 적용
+        damage = Mathf.RoundToInt(damage * damageMultiplier);
         
         return damage;
     }
@@ -585,8 +604,10 @@ public class Weapon : MonoBehaviour
             currentSpread = weaponData.baseSpread;
             warmupProgress = 0f;
             isWarmedUp = false;
-            currentAmmo = weaponData.currentAmmo;
-            OnAmmoChanged?.Invoke(currentAmmo, weaponData.maxAmmo);
+            // 칩셋 효과 적용된 탄창 크기
+            int modifiedMaxAmmo = weaponData.maxAmmo + magazineSizeBonus;
+            currentAmmo = Mathf.Min(weaponData.currentAmmo, modifiedMaxAmmo);
+            OnAmmoChanged?.Invoke(currentAmmo, modifiedMaxAmmo);
             // 등급별 색상 적용
             var sr = GetComponent<SpriteRenderer>();
             if (sr != null)
@@ -599,10 +620,32 @@ public class Weapon : MonoBehaviour
     public float GetWarmupProgress() => warmupProgress;
     public float GetCurrentSpread() => currentSpread;
     public int GetCurrentAmmo() => currentAmmo;
-    public int GetMaxAmmo() => weaponData?.maxAmmo ?? 0;
+    public int GetMaxAmmo() => weaponData != null ? weaponData.maxAmmo + magazineSizeBonus : 0;
     public bool IsReloading() => isReloading;
-    public float GetReloadProgress() => isReloading ? (1f - (reloadTimeRemaining / weaponData.reloadTime)) : 0f;
+    public float GetReloadProgress() => isReloading ? (1f - (reloadTimeRemaining / (weaponData.reloadTime / reloadSpeedMultiplier))) : 0f;
     public float GetCurrentRecoilAngle() => currentRecoilAngle; // 현재 반동 각도
+    
+    // 칩셋 효과 관련 메서드들
+    public void SetDamageMultiplier(float multiplier) => damageMultiplier = multiplier;
+    public void SetFireRateMultiplier(float multiplier) => fireRateMultiplier = multiplier;
+    public void SetRangeMultiplier(float multiplier) => rangeMultiplier = multiplier;
+    public void SetAccuracyMultiplier(float multiplier) => accuracyMultiplier = multiplier;
+    public void SetReloadSpeedMultiplier(float multiplier) => reloadSpeedMultiplier = multiplier;
+    public void SetMagazineSizeBonus(int bonus) => magazineSizeBonus = bonus;
+    public void SetPenetrationBonus(float bonus) => penetrationBonus = bonus;
+    public void SetExplosiveEffect(float effect) => explosiveEffect = effect;
+    
+    public void ResetAllMultipliers()
+    {
+        damageMultiplier = 1f;
+        fireRateMultiplier = 1f;
+        rangeMultiplier = 1f;
+        accuracyMultiplier = 1f;
+        reloadSpeedMultiplier = 1f;
+        magazineSizeBonus = 0;
+        penetrationBonus = 0f;
+        explosiveEffect = 0f;
+    }
 
     private IEnumerator AutoReloadAfterDelay(float delay)
     {

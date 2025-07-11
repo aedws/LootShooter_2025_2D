@@ -8,6 +8,9 @@ public class GoogleSheetsConfig : ScriptableObject
     [SerializeField] private string weaponsSpreadsheetId = "";
     [SerializeField] private string armorsSpreadsheetId = "";
     [SerializeField] private string dropTableSpreadsheetId = "";
+    [SerializeField] private string weaponChipsetsSpreadsheetId = "";
+    [SerializeField] private string armorChipsetsSpreadsheetId = "";
+    [SerializeField] private string playerChipsetsSpreadsheetId = "";
     
     [Header("시트 이름 (탭 이름)")]
     [SerializeField] public string WeaponsSheetName = "Weapons";
@@ -15,6 +18,9 @@ public class GoogleSheetsConfig : ScriptableObject
     [SerializeField] public string MonsterInfoSheetName = "MonsterInfo";
     [SerializeField] public string ItemTypeDropRatesSheetName = "ItemTypeDropRates";
     [SerializeField] public string MonsterRarityDropRatesSheetName = "MonsterRarityDropRates";
+    [SerializeField] public string WeaponChipsetsSheetName = "WeaponChipsets";
+    [SerializeField] public string ArmorChipsetsSheetName = "ArmorChipsets";
+    [SerializeField] public string PlayerChipsetsSheetName = "PlayerChipsets";
     
     // 싱글톤 인스턴스
     private static GoogleSheetsConfig _instance;
@@ -38,6 +44,9 @@ public class GoogleSheetsConfig : ScriptableObject
     public string WeaponsSpreadsheetId => weaponsSpreadsheetId;
     public string ArmorsSpreadsheetId => armorsSpreadsheetId;
     public string DropTableSpreadsheetId => dropTableSpreadsheetId;
+    public string WeaponChipsetsSpreadsheetId => weaponChipsetsSpreadsheetId;
+    public string ArmorChipsetsSpreadsheetId => armorChipsetsSpreadsheetId;
+    public string PlayerChipsetsSpreadsheetId => playerChipsetsSpreadsheetId;
     
     // 환경 변수에서 API 키를 가져오는 메서드 (개발 환경용)
     public string GetApiKey()

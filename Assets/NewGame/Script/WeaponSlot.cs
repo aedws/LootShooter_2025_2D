@@ -74,6 +74,8 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
     public static WeaponData CurrentlyDraggedWeapon { get; private set; } = null;
     public static WeaponSlot CurrentlyDraggedSlot { get; private set; } = null;
 
+    public event System.Action<WeaponData> OnWeaponChanged;
+
     void Start()
     {
         // Debug.Log($"🔧 [WeaponSlot] Start() 호출됨 - {gameObject.name}");
@@ -316,7 +318,6 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
             {
                 draggedFromSlot.SetWeaponData(currentWeapon);
             }
-            
             return;
         }
     }
@@ -393,6 +394,7 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
         // 🏃‍♂️ 플레이어 이동속도 업데이트
         UpdatePlayerMovementSpeed();
         
+        OnWeaponChanged?.Invoke(weaponData);
         UpdateVisuals();
     }
 
@@ -416,6 +418,7 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
         // 인벤토리에 무기 다시 추가 및 UI 업데이트
         ReturnWeaponToInventory(oldWeapon);
         
+        OnWeaponChanged?.Invoke(weaponData);
         UpdateVisuals();
     }
 
@@ -433,6 +436,7 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
         if (playerInventory != null)
             playerInventory.SetEquippedWeapon(null);
         
+        OnWeaponChanged?.Invoke(weaponData);
         UpdateVisuals();
     }
     
@@ -458,6 +462,7 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
     public void SetWeaponData(WeaponData newWeaponData)
     {
         weaponData = newWeaponData;
+        OnWeaponChanged?.Invoke(weaponData);
         UpdateVisuals();
     }
     

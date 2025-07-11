@@ -912,6 +912,31 @@ public class PlayerController : MonoBehaviour
     {
         return baseMoveSpeed;
     }
+    
+    // 칩셋 효과 관련 메서드들
+    public void SetDefenseBonus(float bonus) { /* 방어력 보너스 적용 */ }
+    public void SetHealthBonus(float bonus) { /* 체력 보너스 적용 */ }
+    public void SetMovementSpeedMultiplier(float multiplier) { currentMoveSpeed = baseMoveSpeed * multiplier; }
+    public void SetDodgeChanceBonus(float bonus) { /* 회피 확률 보너스 적용 */ }
+    public void SetBlockChanceBonus(float bonus) { /* 블록 확률 보너스 적용 */ }
+    public void SetRegenerationBonus(float bonus) { /* 체력 재생 보너스 적용 */ }
+    public void SetElementalResistanceBonus(float bonus) { /* 원소 저항 보너스 적용 */ }
+    public void SetWeightReductionBonus(float bonus) { /* 무게 감소 보너스 적용 */ }
+    
+    public void SetExperienceGainMultiplier(float multiplier) { /* 경험치 획득 배율 적용 */ }
+    public void SetLuckBonus(float bonus) { /* 행운 보너스 적용 */ }
+    public void SetCriticalChanceBonus(float bonus) { /* 크리티컬 확률 보너스 적용 */ }
+    public void SetCriticalDamageMultiplier(float multiplier) { /* 크리티컬 데미지 배율 적용 */ }
+    public void SetSkillCooldownMultiplier(float multiplier) { /* 스킬 쿨다운 배율 적용 */ }
+    public void SetResourceGainMultiplier(float multiplier) { /* 자원 획득 배율 적용 */ }
+    public void SetSpecialAbilityBonus(float bonus) { /* 특수 능력 보너스 적용 */ }
+    public void SetUtilityBonus(float bonus) { /* 유틸리티 보너스 적용 */ }
+    
+    public void ResetAllMultipliers()
+    {
+        currentMoveSpeed = baseMoveSpeed;
+        // 다른 멀티플라이어들도 초기화
+    }
 
     void OnDrawGizmosSelected()
     {
