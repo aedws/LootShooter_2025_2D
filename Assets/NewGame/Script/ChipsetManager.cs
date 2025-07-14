@@ -536,14 +536,38 @@ public class ChipsetManager : MonoBehaviour
     
     public void OnArmorChipsetTabButtonClicked()
     {
+        Debug.Log($"🔧 [ChipsetManager] 방어구 칩셋 탭 버튼 클릭됨");
+        
         // 🆕 탭 버튼 클릭 시 ChipsetSlotUI 찾기
         if (chipsetSlotUI == null)
         {
-            var playerChipsetPanel = GameObject.Find("PlayerChipsetPanel");
-            if (playerChipsetPanel != null)
+            var armorChipsetPanel = GameObject.Find("ArmorChipsetPanel");
+            if (armorChipsetPanel != null)
             {
-                chipsetSlotUI = playerChipsetPanel.GetComponent<ChipsetSlotUI>();
-                Debug.Log($"🔧 [ChipsetManager] 방어구 탭 버튼 클릭 시 PlayerChipsetPanel에서 ChipsetSlotUI 찾기: {(chipsetSlotUI != null ? "성공" : "실패")}");
+                chipsetSlotUI = armorChipsetPanel.GetComponent<ChipsetSlotUI>();
+                Debug.Log($"🔧 [ChipsetManager] 방어구 탭 버튼 클릭 시 ArmorChipsetPanel에서 ChipsetSlotUI 찾기: {(chipsetSlotUI != null ? "성공" : "실패")}");
+            }
+        }
+        
+        // 🆕 현재 장착된 방어구 중 첫 번째 방어구를 자동으로 선택
+        if (chipsetSlotUI != null)
+        {
+            var armorSlotManager = FindFirstObjectByType<ArmorSlotManager>();
+            if (armorSlotManager != null)
+            {
+                var equippedArmors = armorSlotManager.GetAllEquippedArmors();
+                if (equippedArmors.Count > 0)
+                {
+                    // 첫 번째 장착된 방어구를 선택
+                    var firstArmor = equippedArmors.Values.First();
+                    chipsetSlotUI.SetItem(firstArmor);
+                    currentArmor = firstArmor;
+                    Debug.Log($"🔧 [ChipsetManager] 자동으로 방어구 선택: {firstArmor.armorName}");
+                }
+                else
+                {
+                    Debug.LogWarning($"🔧 [ChipsetManager] 장착된 방어구가 없습니다!");
+                }
             }
         }
         
@@ -673,8 +697,17 @@ public class ChipsetManager : MonoBehaviour
     /// </summary>
     private void OnArmorChipsetEquipped(ChipsetSlot slot, object chipset)
     {
+        Debug.Log($"🔧 [ChipsetManager] 방어구 칩셋 장착 시작 - Slot: {slot.GetSlotIndex()}, Chipset: {chipset}");
+        
         UpdateArmorCostDisplay();
         CheckArmorCostOver();
+        
+        // 🆕 ArmorChipsetPanel의 ChipsetSlotUI에서 현재 방어구 가져오기
+        if (chipsetSlotUI != null && chipsetSlotUI.currentType == ChipsetSlotUI.ItemType.Armor)
+        {
+            currentArmor = chipsetSlotUI.currentArmor;
+            Debug.Log($"🔧 [ChipsetManager] ChipsetSlotUI에서 현재 방어구 가져옴: {(currentArmor != null ? currentArmor.armorName : "null")}");
+        }
         
         // 방어구 데이터에 칩셋 ID 저장
         if (currentArmor != null && chipset is ArmorChipsetData armorChipset)
@@ -682,16 +715,21 @@ public class ChipsetManager : MonoBehaviour
             int slotIndex = slot.GetSlotIndex();
             string[] currentChipsets = currentArmor.GetEquippedChipsetIds();
             
+            Debug.Log($"🔧 [ChipsetManager] 장착 전 방어구 칩셋: {(currentChipsets != null ? string.Join(",", currentChipsets) : "null")}");
+            
             // 배열 크기 확장
             if (currentChipsets.Length <= slotIndex)
             {
                 string[] newChipsets = new string[armorSlots.Length];
                 currentChipsets.CopyTo(newChipsets, 0);
                 currentChipsets = newChipsets;
+                Debug.Log($"🔧 [ChipsetManager] 배열 크기 확장: {currentChipsets.Length}");
             }
             
             currentChipsets[slotIndex] = armorChipset.chipsetId;
             currentArmor.SetEquippedChipsetIds(currentChipsets);
+            
+            Debug.Log($"🔧 [ChipsetManager] 장착 후 방어구 칩셋: {string.Join(",", currentChipsets)}");
             
             // 효과 적용
             if (effectManager != null)
@@ -701,6 +739,8 @@ public class ChipsetManager : MonoBehaviour
             
             // 개수 정보 업데이트
             UpdateChipsetInfo();
+            
+            Debug.Log($"🔧 [ChipsetManager] 방어구 칩셋 장착 완료");
         }
     }
     
@@ -709,8 +749,17 @@ public class ChipsetManager : MonoBehaviour
     /// </summary>
     private void OnArmorChipsetUnequipped(ChipsetSlot slot, object chipset)
     {
+        Debug.Log($"🔧 [ChipsetManager] 방어구 칩셋 해제 시작 - Slot: {slot.GetSlotIndex()}, Chipset: {chipset}");
+        
         UpdateArmorCostDisplay();
         CheckArmorCostOver();
+        
+        // 🆕 ArmorChipsetPanel의 ChipsetSlotUI에서 현재 방어구 가져오기
+        if (chipsetSlotUI != null && chipsetSlotUI.currentType == ChipsetSlotUI.ItemType.Armor)
+        {
+            currentArmor = chipsetSlotUI.currentArmor;
+            Debug.Log($"🔧 [ChipsetManager] ChipsetSlotUI에서 현재 방어구 가져옴: {(currentArmor != null ? currentArmor.armorName : "null")}");
+        }
         
         // 방어구 데이터에서 칩셋 ID 제거
         if (currentArmor != null)
@@ -718,10 +767,13 @@ public class ChipsetManager : MonoBehaviour
             int slotIndex = slot.GetSlotIndex();
             string[] currentChipsets = currentArmor.GetEquippedChipsetIds();
             
+            Debug.Log($"🔧 [ChipsetManager] 해제 전 방어구 칩셋: {(currentChipsets != null ? string.Join(",", currentChipsets) : "null")}");
+            
             if (slotIndex < currentChipsets.Length)
             {
                 currentChipsets[slotIndex] = null;
                 currentArmor.SetEquippedChipsetIds(currentChipsets);
+                Debug.Log($"🔧 [ChipsetManager] 해제 후 방어구 칩셋: {string.Join(",", currentChipsets)}");
             }
             
             // 효과 적용
@@ -732,6 +784,8 @@ public class ChipsetManager : MonoBehaviour
             
             // 개수 정보 업데이트
             UpdateChipsetInfo();
+            
+            Debug.Log($"🔧 [ChipsetManager] 방어구 칩셋 해제 완료");
         }
     }
     
@@ -1053,6 +1107,13 @@ public class ChipsetManager : MonoBehaviour
     /// </summary>
     private void LoadArmorChipsets()
     {
+        // 🆕 ArmorChipsetPanel의 ChipsetSlotUI에서 현재 방어구 가져오기
+        if (chipsetSlotUI != null && chipsetSlotUI.currentType == ChipsetSlotUI.ItemType.Armor)
+        {
+            currentArmor = chipsetSlotUI.currentArmor;
+            Debug.Log($"🔧 [ChipsetManager] LoadArmorChipsets에서 ChipsetSlotUI에서 현재 방어구 가져옴: {(currentArmor != null ? currentArmor.armorName : "null")}");
+        }
+        
         if (currentArmor == null) return;
         
         // 데이터 로드 상태 확인
@@ -1070,6 +1131,8 @@ public class ChipsetManager : MonoBehaviour
         
         // 방어구에 장착된 칩셋 로드
         string[] equippedChipsets = currentArmor.GetEquippedChipsetIds();
+        Debug.Log($"[ChipsetManager] 방어구에 장착된 칩셋: {(equippedChipsets != null ? string.Join(",", equippedChipsets) : "null")}");
+        
         for (int i = 0; i < equippedChipsets.Length && i < armorSlots.Length; i++)
         {
             var chipsetId = equippedChipsets[i];
@@ -1079,6 +1142,7 @@ public class ChipsetManager : MonoBehaviour
                 if (chipset != null)
                 {
                     armorSlots[i].EquipArmorChipset(chipset);
+                    Debug.Log($"[ChipsetManager] 방어구 칩셋 로드: 슬롯 {i} = {chipset.chipsetName}");
                 }
                 else
                 {
@@ -1090,6 +1154,8 @@ public class ChipsetManager : MonoBehaviour
         // 코스트 표시 업데이트
         UpdateArmorCostDisplay();
         CheckArmorCostOver();
+        
+        Debug.Log($"[ChipsetManager] 방어구 칩셋 로드 완료");
     }
     
     /// <summary>

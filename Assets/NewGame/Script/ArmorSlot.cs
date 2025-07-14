@@ -190,8 +190,8 @@ public class ArmorSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         
         if (draggedArmor != null && sourceSlot != null)
         {
-            // 타입 체크
-            if (draggedArmor.armorType != allowedArmorType)
+            // 타입 체크 (All 타입이 아닌 경우에만)
+            if (allowedArmorType != ArmorType.All && draggedArmor.armorType != allowedArmorType)
             {
                 Debug.LogWarning($"⚠️ [ArmorSlot] {draggedArmor.armorName}은(는) {slotName} 슬롯에 장착할 수 없습니다!");
                 return;
@@ -274,8 +274,8 @@ public class ArmorSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     // 방어구 장착
     public void EquipArmor(ArmorData newArmorData)
     {
-        // 타입 체크
-        if (newArmorData.armorType != allowedArmorType)
+        // 타입 체크 (All 타입이 아닌 경우에만)
+        if (allowedArmorType != ArmorType.All && newArmorData.armorType != allowedArmorType)
         {
             Debug.LogWarning($"⚠️ {newArmorData.armorName}은(는) {allowedArmorType} 슬롯에 장착할 수 없습니다!");
             return;
@@ -304,6 +304,18 @@ public class ArmorSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         UpdatePlayerStats();
         
         UpdateVisuals();
+        
+        // 🆕 ArmorChipsetPanel의 ChipsetSlotUI에 방어구 자동 설정
+        var armorChipsetPanel = GameObject.Find("ArmorChipsetPanel");
+        if (armorChipsetPanel != null)
+        {
+            var chipsetSlotUI = armorChipsetPanel.GetComponent<ChipsetSlotUI>();
+            if (chipsetSlotUI != null)
+            {
+                chipsetSlotUI.SetItem(armorData);
+                Debug.Log($"🔧 [ArmorSlot] ArmorChipsetPanel에 방어구 자동 설정: {armorData.armorName}");
+            }
+        }
         
         // 이벤트 호출
         OnArmorEquipped?.Invoke(armorData);
@@ -336,6 +348,18 @@ public class ArmorSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         }
         
         UpdateVisuals();
+        
+        // 🆕 ArmorChipsetPanel의 ChipsetSlotUI 초기화
+        var armorChipsetPanel = GameObject.Find("ArmorChipsetPanel");
+        if (armorChipsetPanel != null)
+        {
+            var chipsetSlotUI = armorChipsetPanel.GetComponent<ChipsetSlotUI>();
+            if (chipsetSlotUI != null)
+            {
+                chipsetSlotUI.ClearItem();
+                Debug.Log($"🔧 [ArmorSlot] ArmorChipsetPanel 초기화");
+            }
+        }
         
         // 이벤트 호출
         OnArmorUnequipped?.Invoke(oldArmor);
@@ -475,7 +499,10 @@ public class ArmorSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
             
             if (typeText != null)
             {
-                typeText.text = allowedArmorType.ToString();
+                if (allowedArmorType == ArmorType.All)
+                    typeText.text = "모든 타입";
+                else
+                    typeText.text = allowedArmorType.ToString();
             }
             
             if (defenseText != null)

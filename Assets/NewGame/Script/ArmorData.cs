@@ -8,7 +8,8 @@ public enum ArmorType
     Legs,       // 하체
     Boots,      // 신발
     Shoulder,   // 어깨 (악세사리)
-    Accessory   // 기타 악세사리
+    Accessory,  // 기타 악세사리
+    All         // 모든 타입 (칩셋 슬롯용)
 }
 
 [System.Serializable]
@@ -123,6 +124,7 @@ public class ArmorData : ScriptableObject
             case ArmorType.Boots: return "신발";
             case ArmorType.Shoulder: return "어깨";
             case ArmorType.Accessory: return "악세사리";
+            case ArmorType.All: return "모든 타입";
             default: return "알 수 없음";
         }
     }
