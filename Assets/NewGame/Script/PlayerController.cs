@@ -1121,6 +1121,10 @@ public class PlayerController : MonoBehaviour
     public float GetTotalCriticalChance() => criticalChanceBonus;
     public float GetTotalCriticalMultiplier() => criticalDamageMultiplier;
     public float GetLuckBonus() => luckBonus;
+    
+    // 🆕 스탯 UI용 기본 스탯 반환 메서드들
+    public float GetBaseJumpForce() => jumpForce;
+    public float GetBaseDashCooldown() => dashCooldown;
 
     void OnDrawGizmosSelected()
     {

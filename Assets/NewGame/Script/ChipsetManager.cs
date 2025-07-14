@@ -1567,4 +1567,44 @@ public class ChipsetManager : MonoBehaviour
             inventoryManager.RefreshInventory();
         }
     }
+    
+    // 🆕 스탯 UI용 칩셋 개수 반환 메서드들
+    public int GetWeaponChipsetCount()
+    {
+        int count = 0;
+        foreach (var slot in weaponSlots)
+        {
+            if (slot != null && slot.IsEquipped())
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    public int GetArmorChipsetCount()
+    {
+        int count = 0;
+        foreach (var slot in armorSlots)
+        {
+            if (slot != null && slot.IsEquipped())
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    public int GetPlayerChipsetCount()
+    {
+        int count = 0;
+        foreach (var slot in playerSlots)
+        {
+            if (slot != null && slot.IsEquipped())
+            {
+                count++;
+            }
+        }
+        return count;
+    }
 } 

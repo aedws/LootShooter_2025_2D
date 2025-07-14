@@ -628,6 +628,44 @@ public class PlayerInventory : MonoBehaviour
         float totalReduction = equippedArmors.Values.Sum(armor => armor.damageReduction);
         return Mathf.Clamp01(totalReduction); // 최대 100% 제한
     }
+    
+    // 🆕 스탯 UI용 메서드들
+    public float GetTotalMoveSpeedBonus()
+    {
+        return equippedArmors.Values.Sum(armor => armor.moveSpeedBonus);
+    }
+    
+    public float GetTotalJumpForceBonus()
+    {
+        return equippedArmors.Values.Sum(armor => armor.jumpForceBonus);
+    }
+    
+    public float GetTotalDashCooldownReduction()
+    {
+        return equippedArmors.Values.Sum(armor => armor.dashCooldownReduction);
+    }
+    
+    public float GetTotalHealthRegeneration()
+    {
+        float totalRegen = 0f;
+        foreach (var armor in equippedArmors.Values)
+        {
+            if (armor != null && armor.hasRegeneration)
+                totalRegen += armor.regenerationRate;
+        }
+        return totalRegen;
+    }
+    
+    public float GetTotalInvincibilityTime()
+    {
+        float totalTime = 0f;
+        foreach (var armor in equippedArmors.Values)
+        {
+            if (armor != null && armor.hasInvincibilityFrame)
+                totalTime += armor.invincibilityBonus;
+        }
+        return totalTime;
+    }
 
     // Update 함수에서 무기 위치/flip 동적 업데이트
     void Update()
