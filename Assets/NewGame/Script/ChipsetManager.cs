@@ -472,6 +472,7 @@ public class ChipsetManager : MonoBehaviour
         // 칩셋 탭으로 전환
         if (inventoryManager != null)
         {
+            LoadAllChipsetItems(); // 항상 최신 칩셋 인벤토리 로드
             inventoryManager.SwitchTab(InventoryTab.Chipsets);
             inventoryManager.OpenInventory();
             // 강제로 새로고침 실행
@@ -484,6 +485,7 @@ public class ChipsetManager : MonoBehaviour
         // 칩셋 탭으로 전환
         if (inventoryManager != null)
         {
+            LoadAllChipsetItems(); // 항상 최신 칩셋 인벤토리 로드
             inventoryManager.SwitchTab(InventoryTab.Chipsets);
             inventoryManager.OpenInventory();
             // 강제로 새로고침 실행
@@ -496,6 +498,7 @@ public class ChipsetManager : MonoBehaviour
         // 칩셋 탭으로 전환
         if (inventoryManager != null)
         {
+            LoadAllChipsetItems(); // 항상 최신 칩셋 인벤토리 로드
             inventoryManager.SwitchTab(InventoryTab.Chipsets);
             inventoryManager.OpenInventory();
             // 강제로 새로고침 실행

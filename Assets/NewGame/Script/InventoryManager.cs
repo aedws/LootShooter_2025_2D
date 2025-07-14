@@ -509,6 +509,13 @@ public class InventoryManager : MonoBehaviour
     {
         if (currentTab == newTab) return;
         
+        // 칩셋 리스트를 비우지 않음! (칩셋 인벤토리 데이터 유지)
+        // if (currentTab == InventoryTab.Chipsets && newTab != InventoryTab.Chipsets)
+        // {
+        //     ClearChipsets();
+        //     Debug.Log($"[InventoryManager] 칩셋 탭에서 {newTab} 탭으로 이동 - 칩셋 리스트 초기화");
+        // }
+        
         currentTab = newTab;
         UpdateTabVisuals();
         RefreshInventory();
@@ -548,6 +555,9 @@ public class InventoryManager : MonoBehaviour
             colors.normalColor = currentTab == InventoryTab.Armors ? activeTabColor : inactiveTabColor;
             armorTabButton.colors = colors;
         }
+        
+        // 🆕 칩셋 탭 버튼 처리 (ChipsetManager에서 관리하므로 여기서는 색상만 업데이트)
+        // 실제 칩셋 탭 버튼은 ChipsetManager에서 관리됨
     }
     
     public void ToggleInventory()
@@ -843,15 +853,8 @@ public class InventoryManager : MonoBehaviour
         }
 
         int targetSlotCount = Mathf.Min(itemsToShow.Count + minEmptySlots, maxInventorySlots);
-        Debug.Log($"📦 [InventoryManager] 목표 슬롯 수: {targetSlotCount} (아이템: {itemsToShow.Count}, 최소 빈 슬롯: {minEmptySlots})");
+        EnsureEnoughSlots();
 
-        // 슬롯이 부족하면 새로 생성
-        while (inventorySlots.Count < targetSlotCount)
-        {
-            CreateSingleSlot(inventorySlots.Count);
-        }
-        
-        // 남는 슬롯은 ClearSlot만 호출 (파괴하지 않음)
         for (int i = 0; i < inventorySlots.Count; i++)
         {
             if (i < itemsToShow.Count)
@@ -859,15 +862,12 @@ public class InventoryManager : MonoBehaviour
                 if (currentTab == InventoryTab.Weapons)
                 {
                     WeaponData weapon = itemsToShow[i] as WeaponData;
-                    inventorySlots[i].isArmorSlot = false;
                     inventorySlots[i].SetWeapon(weapon);
                 }
                 else if (currentTab == InventoryTab.Armors)
                 {
                     ArmorData armor = itemsToShow[i] as ArmorData;
-                    inventorySlots[i].isArmorSlot = true;
                     inventorySlots[i].SetArmor(armor);
-                    Debug.Log($"🛡️ [InventoryManager] 슬롯 {i}에 방어구 설정: {armor.armorName} (등급: {armor.rarity})");
                 }
                 else if (currentTab == InventoryTab.Chipsets)
                 {
@@ -878,10 +878,10 @@ public class InventoryManager : MonoBehaviour
             }
             else
             {
+                // **여기서 반드시 초기화!**
                 inventorySlots[i].ClearSlot();
             }
         }
-        StartCoroutine(DelayedRebuildLayout());
     }
     
     void UpdateUI()

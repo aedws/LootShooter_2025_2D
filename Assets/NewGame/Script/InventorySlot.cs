@@ -175,6 +175,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         weaponData = null;
         armorData = null;
+        chipsetData = null; // 칩셋 데이터도 초기화
         UpdateVisuals();
     }
     
