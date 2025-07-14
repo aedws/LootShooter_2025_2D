@@ -1283,17 +1283,28 @@ public class InventoryManager : MonoBehaviour
             return;
         }
         
-        if (!chipsets.Contains(chipset))
+        // 🆕 ID 기반으로 중복 체크
+        string chipsetId = GetChipsetId(chipset);
+        if (string.IsNullOrEmpty(chipsetId))
+        {
+            Debug.LogError($"❌ [InventoryManager] 칩셋 ID를 가져올 수 없습니다: {GetChipsetName(chipset)}");
+            return;
+        }
+        
+        // 이미 같은 ID의 칩셋이 있는지 확인
+        bool alreadyExists = chipsets.Any(existingChipset => GetChipsetId(existingChipset) == chipsetId);
+        
+        if (!alreadyExists)
         {
             chipsets.Add(chipset);
             OnChipsetAdded?.Invoke(chipset);
-            Debug.Log($"🔧 칩셋 추가: {GetChipsetName(chipset)} (총 {chipsets.Count}개 보유)");
+            Debug.Log($"🔧 칩셋 추가: {GetChipsetName(chipset)} (ID: {chipsetId}, 총 {chipsets.Count}개 보유)");
             
             RefreshInventory();
         }
         else
         {
-            Debug.LogWarning($"⚠️ [InventoryManager] 이미 보유한 칩셋입니다: {GetChipsetName(chipset)}");
+            Debug.LogWarning($"⚠️ [InventoryManager] 이미 보유한 칩셋입니다: {GetChipsetName(chipset)} (ID: {chipsetId})");
         }
     }
     
@@ -1301,15 +1312,29 @@ public class InventoryManager : MonoBehaviour
     {
         if (chipset == null) return;
         
-        if (chipsets.Remove(chipset))
+        // 🆕 ID 기반으로 제거
+        string chipsetId = GetChipsetId(chipset);
+        if (string.IsNullOrEmpty(chipsetId))
         {
-            OnChipsetRemoved?.Invoke(chipset);
-            Debug.Log($"🔧 칩셋 제거: {GetChipsetName(chipset)}");
+            Debug.LogError($"❌ [InventoryManager] 칩셋 ID를 가져올 수 없습니다: {GetChipsetName(chipset)}");
+            return;
+        }
+        
+        // 같은 ID의 칩셋을 찾아서 제거
+        var chipsetToRemove = chipsets.FirstOrDefault(existingChipset => GetChipsetId(existingChipset) == chipsetId);
+        if (chipsetToRemove != null && chipsets.Remove(chipsetToRemove))
+        {
+            OnChipsetRemoved?.Invoke(chipsetToRemove);
+            Debug.Log($"🔧 칩셋 제거: {GetChipsetName(chipsetToRemove)} (ID: {chipsetId})");
             
             if (shouldRefresh)
             {
                 RefreshInventory();
             }
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ [InventoryManager] 제거할 칩셋을 찾을 수 없습니다: {GetChipsetName(chipset)} (ID: {chipsetId})");
         }
     }
     
@@ -1320,7 +1345,12 @@ public class InventoryManager : MonoBehaviour
     
     public bool HasChipset(object chipset)
     {
-        return chipsets.Contains(chipset);
+        if (chipset == null) return false;
+        
+        string chipsetId = GetChipsetId(chipset);
+        if (string.IsNullOrEmpty(chipsetId)) return false;
+        
+        return chipsets.Any(existingChipset => GetChipsetId(existingChipset) == chipsetId);
     }
     
     public int GetChipsetCount()
@@ -1343,6 +1373,21 @@ public class InventoryManager : MonoBehaviour
             return playerChipset.chipsetName;
         else
             return "알 수 없는 칩셋";
+    }
+    
+    /// <summary>
+    /// 칩셋의 ID를 반환하는 헬퍼 메서드
+    /// </summary>
+    private string GetChipsetId(object chipset)
+    {
+        if (chipset is WeaponChipsetData weaponChipset)
+            return weaponChipset.chipsetId;
+        else if (chipset is ArmorChipsetData armorChipset)
+            return armorChipset.chipsetId;
+        else if (chipset is PlayerChipsetData playerChipset)
+            return playerChipset.chipsetId;
+        else
+            return null;
     }
     
     /// <summary>

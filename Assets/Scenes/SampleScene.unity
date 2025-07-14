@@ -2397,7 +2397,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &397975867
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3176,8 +3176,6 @@ MonoBehaviour:
   playerTotalCostText: {fileID: 44355459}
   playerMaxCostText: {fileID: 1247738169}
   playerCostSlider: {fileID: 730141515}
-  chipsetInventoryParent: {fileID: 1067155683}
-  chipsetItemPrefab: {fileID: 1549703928096181891, guid: c03e687493bdc1a499bc5d1ee5a6ef7f, type: 3}
   weaponChipsetTabButton: {fileID: 0}
   armorChipsetTabButton: {fileID: 0}
   playerChipsetTabButton: {fileID: 861401373}
@@ -3191,6 +3189,8 @@ MonoBehaviour:
   inventoryManager: {fileID: 2112165850}
   chipsetPickupPrefab: {fileID: 9148073665157120584, guid: 1fbc9fab5faf5564eaf6904b97e06fd9, type: 3}
   spawnPoint: {fileID: 1163192265}
+  returnToInventoryOnUnequip: 1
+  returnToInventoryToggle: {fileID: 0}
 --- !u!1 &533600399
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,7 +9,7 @@ using TMPro;
 /// </summary>
 public enum ChipsetOwnerType { Weapon, Armor, Player }
 
-public class ChipsetSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPointerExitHandler
+public class ChipsetSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [Header("UI References")]
     [SerializeField] private Image slotBackground;
@@ -83,6 +83,10 @@ public class ChipsetSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IP
         armorChipset = null;
         playerChipset = null;
         isEquipped = true;
+        
+        // 🆕 인벤토리에서 칩셋 제거
+        RemoveChipsetFromInventory(chipset);
+        
         // 칩셋 배열 갱신
         if (parentSlotUI != null && parentSlotUI.currentType == ChipsetSlotUI.ItemType.Weapon && parentSlotUI.currentWeapon != null)
         {
@@ -99,12 +103,17 @@ public class ChipsetSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IP
         UpdateVisualState();
         OnChipsetEquipped?.Invoke(this, chipset);
     }
+    
     public void EquipArmorChipset(ArmorChipsetData chipset)
     {
         armorChipset = chipset;
         weaponChipset = null;
         playerChipset = null;
         isEquipped = true;
+        
+        // 🆕 인벤토리에서 칩셋 제거
+        RemoveChipsetFromInventory(chipset);
+        
         // 칩셋 배열 갱신
         if (parentSlotUI != null && parentSlotUI.currentType == ChipsetSlotUI.ItemType.Armor && parentSlotUI.currentArmor != null)
         {
@@ -121,12 +130,17 @@ public class ChipsetSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IP
         UpdateVisualState();
         OnChipsetEquipped?.Invoke(this, chipset);
     }
+    
     public void EquipPlayerChipset(PlayerChipsetData chipset)
     {
         playerChipset = chipset;
         weaponChipset = null;
         armorChipset = null;
         isEquipped = true;
+        
+        // 🆕 플레이어 칩셋도 인벤토리에서 제거
+        RemoveChipsetFromInventory(chipset);
+        
         // 칩셋 배열 갱신
         if (parentSlotUI != null && parentSlotUI.currentType == ChipsetSlotUI.ItemType.Player && parentSlotUI.playerEquippedChipsets != null)
         {
@@ -142,10 +156,56 @@ public class ChipsetSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IP
         }
         UpdateVisualState();
         OnChipsetEquipped?.Invoke(this, chipset);
+        
+        // 🆕 플레이어 칩셋 상시 저장 (장착 시)
+        if (parentSlotUI != null)
+        {
+            parentSlotUI.SavePlayerChipsetsImmediately(true); // true = 장착 시
+        }
     }
+    
     public void UnequipChipset()
     {
         var removedChipset = GetCurrentChipset();
+        
+        Debug.Log($"🔧 [ChipsetSlot] UnequipChipset 호출됨 - 칩셋: {GetChipsetName(removedChipset)}");
+        Debug.Log($"🔧 [ChipsetSlot] parentSlotUI: {(parentSlotUI != null ? "있음" : "없음")}");
+        Debug.Log($"🔧 [ChipsetSlot] currentType: {(parentSlotUI != null ? parentSlotUI.currentType.ToString() : "parentSlotUI 없음")}");
+        
+        // 🆕 플레이어 칩셋인 경우 parentSlotUI를 Player 모드로 강제 설정
+        if (removedChipset is PlayerChipsetData && parentSlotUI != null)
+        {
+            Debug.Log($"🔧 [ChipsetSlot] 플레이어 칩셋 해제 시 parentSlotUI를 Player 모드로 강제 설정");
+            parentSlotUI.currentType = ChipsetSlotUI.ItemType.Player;
+        }
+        
+        // 🆕 칩셋 해제 처리
+        if (removedChipset != null)
+        {
+            // 플레이어 칩셋의 경우 항상 인벤토리로 반환
+            if (parentSlotUI != null && parentSlotUI.currentType == ChipsetSlotUI.ItemType.Player)
+            {
+                ReturnChipsetToInventory(removedChipset);
+                Debug.Log($"🔧 [ChipsetSlot] 플레이어 칩셋 해제 - 인벤토리로 반환: {GetChipsetName(removedChipset)}");
+            }
+            else
+            {
+                // 무기/방어구 칩셋은 옵션에 따라 처리
+                bool returnToInventory = GetChipsetReturnOption();
+                if (returnToInventory)
+                {
+                    // 인벤토리로 반환
+                    ReturnChipsetToInventory(removedChipset);
+                    Debug.Log($"🔧 [ChipsetSlot] 칩셋 해제 - 인벤토리로 반환: {GetChipsetName(removedChipset)}");
+                }
+                else
+                {
+                    // 소멸 (기존 동작)
+                    Debug.Log($"🔧 [ChipsetSlot] 칩셋 해제 - 소멸: {GetChipsetName(removedChipset)}");
+                }
+            }
+        }
+        
         // 칩셋 배열 갱신
         if (parentSlotUI != null)
         {
@@ -186,6 +246,83 @@ public class ChipsetSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IP
         {
             OnChipsetUnequipped?.Invoke(this, removedChipset);
         }
+        
+        // 🆕 플레이어 칩셋 해제 시 상시 저장
+        if (parentSlotUI != null && parentSlotUI.currentType == ChipsetSlotUI.ItemType.Player)
+        {
+            parentSlotUI.SavePlayerChipsetsImmediately(false); // false = 해제 시
+        }
+    }
+    
+    /// <summary>
+    /// 칩셋 해제 시 인벤토리 반환 옵션을 가져옴
+    /// </summary>
+    private bool GetChipsetReturnOption()
+    {
+        // ChipsetManager에서 옵션을 가져옴
+        var chipsetManager = FindFirstObjectByType<ChipsetManager>();
+        if (chipsetManager != null)
+        {
+            return chipsetManager.returnToInventoryOnUnequip;
+        }
+        return false; // 기본값: 소멸
+    }
+    
+    /// <summary>
+    /// 칩셋을 인벤토리로 반환
+    /// </summary>
+    private void ReturnChipsetToInventory(object chipset)
+    {
+        var inventoryManager = FindFirstObjectByType<InventoryManager>();
+        if (inventoryManager != null)
+        {
+            inventoryManager.AddChipset(chipset);
+            
+            // 🆕 칩셋 탭으로 강제 전환 후 UI 새로고침
+            inventoryManager.SwitchTab(InventoryTab.Chipsets);
+            inventoryManager.RefreshInventory();
+            
+            Debug.Log($"🔧 [ChipsetSlot] 칩셋이 인벤토리로 반환되었습니다: {GetChipsetName(chipset)}");
+        }
+        else
+        {
+            Debug.LogError($"🔧 [ChipsetSlot] InventoryManager를 찾을 수 없습니다!");
+        }
+    }
+    
+    /// <summary>
+    /// 인벤토리에서 칩셋 제거
+    /// </summary>
+    private void RemoveChipsetFromInventory(object chipset)
+    {
+        var inventoryManager = FindFirstObjectByType<InventoryManager>();
+        if (inventoryManager != null)
+        {
+            inventoryManager.RemoveChipset(chipset, false); // UI 새로고침 없이 제거
+            inventoryManager.RefreshInventory(); // 수동으로 UI 새로고침
+        }
+        
+        // 🆕 ChipsetManager의 개수 정보 업데이트
+        var chipsetManager = FindFirstObjectByType<ChipsetManager>();
+        if (chipsetManager != null)
+        {
+            chipsetManager.UpdateChipsetInfo();
+        }
+    }
+    
+    /// <summary>
+    /// 칩셋 이름을 반환하는 헬퍼 메서드
+    /// </summary>
+    private string GetChipsetName(object chipset)
+    {
+        if (chipset is WeaponChipsetData weaponChipset)
+            return weaponChipset.chipsetName;
+        else if (chipset is ArmorChipsetData armorChipset)
+            return armorChipset.chipsetName;
+        else if (chipset is PlayerChipsetData playerChipset)
+            return playerChipset.chipsetName;
+        else
+            return "알 수 없는 칩셋";
     }
     
     /// <summary>
@@ -312,6 +449,16 @@ public class ChipsetSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IP
         if (armorChipset != null) return armorChipset.GetRarityColor();
         if (playerChipset != null) return playerChipset.GetRarityColor();
         return Color.white;
+    }
+    
+    // 🆕 우클릭 이벤트 처리
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Right && isEquipped)
+        {
+            // 우클릭으로 칩셋 해제
+            UnequipChipset();
+        }
     }
     
     // 드래그 앤 드롭 이벤트
