@@ -25,8 +25,8 @@ public class DamageTextManager : MonoBehaviour
     {
         get
         {
-                    if (instance == null)
-        {
+            if (instance == null)
+            {
             instance = FindAnyObjectByType<DamageTextManager>();
                 if (instance == null)
                 {

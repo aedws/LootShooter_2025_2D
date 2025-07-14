@@ -27,6 +27,7 @@ public class ChipsetSystemExample : MonoBehaviour
     {
         SetupUI();
         LoadTestData();
+        ShowF4KeyInfo(); // F4키 안내 출력
     }
     
     /// <summary>
@@ -218,6 +219,190 @@ public class ChipsetSystemExample : MonoBehaviour
             
             Debug.Log($"장착된 칩셋: {equippedCount}개, 총 코스트: {totalCost}");
         }
+    }
+    
+    /// <summary>
+    /// 칩셋 UI 상태 확인
+    /// </summary>
+    public void CheckChipsetUIStatus()
+    {
+        Debug.Log("=== 칩셋 UI 상태 확인 ===");
+        
+        // 데이터 로드 상태 확인
+        Debug.Log($"데이터 로드 완료: {GameDataRepository.Instance.IsAllDataLoaded}");
+        Debug.Log($"무기 칩셋 로드: {GameDataRepository.Instance.IsWeaponChipsetsLoaded}");
+        Debug.Log($"방어구 칩셋 로드: {GameDataRepository.Instance.IsArmorChipsetsLoaded}");
+        Debug.Log($"플레이어 칩셋 로드: {GameDataRepository.Instance.IsPlayerChipsetsLoaded}");
+        
+        // 칩셋 매니저 상태 확인
+        if (chipsetManager != null)
+        {
+            Debug.Log("칩셋 매니저: 활성화됨");
+        }
+        else
+        {
+            Debug.LogWarning("칩셋 매니저: 비활성화됨");
+        }
+        
+        // 효과 매니저 상태 확인
+        if (effectManager != null)
+        {
+            Debug.Log("효과 매니저: 활성화됨");
+        }
+        else
+        {
+            Debug.LogWarning("효과 매니저: 비활성화됨");
+        }
+        
+        // 테스트 무기 상태 확인
+        if (testWeapon != null)
+        {
+            string[] equippedChipsets = testWeapon.GetEquippedChipsetIds();
+            Debug.Log($"테스트 무기: {testWeapon.weaponName}");
+            Debug.Log($"장착된 칩셋 수: {equippedChipsets.Length}");
+            
+            for (int i = 0; i < equippedChipsets.Length; i++)
+            {
+                if (!string.IsNullOrEmpty(equippedChipsets[i]))
+                {
+                    var chipset = GameDataRepository.Instance.GetWeaponChipsetById(equippedChipsets[i]);
+                    if (chipset != null)
+                    {
+                        Debug.Log($"  슬롯 {i}: {chipset.chipsetName} (코스트: {chipset.cost})");
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"  슬롯 {i}: 칩셋을 찾을 수 없음 ({equippedChipsets[i]})");
+                    }
+                }
+            }
+        }
+        else
+        {
+            Debug.LogWarning("테스트 무기: 설정되지 않음");
+        }
+        
+        Debug.Log("=== UI 상태 확인 완료 ===");
+    }
+    
+    /// <summary>
+    /// 칩셋 UI 강제 새로고침
+    /// </summary>
+    public void RefreshChipsetUI()
+    {
+        Debug.Log("칩셋 UI 새로고침 중...");
+        
+        if (chipsetManager != null)
+        {
+            // 현재 무기/방어구 재설정
+            if (testWeapon != null)
+            {
+                chipsetManager.SetCurrentWeapon(testWeapon);
+            }
+            
+            if (testArmor != null)
+            {
+                chipsetManager.SetCurrentArmor(testArmor);
+            }
+            
+            Debug.Log("칩셋 UI 새로고침 완료");
+        }
+        else
+        {
+            Debug.LogWarning("칩셋 매니저가 없어서 새로고침할 수 없습니다.");
+        }
+    }
+    
+    /// <summary>
+    /// 칩셋 인벤토리 저장 테스트
+    /// </summary>
+    public void TestSaveChipsetInventory()
+    {
+        if (chipsetManager != null)
+        {
+            chipsetManager.SaveChipsetInventoryData();
+            Debug.Log("칩셋 인벤토리 저장 테스트 완료");
+        }
+        else
+        {
+            Debug.LogWarning("칩셋 매니저가 없어서 저장할 수 없습니다.");
+        }
+    }
+    
+    /// <summary>
+    /// 칩셋 인벤토리 로드 테스트
+    /// </summary>
+    public void TestLoadChipsetInventory()
+    {
+        if (chipsetManager != null)
+        {
+            chipsetManager.LoadChipsetInventoryData();
+            Debug.Log("칩셋 인벤토리 로드 테스트 완료");
+        }
+        else
+        {
+            Debug.LogWarning("칩셋 매니저가 없어서 로드할 수 없습니다.");
+        }
+    }
+    
+    /// <summary>
+    /// 랜덤 칩셋을 인벤토리에 추가 테스트
+    /// </summary>
+    public void TestAddRandomChipsetToInventory()
+    {
+        if (chipsetManager != null && GameDataRepository.Instance.IsAllDataLoaded)
+        {
+            // 랜덤 칩셋 선택
+            var weaponChipsets = GameDataRepository.Instance.GetAllWeaponChipsets();
+            var armorChipsets = GameDataRepository.Instance.GetAllArmorChipsets();
+            var playerChipsets = GameDataRepository.Instance.GetAllPlayerChipsets();
+            
+            int totalChipsets = weaponChipsets.Count + armorChipsets.Count + playerChipsets.Count;
+            if (totalChipsets > 0)
+            {
+                int randomIndex = Random.Range(0, totalChipsets);
+                object randomChipset = null;
+                
+                if (randomIndex < weaponChipsets.Count)
+                {
+                    randomChipset = weaponChipsets[randomIndex];
+                }
+                else if (randomIndex < weaponChipsets.Count + armorChipsets.Count)
+                {
+                    randomChipset = armorChipsets[randomIndex - weaponChipsets.Count];
+                }
+                else
+                {
+                    randomChipset = playerChipsets[randomIndex - weaponChipsets.Count - armorChipsets.Count];
+                }
+                
+                if (randomChipset != null)
+                {
+                    chipsetManager.AddChipsetToInventory(randomChipset);
+                    Debug.Log($"랜덤 칩셋 추가 테스트 완료");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("추가할 칩셋이 없습니다.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("칩셋 매니저가 없거나 데이터가 로드되지 않았습니다.");
+        }
+    }
+    
+    /// <summary>
+    /// F4키 안내 출력
+    /// </summary>
+    public void ShowF4KeyInfo()
+    {
+        Debug.Log("=== F4키 사용법 ===");
+        Debug.Log("F4키를 누르면 랜덤 칩셋이 필드에 소환됩니다.");
+        Debug.Log("플레이어가 칩셋에 접근하면 자동으로 인벤토리에 추가됩니다.");
+        Debug.Log("칩셋 인벤토리는 자동으로 저장/로드됩니다.");
+        Debug.Log("==================");
     }
     
     private void Update()

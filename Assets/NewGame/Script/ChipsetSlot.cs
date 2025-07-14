@@ -321,18 +321,28 @@ public class ChipsetSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IP
         var draggedChipset = eventData.pointerDrag?.GetComponent<ChipsetItem>();
         if (draggedChipset != null)
         {
-            // 칩셋 타입에 따라 장착
-            if (draggedChipset.weaponChipset != null)
+            // 칩셋 타입 검증
+            bool isValidDrop = false;
+            
+            if (draggedChipset.weaponChipset != null && ownerType == ChipsetOwnerType.Weapon)
             {
                 EquipWeaponChipset(draggedChipset.weaponChipset);
+                isValidDrop = true;
             }
-            else if (draggedChipset.armorChipset != null)
+            else if (draggedChipset.armorChipset != null && ownerType == ChipsetOwnerType.Armor)
             {
                 EquipArmorChipset(draggedChipset.armorChipset);
+                isValidDrop = true;
             }
-            else if (draggedChipset.playerChipset != null)
+            else if (draggedChipset.playerChipset != null && ownerType == ChipsetOwnerType.Player)
             {
                 EquipPlayerChipset(draggedChipset.playerChipset);
+                isValidDrop = true;
+            }
+            
+            if (!isValidDrop)
+            {
+                Debug.LogWarning($"[ChipsetSlot] 잘못된 칩셋 타입입니다. 슬롯 타입: {ownerType}");
             }
         }
     }

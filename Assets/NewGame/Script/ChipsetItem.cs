@@ -178,6 +178,9 @@ public class ChipsetItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     // 드래그 이벤트
     public void OnBeginDrag(PointerEventData eventData)
     {
+        // 칩셋이 없으면 드래그 불가
+        if (GetCurrentChipset() == null) return;
+        
         originalPosition = rectTransform.position;
         originalParent = transform.parent;
         
@@ -196,6 +199,9 @@ public class ChipsetItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     
     public void OnDrag(PointerEventData eventData)
     {
+        // 칩셋이 없으면 드래그 불가
+        if (GetCurrentChipset() == null) return;
+        
         if (rectTransform != null)
         {
             rectTransform.position = eventData.position;
@@ -204,6 +210,9 @@ public class ChipsetItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
     
     public void OnEndDrag(PointerEventData eventData)
     {
+        // 칩셋이 없으면 처리하지 않음
+        if (GetCurrentChipset() == null) return;
+        
         // 원래 위치로 복원
         if (canvasGroup != null)
         {

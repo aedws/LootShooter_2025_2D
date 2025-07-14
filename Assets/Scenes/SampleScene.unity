@@ -3157,33 +3157,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1526726c765fef4f9454d6fb625549c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponChipsetPanel: {fileID: 0}
-  armorChipsetPanel: {fileID: 0}
-  playerChipsetPanel: {fileID: 0}
-  inventoryPanel: {fileID: 0}
-  weaponSlotsParent: {fileID: 0}
+  weaponChipsetPanel: {fileID: 887657181}
+  armorChipsetPanel: {fileID: 996797093}
+  playerChipsetPanel: {fileID: 1834459629}
+  inventoryPanel: {fileID: 1067155682}
+  weaponSlotsParent: {fileID: 1728471289}
   weaponSlots: []
-  weaponTotalCostText: {fileID: 0}
-  weaponMaxCostText: {fileID: 0}
-  weaponCostSlider: {fileID: 0}
-  armorSlotsParent: {fileID: 0}
+  weaponTotalCostText: {fileID: 549820992}
+  weaponMaxCostText: {fileID: 1060217504}
+  weaponCostSlider: {fileID: 1953304557}
+  armorSlotsParent: {fileID: 1498834787}
   armorSlots: []
-  armorTotalCostText: {fileID: 0}
-  armorMaxCostText: {fileID: 0}
-  armorCostSlider: {fileID: 0}
-  playerSlotsParent: {fileID: 0}
+  armorTotalCostText: {fileID: 457107834}
+  armorMaxCostText: {fileID: 668993750}
+  armorCostSlider: {fileID: 657693545}
+  playerSlotsParent: {fileID: 799193191}
   playerSlots: []
-  playerTotalCostText: {fileID: 0}
-  playerMaxCostText: {fileID: 0}
-  playerCostSlider: {fileID: 0}
-  weaponChipsetInventoryParent: {fileID: 0}
-  armorChipsetInventoryParent: {fileID: 0}
-  playerChipsetInventoryParent: {fileID: 0}
-  chipsetItemPrefab: {fileID: 0}
+  playerTotalCostText: {fileID: 44355459}
+  playerMaxCostText: {fileID: 1247738169}
+  playerCostSlider: {fileID: 730141515}
+  chipsetInventoryParent: {fileID: 1067155683}
+  chipsetItemPrefab: {fileID: 1549703928096181891, guid: c03e687493bdc1a499bc5d1ee5a6ef7f, type: 3}
+  weaponChipsetTabButton: {fileID: 0}
+  armorChipsetTabButton: {fileID: 0}
+  playerChipsetTabButton: {fileID: 861401373}
+  activeTabColor: {r: 0, g: 1, b: 1, a: 1}
+  inactiveTabColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  chipsetInfoText: {fileID: 1926863402}
   weaponMaxCost: 10
   armorMaxCost: 8
   playerMaxCost: 12
   effectManager: {fileID: 0}
+  inventoryManager: {fileID: 2112165850}
+  chipsetPickupPrefab: {fileID: 9148073665157120584, guid: 1fbc9fab5faf5564eaf6904b97e06fd9, type: 3}
+  spawnPoint: {fileID: 1163192265}
 --- !u!1 &533600399
 GameObject:
   m_ObjectHideFlags: 0
@@ -7486,6 +7493,7 @@ RectTransform:
   - {fileID: 576076861}
   - {fileID: 196822450}
   - {fileID: 909896260}
+  - {fileID: 1329359624}
   - {fileID: 69393126}
   - {fileID: 887657182}
   - {fileID: 996797094}
@@ -9782,6 +9790,142 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1324023754}
+  m_CullTransparentMesh: 1
+--- !u!1 &1329359623
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1329359624}
+  - component: {fileID: 1329359626}
+  - component: {fileID: 1329359625}
+  m_Layer: 0
+  m_Name: Chipset Text
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1329359624
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1329359623}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1067155683}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: -397, y: 80}
+  m_SizeDelta: {x: 150, y: 30}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1329359625
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1329359623}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_text: test
+  m_isRightToLeft: 0
+  m_fontAsset: {fileID: 11400000, guid: 9285472808e56ef4e8eaebd00e044901, type: 2}
+  m_sharedMaterial: {fileID: -8204857461977660834, guid: 9285472808e56ef4e8eaebd00e044901, type: 2}
+  m_fontSharedMaterials: []
+  m_fontMaterial: {fileID: 0}
+  m_fontMaterials: []
+  m_fontColor32:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_enableVertexGradient: 0
+  m_colorMode: 3
+  m_fontColorGradient:
+    topLeft: {r: 1, g: 1, b: 1, a: 1}
+    topRight: {r: 1, g: 1, b: 1, a: 1}
+    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
+    bottomRight: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColorGradientPreset: {fileID: 0}
+  m_spriteAsset: {fileID: 0}
+  m_tintAllSprites: 0
+  m_StyleSheet: {fileID: 0}
+  m_TextStyleHashCode: -1183493901
+  m_overrideHtmlColors: 0
+  m_faceColor:
+    serializedVersion: 2
+    rgba: 4294967295
+  m_fontSize: 20
+  m_fontSizeBase: 20
+  m_fontWeight: 400
+  m_enableAutoSizing: 0
+  m_fontSizeMin: 18
+  m_fontSizeMax: 72
+  m_fontStyle: 0
+  m_HorizontalAlignment: 1
+  m_VerticalAlignment: 512
+  m_textAlignment: 65535
+  m_characterSpacing: 0
+  m_wordSpacing: 0
+  m_lineSpacing: 0
+  m_lineSpacingMax: 0
+  m_paragraphSpacing: 0
+  m_charWidthMaxAdj: 0
+  m_TextWrappingMode: 1
+  m_wordWrappingRatios: 0.4
+  m_overflowMode: 0
+  m_linkedTextComponent: {fileID: 0}
+  parentLinkedComponent: {fileID: 0}
+  m_enableKerning: 0
+  m_ActiveFontFeatures: 6e72656b
+  m_enableExtraPadding: 0
+  checkPaddingRequired: 0
+  m_isRichText: 1
+  m_EmojiFallbackSupport: 1
+  m_parseCtrlCharacters: 1
+  m_isOrthographic: 1
+  m_isCullingEnabled: 0
+  m_horizontalMapping: 0
+  m_verticalMapping: 0
+  m_uvLineOffset: 0
+  m_geometrySortingOrder: 0
+  m_IsTextObjectScaleStatic: 0
+  m_VertexBufferAutoSizeReduction: 0
+  m_useMaxVisibleDescender: 1
+  m_pageToDisplay: 1
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_isUsingLegacyAnimationComponent: 0
+  m_isVolumetricText: 0
+  m_hasFontAssetChanged: 0
+  m_baseMaterial: {fileID: 0}
+  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!222 &1329359626
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1329359623}
   m_CullTransparentMesh: 1
 --- !u!1 &1356433549
 GameObject:

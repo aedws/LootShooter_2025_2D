@@ -30,7 +30,34 @@ public class ChipsetSlotUI : MonoBehaviour
         {
             linkedWeaponSlot.OnWeaponChanged += OnLinkedWeaponChanged;
         }
+        
+        // GameDataRepository 데이터 로드 완료 이벤트 구독
+        GameDataRepository.Instance.OnAllDataLoaded += OnDataLoaded;
     }
+    
+    private void OnDestroy()
+    {
+        // 이벤트 구독 해제
+        if (linkedWeaponSlot != null)
+        {
+            linkedWeaponSlot.OnWeaponChanged -= OnLinkedWeaponChanged;
+        }
+        
+        if (GameDataRepository.Instance != null)
+        {
+            GameDataRepository.Instance.OnAllDataLoaded -= OnDataLoaded;
+        }
+    }
+    
+    private void OnDataLoaded()
+    {
+        // 데이터 로드 완료 시 UI 업데이트
+        if (currentType != ItemType.None)
+        {
+            UpdateUI();
+        }
+    }
+    
     private void OnLinkedWeaponChanged(WeaponData weapon)
     {
         SetItem(weapon);
@@ -42,7 +69,7 @@ public class ChipsetSlotUI : MonoBehaviour
         currentType = ItemType.Weapon;
         currentWeapon = weapon;
         currentArmor = null;
-        playerEquippedChipsets = null;
+        // playerEquippedChipsets는 null로 설정하지 않고 빈 배열로 유지
         UpdateUI();
     }
     // 방어구 올리기
@@ -51,7 +78,7 @@ public class ChipsetSlotUI : MonoBehaviour
         currentType = ItemType.Armor;
         currentWeapon = null;
         currentArmor = armor;
-        playerEquippedChipsets = null;
+        // playerEquippedChipsets는 null로 설정하지 않고 빈 배열로 유지
         UpdateUI();
     }
     // 플레이어 칩셋 배열 올리기
@@ -69,7 +96,7 @@ public class ChipsetSlotUI : MonoBehaviour
         currentType = ItemType.None;
         currentWeapon = null;
         currentArmor = null;
-        playerEquippedChipsets = null;
+        playerEquippedChipsets = new string[6]; // 빈 배열로 초기화
         UpdateUI();
     }
     // UI 갱신
@@ -81,7 +108,7 @@ public class ChipsetSlotUI : MonoBehaviour
                 itemNameText.text = currentWeapon.weaponName;
             else if (currentType == ItemType.Armor && currentArmor != null)
                 itemNameText.text = currentArmor.armorName;
-            else if (currentType == ItemType.Player && playerEquippedChipsets != null)
+            else if (currentType == ItemType.Player)
                 itemNameText.text = "Player";
             else
                 itemNameText.text = "-";
@@ -92,19 +119,29 @@ public class ChipsetSlotUI : MonoBehaviour
     private void SyncChipsetSlots()
     {
         if (chipsetSlots == null) return;
+        
+        // GameDataRepository가 로드되지 않았으면 대기
+        if (!GameDataRepository.Instance.IsAllDataLoaded)
+        {
+            Debug.LogWarning("[ChipsetSlotUI] 데이터가 아직 로드되지 않았습니다. 나중에 다시 시도합니다.");
+            return;
+        }
+        
         string[] equippedChipsets = null;
         if (currentType == ItemType.Weapon && currentWeapon != null)
             equippedChipsets = currentWeapon.GetEquippedChipsetIds();
         else if (currentType == ItemType.Armor && currentArmor != null)
             equippedChipsets = currentArmor.GetEquippedChipsetIds();
-        else if (currentType == ItemType.Player && playerEquippedChipsets != null)
+        else if (currentType == ItemType.Player)
             equippedChipsets = playerEquippedChipsets;
         else
             equippedChipsets = new string[chipsetSlots.Length];
+            
         for (int i = 0; i < chipsetSlots.Length; i++)
         {
             chipsetSlots[i].parentSlotUI = this;
             chipsetSlots[i].SetSlotIndex(i);
+            
             if (equippedChipsets != null && i < equippedChipsets.Length && !string.IsNullOrEmpty(equippedChipsets[i]))
             {
                 object chipset = null;
@@ -114,6 +151,7 @@ public class ChipsetSlotUI : MonoBehaviour
                     chipset = GameDataRepository.Instance.GetArmorChipsetById(equippedChipsets[i]);
                 else if (currentType == ItemType.Player)
                     chipset = GameDataRepository.Instance.GetPlayerChipsetById(equippedChipsets[i]);
+                    
                 if (chipset != null)
                 {
                     if (currentType == ItemType.Weapon)
@@ -125,6 +163,7 @@ public class ChipsetSlotUI : MonoBehaviour
                 }
                 else
                 {
+                    Debug.LogWarning($"[ChipsetSlotUI] 칩셋을 찾을 수 없습니다: {equippedChipsets[i]}");
                     chipsetSlots[i].UnequipChipset();
                 }
             }
@@ -141,7 +180,7 @@ public class ChipsetSlotUI : MonoBehaviour
             OnWeaponSave?.Invoke(currentWeapon);
         else if (currentType == ItemType.Armor && currentArmor != null)
             OnArmorSave?.Invoke(currentArmor);
-        else if (currentType == ItemType.Player && playerEquippedChipsets != null)
+        else if (currentType == ItemType.Player)
             OnPlayerSave?.Invoke(playerEquippedChipsets);
     }
 } 
