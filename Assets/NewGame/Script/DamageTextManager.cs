@@ -25,9 +25,9 @@ public class DamageTextManager : MonoBehaviour
     {
         get
         {
-            if (instance == null)
-            {
-                instance = FindObjectOfType<DamageTextManager>();
+                    if (instance == null)
+        {
+            instance = FindAnyObjectByType<DamageTextManager>();
                 if (instance == null)
                 {
                     GameObject go = new GameObject("DamageTextManager");

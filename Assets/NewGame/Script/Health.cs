@@ -21,10 +21,19 @@ public class Health : MonoBehaviour
     public bool isInvincible = false;
     private bool isDead = false;
     
+    // 칩셋 효과를 위한 참조
+    private PlayerController playerController;
+    
     void Start()
     {
         currentHealth = maxHealth;
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        
+        // 플레이어인 경우 PlayerController 참조
+        if (gameObject.CompareTag("Player"))
+        {
+            playerController = GetComponent<PlayerController>();
+        }
     }
     
     public void TakeDamage(int damage)
@@ -47,6 +56,19 @@ public class Health : MonoBehaviour
         if (Time.time - lastDamageTime < invincibilityTime)
         {
             return;
+        }
+        
+        // 플레이어인 경우 회피/블록 처리
+        if (playerController != null)
+        {
+            // 회피 또는 블록 성공 시 데미지 무시
+            if (playerController.TryDodgeOrBlock())
+            {
+                return;
+            }
+            
+            // 방어력 적용한 최종 데미지 계산
+            damage = playerController.CalculateFinalDamage(damage);
         }
         
         lastDamageTime = Time.time;

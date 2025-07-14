@@ -51,6 +51,10 @@ public class Weapon : MonoBehaviour
     public System.Action<Vector3> OnRecoil; // 반동 이벤트
     public System.Action<Vector3, float> OnExplosion; // 폭발 이벤트
 
+    // 칩셋 효과 관련 변수들 추가
+    private float playerCriticalChanceBonus = 0f;
+    private float playerCriticalMultiplierBonus = 0f;
+
     void Start()
     {
         if (weaponData != null)
@@ -231,11 +235,13 @@ public class Weapon : MonoBehaviour
             // 기본 데미지 계산
             int finalDamage = GetCurrentDamage();
             
-            // 크리티컬 계산
-            bool isCritical = Random.Range(0f, 1f) < (weaponData != null ? weaponData.criticalChance : 0.1f);
+            // 크리티컬 계산 (플레이어 칩셋 보너스 포함)
+            float totalCriticalChance = (weaponData != null ? weaponData.criticalChance : 0.1f) + playerCriticalChanceBonus;
+            bool isCritical = Random.Range(0f, 1f) < totalCriticalChance;
             if (isCritical)
             {
-                finalDamage = Mathf.RoundToInt(finalDamage * (weaponData != null ? weaponData.criticalMultiplier : 2f));
+                float totalCriticalMultiplier = (weaponData != null ? weaponData.criticalMultiplier : 2f) + playerCriticalMultiplierBonus;
+                finalDamage = Mathf.RoundToInt(finalDamage * totalCriticalMultiplier);
                 // Debug.Log($"Critical Hit! Damage: {finalDamage}");
             }
             
@@ -274,10 +280,13 @@ public class Weapon : MonoBehaviour
             {
                             // 샷건 펠릿별 개별 크리티컬 계산
             int finalDamage = GetCurrentDamage();
-            bool isCritical = Random.Range(0f, 1f) < (weaponData != null ? weaponData.criticalChance : 0.1f);
+            // 크리티컬 계산 (플레이어 칩셋 보너스 포함)
+            float totalCriticalChance = (weaponData != null ? weaponData.criticalChance : 0.1f) + playerCriticalChanceBonus;
+            bool isCritical = Random.Range(0f, 1f) < totalCriticalChance;
                 if (isCritical)
                 {
-                    finalDamage = Mathf.RoundToInt(finalDamage * weaponData.criticalMultiplier);
+                    float totalCriticalMultiplier = (weaponData != null ? weaponData.criticalMultiplier : 2f) + playerCriticalMultiplierBonus;
+                    finalDamage = Mathf.RoundToInt(finalDamage * totalCriticalMultiplier);
                 }
                 
                 projectile.Init(spreadDirection.normalized, finalDamage, GetCurrentProjectileSpeed());
@@ -456,6 +465,13 @@ public class Weapon : MonoBehaviour
                 break;
         }
         
+        // 칩셋 정확도 효과 적용
+        // accuracyMultiplier가 1보다 크면 정확도 증가 (퍼짐 감소)
+        if (accuracyMultiplier != 1f)
+        {
+            spreadAmount = spreadAmount / accuracyMultiplier;
+        }
+        
         // 랜덤 퍼짐 적용
         float randomAngle = Random.Range(-spreadAmount, spreadAmount);
         return RotateVector(direction, randomAngle);
@@ -625,6 +641,12 @@ public class Weapon : MonoBehaviour
     public float GetReloadProgress() => isReloading ? (1f - (reloadTimeRemaining / (weaponData.reloadTime / reloadSpeedMultiplier))) : 0f;
     public float GetCurrentRecoilAngle() => currentRecoilAngle; // 현재 반동 각도
     
+    // 칩셋 효과 관련 getter 메서드들
+    public float GetDamageMultiplier() => damageMultiplier;
+    public float GetFireRateMultiplier() => fireRateMultiplier;
+    public float GetAccuracyMultiplier() => accuracyMultiplier;
+    public float GetReloadSpeedMultiplier() => reloadSpeedMultiplier;
+    
     // 칩셋 효과 관련 메서드들
     public void SetDamageMultiplier(float multiplier) => damageMultiplier = multiplier;
     public void SetFireRateMultiplier(float multiplier) => fireRateMultiplier = multiplier;
@@ -634,6 +656,13 @@ public class Weapon : MonoBehaviour
     public void SetMagazineSizeBonus(int bonus) => magazineSizeBonus = bonus;
     public void SetPenetrationBonus(float bonus) => penetrationBonus = bonus;
     public void SetExplosiveEffect(float effect) => explosiveEffect = effect;
+    
+    // 플레이어 칩셋의 크리티컬 보너스 설정
+    public void SetPlayerCriticalBonus(float chanceBonus, float multiplierBonus)
+    {
+        playerCriticalChanceBonus = chanceBonus;
+        playerCriticalMultiplierBonus = multiplierBonus;
+    }
     
     public void ResetAllMultipliers()
     {
@@ -645,6 +674,8 @@ public class Weapon : MonoBehaviour
         magazineSizeBonus = 0;
         penetrationBonus = 0f;
         explosiveEffect = 0f;
+        playerCriticalChanceBonus = 0f;
+        playerCriticalMultiplierBonus = 0f;
     }
 
     private IEnumerator AutoReloadAfterDelay(float delay)

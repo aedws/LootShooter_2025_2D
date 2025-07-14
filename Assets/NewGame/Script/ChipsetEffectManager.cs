@@ -11,11 +11,16 @@ public class ChipsetEffectManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private PlayerController playerController;
     [SerializeField] private Weapon weaponController;
+    [SerializeField] private PlayerInventory playerInventory; // 추가
+    [SerializeField] private ChipsetManager chipsetManager; // 추가
     
     // 현재 적용된 칩셋 효과들
     private Dictionary<string, float> weaponEffects = new Dictionary<string, float>();
     private Dictionary<string, float> armorEffects = new Dictionary<string, float>();
     private Dictionary<string, float> playerEffects = new Dictionary<string, float>();
+    
+    // 장착된 플레이어 칩셋 데이터
+    private List<PlayerChipsetData> playerEquippedChipsets = new List<PlayerChipsetData>();
     
     // 이벤트
     public System.Action OnEffectsUpdated;
@@ -23,10 +28,57 @@ public class ChipsetEffectManager : MonoBehaviour
     private void Awake()
     {
         if (playerController == null)
-            playerController = FindObjectOfType<PlayerController>();
+            playerController = FindAnyObjectByType<PlayerController>();
         
         if (weaponController == null)
-            weaponController = FindObjectOfType<Weapon>();
+            weaponController = FindAnyObjectByType<Weapon>();
+            
+        if (playerInventory == null)
+            playerInventory = FindAnyObjectByType<PlayerInventory>();
+            
+        if (chipsetManager == null)
+            chipsetManager = FindAnyObjectByType<ChipsetManager>();
+    }
+    
+    private void Start()
+    {
+        // PlayerInventory의 무기 변경 이벤트 구독
+        if (playerInventory != null)
+        {
+            playerInventory.OnWeaponChanged += OnWeaponChanged;
+        }
+    }
+    
+    private void OnDestroy()
+    {
+        // 이벤트 구독 해제
+        if (playerInventory != null)
+        {
+            playerInventory.OnWeaponChanged -= OnWeaponChanged;
+        }
+    }
+    
+    /// <summary>
+    /// 무기가 변경될 때 호출되는 이벤트 핸들러
+    /// </summary>
+    private void OnWeaponChanged(WeaponData newWeapon, WeaponData oldWeapon)
+    {
+        Debug.Log($"🔄 [ChipsetEffectManager] 무기 변경 감지: {(oldWeapon != null ? oldWeapon.weaponName : "없음")} → {(newWeapon != null ? newWeapon.weaponName : "없음")}");
+        
+        if (newWeapon != null)
+        {
+            // 새 무기의 칩셋 효과 계산 및 적용
+            CalculateWeaponEffects(newWeapon);
+            
+            // 플레이어 칩셋 효과도 새 무기에 재적용
+            ApplyPlayerChipsetEffectsToWeapons();
+        }
+        else
+        {
+            // 무기가 없으면 무기 효과 초기화
+            weaponEffects.Clear();
+            ApplyAllEffects();
+        }
     }
     
     /// <summary>
@@ -49,7 +101,7 @@ public class ChipsetEffectManager : MonoBehaviour
             ApplyWeaponChipsetEffects(chipset);
         }
         
-        ApplyWeaponEffectsToController();
+        ApplyWeaponEffectsToWeapons();
         OnEffectsUpdated?.Invoke();
     }
     
@@ -83,6 +135,7 @@ public class ChipsetEffectManager : MonoBehaviour
     public void CalculatePlayerEffects(string[] playerChipsetIds)
     {
         playerEffects.Clear();
+        playerEquippedChipsets.Clear();
         
         if (playerChipsetIds == null) return;
         
@@ -93,6 +146,7 @@ public class ChipsetEffectManager : MonoBehaviour
             var chipset = GameDataRepository.Instance.GetPlayerChipsetById(chipsetId);
             if (chipset == null) continue;
             
+            playerEquippedChipsets.Add(chipset);
             ApplyPlayerChipsetEffects(chipset);
         }
         
@@ -230,12 +284,12 @@ public class ChipsetEffectManager : MonoBehaviour
     }
     
     /// <summary>
-    /// 무기 효과를 컨트롤러에 적용
+    /// 무기 효과를 무기에 적용
     /// </summary>
-    private void ApplyWeaponEffectsToController()
+    private void ApplyWeaponEffectsToWeapons()
     {
         // 현재 활성화된 모든 무기들을 찾아서 효과 적용
-        var activeWeapons = FindObjectsOfType<Weapon>();
+        var activeWeapons = FindObjectsByType<Weapon>(FindObjectsSortMode.None);
         
         foreach (var weapon in activeWeapons)
         {
@@ -402,6 +456,71 @@ public class ChipsetEffectManager : MonoBehaviour
     }
     
     /// <summary>
+    /// 플레이어 칩셋 효과를 무기에도 적용
+    /// </summary>
+    private void ApplyPlayerChipsetEffectsToWeapons()
+    {
+        // 현재 활성화된 모든 무기들을 찾아서 효과 적용
+        var activeWeapons = FindObjectsByType<Weapon>(FindObjectsSortMode.None);
+        
+        foreach (var weapon in activeWeapons)
+        {
+            // 플레이어 칩셋의 무기 관련 효과들을 적용
+            ApplyPlayerWeaponBonuses(weapon);
+        }
+    }
+    
+    /// <summary>
+    /// 플레이어 칩셋의 무기 보너스를 특정 무기에 적용
+    /// </summary>
+    private void ApplyPlayerWeaponBonuses(Weapon weapon)
+    {
+        if (weapon == null) return;
+        
+        // 플레이어 칩셋 데이터에서 무기 보너스 가져오기
+        float weaponDamageBonus = 0f;
+        float weaponFireRateBonus = 0f;
+        float weaponAccuracyBonus = 0f;
+        float weaponReloadSpeedBonus = 0f;
+        float weaponCriticalChanceBonus = 0f;
+        float weaponCriticalMultiplierBonus = 0f;
+        
+        // 장착된 플레이어 칩셋들을 순회하며 무기 보너스 합산
+        foreach (var chipsetData in playerEquippedChipsets)
+        {
+            if (chipsetData != null)
+            {
+                weaponDamageBonus += chipsetData.weaponDamageBonus;
+                weaponFireRateBonus += chipsetData.weaponFireRateBonus;
+                weaponAccuracyBonus += chipsetData.weaponAccuracyBonus;
+                weaponReloadSpeedBonus += chipsetData.weaponReloadSpeedBonus;
+                weaponCriticalChanceBonus += chipsetData.weaponCriticalChanceBonus;
+                weaponCriticalMultiplierBonus += chipsetData.weaponCriticalMultiplierBonus;
+            }
+        }
+        
+        // 무기에 플레이어 칩셋 보너스 적용 (기존 무기 칩셋 효과에 추가)
+        float currentDamageMultiplier = weapon.GetDamageMultiplier();
+        weapon.SetDamageMultiplier(currentDamageMultiplier + weaponDamageBonus);
+        
+        float currentFireRateMultiplier = weapon.GetFireRateMultiplier();
+        weapon.SetFireRateMultiplier(currentFireRateMultiplier + weaponFireRateBonus);
+        
+        float currentAccuracyMultiplier = weapon.GetAccuracyMultiplier();
+        weapon.SetAccuracyMultiplier(currentAccuracyMultiplier + weaponAccuracyBonus);
+        
+        float currentReloadSpeedMultiplier = weapon.GetReloadSpeedMultiplier();
+        weapon.SetReloadSpeedMultiplier(currentReloadSpeedMultiplier + weaponReloadSpeedBonus);
+        
+        // 크리티컬 관련 효과는 WeaponData에 직접 추가
+        if (weapon.weaponData != null && (weaponCriticalChanceBonus > 0 || weaponCriticalMultiplierBonus > 0))
+        {
+            // 플레이어 칩셋의 크리티컬 보너스를 임시로 저장
+            weapon.SetPlayerCriticalBonus(weaponCriticalChanceBonus, weaponCriticalMultiplierBonus);
+        }
+    }
+    
+    /// <summary>
     /// 특정 효과 값 가져오기
     /// </summary>
     public float GetWeaponEffect(string effectName)
@@ -428,7 +547,7 @@ public class ChipsetEffectManager : MonoBehaviour
         armorEffects.Clear();
         playerEffects.Clear();
         
-        var activeWeapons = FindObjectsOfType<Weapon>();
+        var activeWeapons = FindObjectsByType<Weapon>(FindObjectsSortMode.None);
         foreach (var weapon in activeWeapons)
         {
             weapon.ResetAllMultipliers();
@@ -440,6 +559,28 @@ public class ChipsetEffectManager : MonoBehaviour
         }
         
         OnEffectsUpdated?.Invoke();
+    }
+    
+    /// <summary>
+    /// 모든 효과를 적용
+    /// </summary>
+    private void ApplyAllEffects()
+    {
+        Debug.Log("🔧 [ChipsetEffectManager] 모든 칩셋 효과 적용 시작");
+        
+        // 무기 효과 적용
+        ApplyWeaponEffectsToWeapons();
+        
+        // 방어구 효과 적용
+        ApplyArmorEffectsToPlayer();
+        
+        // 플레이어 효과 적용
+        ApplyPlayerEffectsToPlayer();
+        
+        // 플레이어 칩셋 효과를 무기에도 적용
+        ApplyPlayerChipsetEffectsToWeapons();
+        
+        Debug.Log("✅ [ChipsetEffectManager] 모든 칩셋 효과 적용 완료");
     }
     
     /// <summary>

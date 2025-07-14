@@ -76,6 +76,20 @@ public class PlayerController : MonoBehaviour
     // 3점사/연사 모드 토글 변수
     public bool isBurstMode = false;
 
+    // 칩셋 효과 관련 변수들
+    private float defenseBonus = 0f;
+    private float healthBonus = 0f;
+    private float dodgeChance = 0f;
+    private float blockChance = 0f;
+    private float regenerationRate = 0f;
+    private float elementalResistance = 0f;
+    private float experienceMultiplier = 1f;
+    private float luckBonus = 0f;
+    private float criticalChanceBonus = 0f;
+    private float criticalDamageMultiplier = 1f;
+    private float skillCooldownMultiplier = 1f;
+    private float regenerationTimer = 0f;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -268,6 +282,9 @@ public class PlayerController : MonoBehaviour
 
         // 무기 반동 이벤트 구독 관리
         UpdateWeaponEventSubscription();
+
+        // 체력 재생 처리 (Update에서 호출)
+        HandleRegeneration();
     }
 
     void Move()
@@ -927,29 +944,183 @@ public class PlayerController : MonoBehaviour
     }
     
     // 칩셋 효과 관련 메서드들
-    public void SetDefenseBonus(float bonus) { /* 방어력 보너스 적용 */ }
-    public void SetHealthBonus(float bonus) { /* 체력 보너스 적용 */ }
-    public void SetMovementSpeedMultiplier(float multiplier) { currentMoveSpeed = baseMoveSpeed * multiplier; }
-    public void SetDodgeChanceBonus(float bonus) { /* 회피 확률 보너스 적용 */ }
-    public void SetBlockChanceBonus(float bonus) { /* 블록 확률 보너스 적용 */ }
-    public void SetRegenerationBonus(float bonus) { /* 체력 재생 보너스 적용 */ }
-    public void SetElementalResistanceBonus(float bonus) { /* 원소 저항 보너스 적용 */ }
-    public void SetWeightReductionBonus(float bonus) { /* 무게 감소 보너스 적용 */ }
+    public void SetDefenseBonus(float bonus) 
+    { 
+        defenseBonus = bonus;
+        // 방어력은 데미지 계산 시 적용
+    }
     
-    public void SetExperienceGainMultiplier(float multiplier) { /* 경험치 획득 배율 적용 */ }
-    public void SetLuckBonus(float bonus) { /* 행운 보너스 적용 */ }
-    public void SetCriticalChanceBonus(float bonus) { /* 크리티컬 확률 보너스 적용 */ }
-    public void SetCriticalDamageMultiplier(float multiplier) { /* 크리티컬 데미지 배율 적용 */ }
-    public void SetSkillCooldownMultiplier(float multiplier) { /* 스킬 쿨다운 배율 적용 */ }
-    public void SetResourceGainMultiplier(float multiplier) { /* 자원 획득 배율 적용 */ }
-    public void SetSpecialAbilityBonus(float bonus) { /* 특수 능력 보너스 적용 */ }
-    public void SetUtilityBonus(float bonus) { /* 유틸리티 보너스 적용 */ }
+    public void SetHealthBonus(float bonus) 
+    { 
+        healthBonus = bonus;
+        if (health != null)
+        {
+            // 최대 체력 증가
+            int baseMaxHealth = 100; // 기본 체력
+            health.SetMaxHealth(baseMaxHealth + Mathf.RoundToInt(healthBonus));
+        }
+    }
+    
+    public void SetMovementSpeedMultiplier(float multiplier) 
+    { 
+        // 무기 속도 배수와 별개로 칩셋 속도 배수 적용
+        float weaponSpeedMultiplier = 1f;
+        if (playerInventory != null && playerInventory.equippedWeapon != null)
+        {
+            weaponSpeedMultiplier = playerInventory.equippedWeapon.movementSpeedMultiplier;
+        }
+        currentMoveSpeed = baseMoveSpeed * weaponSpeedMultiplier * multiplier;
+    }
+    
+    public void SetDodgeChanceBonus(float bonus) 
+    { 
+        dodgeChance = Mathf.Clamp01(bonus); // 0~1 사이로 제한
+    }
+    
+    public void SetBlockChanceBonus(float bonus) 
+    { 
+        blockChance = Mathf.Clamp01(bonus); // 0~1 사이로 제한
+    }
+    
+    public void SetRegenerationBonus(float bonus) 
+    { 
+        regenerationRate = bonus;
+    }
+    
+    public void SetElementalResistanceBonus(float bonus) 
+    { 
+        elementalResistance = bonus;
+    }
+    
+    public void SetWeightReductionBonus(float bonus) 
+    { 
+        // 무게 감소는 이동속도에 추가 보너스로 적용
+        if (bonus > 0)
+        {
+            currentMoveSpeed *= (1f + bonus * 0.1f); // 10% 당 이동속도 증가
+        }
+    }
+    
+    public void SetExperienceGainMultiplier(float multiplier) 
+    { 
+        experienceMultiplier = multiplier;
+    }
+    
+    public void SetLuckBonus(float bonus) 
+    { 
+        luckBonus = bonus;
+    }
+    
+    public void SetCriticalChanceBonus(float bonus) 
+    { 
+        criticalChanceBonus = bonus;
+    }
+    
+    public void SetCriticalDamageMultiplier(float multiplier) 
+    { 
+        criticalDamageMultiplier = multiplier;
+    }
+    
+    public void SetSkillCooldownMultiplier(float multiplier) 
+    { 
+        skillCooldownMultiplier = multiplier;
+        // 대시 쿨다운에 적용
+        dashCooldown = 1.2f * skillCooldownMultiplier;
+    }
+    
+    public void SetResourceGainMultiplier(float multiplier) 
+    { 
+        // 자원 획득은 아이템 드롭률에 영향
+        // ItemDropManager에서 참조 가능
+    }
+    
+    public void SetSpecialAbilityBonus(float bonus) 
+    { 
+        // 특수 능력은 추후 구현
+    }
+    
+    public void SetUtilityBonus(float bonus) 
+    { 
+        // 유틸리티는 픽업 범위 증가 등에 사용
+        pickupRange = 1.5f * (1f + bonus);
+    }
     
     public void ResetAllMultipliers()
     {
         currentMoveSpeed = baseMoveSpeed;
-        // 다른 멀티플라이어들도 초기화
+        defenseBonus = 0f;
+        healthBonus = 0f;
+        dodgeChance = 0f;
+        blockChance = 0f;
+        regenerationRate = 0f;
+        elementalResistance = 0f;
+        experienceMultiplier = 1f;
+        luckBonus = 0f;
+        criticalChanceBonus = 0f;
+        criticalDamageMultiplier = 1f;
+        skillCooldownMultiplier = 1f;
     }
+    
+    // 체력 재생 처리 (Update에서 호출)
+    void HandleRegeneration()
+    {
+        if (regenerationRate > 0 && health != null && health.IsAlive())
+        {
+            regenerationTimer += Time.deltaTime;
+            if (regenerationTimer >= 1f) // 1초마다
+            {
+                regenerationTimer = 0f;
+                health.Heal(Mathf.RoundToInt(regenerationRate));
+            }
+        }
+    }
+    
+    // 데미지 받을 때 회피/블록 처리
+    public bool TryDodgeOrBlock()
+    {
+        // 회피 확률 체크
+        if (Random.Range(0f, 1f) < dodgeChance)
+        {
+            Debug.Log("🛡️ 회피 성공!");
+            return true;
+        }
+        
+        // 블록 확률 체크
+        if (Random.Range(0f, 1f) < blockChance)
+        {
+            Debug.Log("🛡️ 블록 성공!");
+            return true;
+        }
+        
+        return false;
+    }
+    
+    // 방어력 적용한 최종 데미지 계산
+    public int CalculateFinalDamage(int baseDamage)
+    {
+        // 방어력으로 데미지 감소
+        float damageReduction = defenseBonus / (defenseBonus + 100f); // 방어력 공식
+        int finalDamage = Mathf.RoundToInt(baseDamage * (1f - damageReduction));
+        
+        // 원소 저항 적용 (추후 원소 타입별로 구분 가능)
+        if (elementalResistance > 0)
+        {
+            finalDamage = Mathf.RoundToInt(finalDamage * (1f - elementalResistance * 0.01f));
+        }
+        
+        return Mathf.Max(1, finalDamage); // 최소 1 데미지
+    }
+    
+    // 경험치 획득 시 배수 적용
+    public int CalculateFinalExp(int baseExp)
+    {
+        return Mathf.RoundToInt(baseExp * experienceMultiplier);
+    }
+    
+    // 크리티컬 관련 getter
+    public float GetTotalCriticalChance() => criticalChanceBonus;
+    public float GetTotalCriticalMultiplier() => criticalDamageMultiplier;
+    public float GetLuckBonus() => luckBonus;
 
     void OnDrawGizmosSelected()
     {
@@ -981,4 +1152,4 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-} 
+}

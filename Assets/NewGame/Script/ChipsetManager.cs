@@ -69,7 +69,7 @@ public class ChipsetManager : MonoBehaviour
         SetupEventListeners();
         
         if (effectManager == null)
-            effectManager = FindObjectOfType<ChipsetEffectManager>();
+            effectManager = FindAnyObjectByType<ChipsetEffectManager>();
     }
     
     private void Start()
