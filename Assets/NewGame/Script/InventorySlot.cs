@@ -112,6 +112,7 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     // Public properties
     public WeaponData weaponData { get; private set; }
     public ArmorData armorData { get; private set; } // 🆕 방어구 데이터 추가
+    public object chipsetData { get; private set; } // 칩셋 데이터 저장
     public int slotIndex { get; set; }
     public InventoryManager inventoryManager { get; set; }
     public bool isArmorSlot { get; set; } = false; // 🆕 방어구 슬롯 여부
@@ -177,6 +178,14 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         UpdateVisuals();
     }
     
+    public void SetChipset(object newChipset)
+    {
+        chipsetData = newChipset;
+        weaponData = null;
+        armorData = null;
+        UpdateVisuals();
+    }
+    
     void UpdateVisuals()
     {
         // 드래그 중 일시적으로 빈 상태라면 빈 슬롯으로 표시
@@ -195,6 +204,10 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         {
             // 🆕 방어구 표시
             ShowArmorVisuals();
+        }
+        else if (chipsetData != null)
+        {
+            ShowChipsetVisuals();
         }
         else
         {
@@ -327,6 +340,74 @@ public class InventorySlot : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         if (rarityGlow != null)
         {
             rarityGlow.SetActive(armorData.rarity >= ArmorRarity.Rare);
+        }
+    }
+    
+    void ShowChipsetVisuals()
+    {
+        // 칩셋 이름, 아이콘 등 표시
+        string name = "";
+        Sprite icon = null;
+        Color color = Color.white;
+        string desc = "";
+        
+        if (chipsetData is WeaponChipsetData weaponChipset)
+        {
+            name = weaponChipset.chipsetName;
+            color = weaponChipset.GetRarityColor();
+            desc = weaponChipset.description;
+            // 무기 칩셋 기본 아이콘 사용
+            icon = defaultHGIcon; // 권총 아이콘을 기본으로 사용
+        }
+        else if (chipsetData is ArmorChipsetData armorChipset)
+        {
+            name = armorChipset.chipsetName;
+            color = armorChipset.GetRarityColor();
+            desc = armorChipset.description;
+            // 방어구 칩셋 기본 아이콘 사용
+            icon = defaultChestIcon; // 상체 아이콘을 기본으로 사용
+        }
+        else if (chipsetData is PlayerChipsetData playerChipset)
+        {
+            name = playerChipset.chipsetName;
+            color = playerChipset.GetRarityColor();
+            desc = playerChipset.description;
+            // 플레이어 칩셋 기본 아이콘 사용
+            icon = defaultHelmetIcon; // 헬멧 아이콘을 기본으로 사용
+        }
+        
+        if (iconImage != null)
+        {
+            iconImage.sprite = icon;
+            iconImage.color = color;
+            iconImage.enabled = (icon != null); // 아이콘이 있으면 활성화
+            if (icon != null)
+            {
+                AdjustIconSize();
+            }
+        }
+        
+        if (flavorText != null)
+        {
+            flavorText.text = name;
+            flavorText.enabled = true;
+        }
+        
+        if (ammoText != null)
+        {
+            ammoText.text = desc;
+            ammoText.enabled = true;
+        }
+        
+        if (borderImage != null)
+        {
+            borderImage.color = color;
+            borderImage.enabled = true;
+        }
+        
+        if (rarityGlow != null)
+        {
+            rarityGlow.SetActive(false);
         }
     }
     

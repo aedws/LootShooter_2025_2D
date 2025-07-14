@@ -32,7 +32,8 @@ public enum FilterType
 public enum InventoryTab
 {
     Weapons,
-    Armors
+    Armors,
+    Chipsets  // 🆕 칩셋 탭 추가
 }
 
 [System.Serializable]
@@ -170,6 +171,10 @@ public class InventoryManager : MonoBehaviour
     private List<ArmorData> armors = new List<ArmorData>();
     private List<ArmorData> filteredArmors = new List<ArmorData>();
     
+    // 🆕 칩셋 관련 변수들
+    private List<object> chipsets = new List<object>();
+    private List<object> filteredChipsets = new List<object>();
+    
     private PlayerInventory playerInventory;
     private bool isInitialized = false;
     private bool isOpen = false;
@@ -188,6 +193,10 @@ public class InventoryManager : MonoBehaviour
     // 🆕 방어구 이벤트들
     public System.Action<ArmorData> OnArmorAdded;
     public System.Action<ArmorData> OnArmorRemoved;
+    
+    // 🆕 칩셋 이벤트들
+    public System.Action<object> OnChipsetAdded;
+    public System.Action<object> OnChipsetRemoved;
     
     void Awake()
     {
@@ -741,35 +750,60 @@ public class InventoryManager : MonoBehaviour
             return true;
         }).ToList();
         
+        // 🆕 칩셋 필터링
+        filteredChipsets = chipsets.Where(chipset => 
+        {
+            // 검색 필터 (칩셋 이름으로 검색)
+            if (!string.IsNullOrEmpty(currentSearchTerm))
+            {
+                string chipsetName = GetChipsetName(chipset);
+                if (!chipsetName.ToLower().Contains(currentSearchTerm.ToLower()))
+                    return false;
+            }
+            
+            return true;
+        }).ToList();
+        
         // 정렬
         switch (currentSort)
         {
             case SortType.Name:
                 filteredWeapons = filteredWeapons.OrderBy(w => w.weaponName).ToList();
                 filteredArmors = filteredArmors.OrderBy(a => a.armorName).ToList();
+                filteredChipsets = filteredChipsets.OrderBy(c => GetChipsetName(c)).ToList();
                 break;
             case SortType.Type:
                 filteredWeapons = filteredWeapons.OrderBy(w => w.weaponType).ToList();
                 filteredArmors = filteredArmors.OrderBy(a => a.armorType).ToList();
+                // 칩셋은 타입별 정렬 (임시로 이름순)
+                filteredChipsets = filteredChipsets.OrderBy(c => GetChipsetName(c)).ToList();
                 break;
             case SortType.Damage:
                 filteredWeapons = filteredWeapons.OrderByDescending(w => w.damage).ToList();
                 filteredArmors = filteredArmors.OrderByDescending(a => a.defense).ToList();
+                // 칩셋은 데미지가 없으므로 이름순
+                filteredChipsets = filteredChipsets.OrderBy(c => GetChipsetName(c)).ToList();
                 break;
             case SortType.FireRate:
                 filteredWeapons = filteredWeapons.OrderBy(w => w.fireRate).ToList();
                 // 방어구는 발사속도가 없으므로 레어리티로 정렬
                 filteredArmors = filteredArmors.OrderByDescending(a => a.rarity).ToList();
+                // 칩셋은 발사속도가 없으므로 이름순
+                filteredChipsets = filteredChipsets.OrderBy(c => GetChipsetName(c)).ToList();
                 break;
             case SortType.Defense:
                 // 🆕 방어구 전용: 방어력 순 정렬
                 filteredWeapons = filteredWeapons.OrderByDescending(w => w.damage).ToList(); // 무기는 데미지로 대체
                 filteredArmors = filteredArmors.OrderByDescending(a => a.defense).ToList();
+                // 칩셋은 방어력이 없으므로 이름순
+                filteredChipsets = filteredChipsets.OrderBy(c => GetChipsetName(c)).ToList();
                 break;
             case SortType.Rarity:
                 // 🆕 방어구 전용: 레어리티 순 정렬
                 filteredWeapons = filteredWeapons.OrderByDescending(w => w.damage).ToList(); // 무기는 데미지로 대체
                 filteredArmors = filteredArmors.OrderByDescending(a => a.rarity).ToList();
+                // 칩셋은 레어리티가 없으므로 이름순
+                filteredChipsets = filteredChipsets.OrderBy(c => GetChipsetName(c)).ToList();
                 break;
         }
     }
@@ -802,6 +836,11 @@ public class InventoryManager : MonoBehaviour
             itemsToShow.AddRange(filteredArmors.Cast<object>());
             Debug.Log($"🛡️ [InventoryManager] 방어구 탭 - 표시할 방어구: {filteredArmors.Count}개");
         }
+        else if (currentTab == InventoryTab.Chipsets)
+        {
+            itemsToShow.AddRange(filteredChipsets);
+            Debug.Log($"🔧 [InventoryManager] 칩셋 탭 - 표시할 칩셋: {filteredChipsets.Count}개");
+        }
 
         int targetSlotCount = Mathf.Min(itemsToShow.Count + minEmptySlots, maxInventorySlots);
         Debug.Log($"📦 [InventoryManager] 목표 슬롯 수: {targetSlotCount} (아이템: {itemsToShow.Count}, 최소 빈 슬롯: {minEmptySlots})");
@@ -830,6 +869,12 @@ public class InventoryManager : MonoBehaviour
                     inventorySlots[i].SetArmor(armor);
                     Debug.Log($"🛡️ [InventoryManager] 슬롯 {i}에 방어구 설정: {armor.armorName} (등급: {armor.rarity})");
                 }
+                else if (currentTab == InventoryTab.Chipsets)
+                {
+                    object chipset = itemsToShow[i];
+                    inventorySlots[i].SetChipset(chipset);
+                    Debug.Log($"🔧 [InventoryManager] 슬롯 {i}에 칩셋 설정: {chipset}");
+                }
             }
             else
             {
@@ -855,6 +900,11 @@ public class InventoryManager : MonoBehaviour
                 int totalArmors = armors.Count;
                 int equippedArmorCount = armorSlotManager != null ? armorSlotManager.GetEquippedArmorCount() : 0;
                 info = $"방어구: {totalArmors} / {maxInventorySlots} | 장착: {equippedArmorCount}";
+            }
+            else if (currentTab == InventoryTab.Chipsets)
+            {
+                int totalChipsets = chipsets.Count;
+                info = $"칩셋: {totalChipsets} / {maxInventorySlots}";
             }
             inventoryInfoText.text = info;
         }
@@ -1214,6 +1264,86 @@ public class InventoryManager : MonoBehaviour
         RefreshInventory();
     }
     
+    // 🆕 칩셋 관련 메서드들
+    
+    public void AddChipset(object chipset)
+    {
+        if (chipset == null) 
+        {
+            Debug.LogError("❌ [InventoryManager] 칩셋 데이터가 null입니다!");
+            return;
+        }
+        
+        if (!chipsets.Contains(chipset))
+        {
+            chipsets.Add(chipset);
+            OnChipsetAdded?.Invoke(chipset);
+            Debug.Log($"🔧 칩셋 추가: {GetChipsetName(chipset)} (총 {chipsets.Count}개 보유)");
+            
+            RefreshInventory();
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ [InventoryManager] 이미 보유한 칩셋입니다: {GetChipsetName(chipset)}");
+        }
+    }
+    
+    public void RemoveChipset(object chipset, bool shouldRefresh = true)
+    {
+        if (chipset == null) return;
+        
+        if (chipsets.Remove(chipset))
+        {
+            OnChipsetRemoved?.Invoke(chipset);
+            Debug.Log($"🔧 칩셋 제거: {GetChipsetName(chipset)}");
+            
+            if (shouldRefresh)
+            {
+                RefreshInventory();
+            }
+        }
+    }
+    
+    public List<object> GetAllChipsets()
+    {
+        return new List<object>(chipsets);
+    }
+    
+    public bool HasChipset(object chipset)
+    {
+        return chipsets.Contains(chipset);
+    }
+    
+    public int GetChipsetCount()
+    {
+        return chipsets.Count;
+    }
+    
+    public void ClearChipsets()
+    {
+        chipsets.Clear();
+    }
+    
+    private string GetChipsetName(object chipset)
+    {
+        if (chipset is WeaponChipsetData weaponChipset)
+            return weaponChipset.chipsetName;
+        else if (chipset is ArmorChipsetData armorChipset)
+            return armorChipset.chipsetName;
+        else if (chipset is PlayerChipsetData playerChipset)
+            return playerChipset.chipsetName;
+        else
+            return "알 수 없는 칩셋";
+    }
+    
+    /// <summary>
+    /// 인벤토리 슬롯 리스트를 반환합니다 (ChipsetManager에서 사용)
+    /// </summary>
+    public List<InventorySlot> GetInventorySlots()
+    {
+        return new List<InventorySlot>(inventorySlots);
+    }
+    
     void OnDestroy()
     {
         SaveInventoryState();
@@ -1221,5 +1351,9 @@ public class InventoryManager : MonoBehaviour
         // 🆕 방어구 이벤트 구독 해제
         OnArmorAdded = null;
         OnArmorRemoved = null;
+        
+        // 🆕 칩셋 이벤트 구독 해제
+        OnChipsetAdded = null;
+        OnChipsetRemoved = null;
     }
 } 
