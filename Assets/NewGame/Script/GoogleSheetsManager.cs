@@ -710,20 +710,20 @@ public class GoogleSheetsManager : MonoBehaviour
                     Debug.LogWarning($"무기 칩셋 데이터 행 {i + 1}의 컬럼 수가 부족합니다. (필요: 16, 실제: {row.Count}) - 기본값으로 처리합니다.");
                 }
                 
-                WeaponChipsetData chipset = new WeaponChipsetData();
-                
+                    WeaponChipsetData chipset = new WeaponChipsetData();
+                    
                 // 기본 정보 (안전한 인덱스 접근)
                 chipset.chipsetId = row.Count > 0 ? row[0] : "";
                 chipset.chipsetName = row.Count > 1 ? row[1] : "";
                 if (row.Count > 2 && System.Enum.TryParse<WeaponChipsetType>(row[2], out WeaponChipsetType chipsetType))
-                    chipset.chipsetType = chipsetType;
-                
+                        chipset.chipsetType = chipsetType;
+                    
                 if (row.Count > 3 && System.Enum.TryParse<ChipsetRarity>(row[3], out ChipsetRarity rarity))
-                    chipset.rarity = rarity;
-                
+                        chipset.rarity = rarity;
+                    
                 chipset.cost = row.Count > 4 ? SafeParseInt(row[4]) : 0;
                 chipset.description = row.Count > 5 ? row[5] : "";
-                
+                    
                 // 무기 효과 (안전한 인덱스 접근)
                 chipset.damageBonus = row.Count > 6 ? SafeParseFloat(row[6]) : 0f;
                 chipset.fireRateBonus = row.Count > 7 ? SafeParseFloat(row[7]) : 0f;
@@ -733,12 +733,12 @@ public class GoogleSheetsManager : MonoBehaviour
                 chipset.ammoCapacityBonus = row.Count > 11 ? SafeParseInt(row[11]) : 0;
                 chipset.criticalChanceBonus = row.Count > 12 ? SafeParseFloat(row[12]) : 0f;
                 chipset.criticalMultiplierBonus = row.Count > 13 ? SafeParseFloat(row[13]) : 0f;
-                
-                // 특수 효과
+                    
+                    // 특수 효과
                 chipset.specialEffectType = row.Count > 14 ? row[14] : "";
                 chipset.specialEffectValue = row.Count > 15 ? SafeParseFloat(row[15]) : 0f;
-                
-                chipsets.Add(chipset);
+                    
+                    chipsets.Add(chipset);
             }
             
             Debug.Log($"무기 칩셋 데이터 로드 완료: {chipsets.Count}개");
@@ -774,20 +774,20 @@ public class GoogleSheetsManager : MonoBehaviour
                     Debug.LogWarning($"방어구 칩셋 데이터 행 {i + 1}의 컬럼 수가 부족합니다. (필요: 17, 실제: {row.Count}) - 기본값으로 처리합니다.");
                 }
                 
-                ArmorChipsetData chipset = new ArmorChipsetData();
-                
+                    ArmorChipsetData chipset = new ArmorChipsetData();
+                    
                 // 기본 정보 (안전한 인덱스 접근)
                 chipset.chipsetId = row.Count > 0 ? row[0] : "";
                 chipset.chipsetName = row.Count > 1 ? row[1] : "";
                 if (row.Count > 2 && System.Enum.TryParse<ArmorChipsetType>(row[2], out ArmorChipsetType chipsetType))
-                    chipset.chipsetType = chipsetType;
-                
+                        chipset.chipsetType = chipsetType;
+                    
                 if (row.Count > 3 && System.Enum.TryParse<ChipsetRarity>(row[3], out ChipsetRarity rarity))
-                    chipset.rarity = rarity;
-                
+                        chipset.rarity = rarity;
+                    
                 chipset.cost = row.Count > 4 ? SafeParseInt(row[4]) : 0;
                 chipset.description = row.Count > 5 ? row[5] : "";
-                
+                    
                 // 방어구 효과 (안전한 인덱스 접근)
                 chipset.defenseBonus = row.Count > 6 ? SafeParseFloat(row[6]) : 0f;
                 chipset.healthBonus = row.Count > 7 ? SafeParseFloat(row[7]) : 0f;
@@ -798,12 +798,12 @@ public class GoogleSheetsManager : MonoBehaviour
                 chipset.regenerationRate = row.Count > 12 ? SafeParseFloat(row[12]) : 0f;
                 chipset.hasInvincibilityFrame = row.Count > 13 ? SafeParseBool(row[13]) : false;
                 chipset.invincibilityBonus = row.Count > 14 ? SafeParseFloat(row[14]) : 0f;
-                
-                // 특수 효과
+                    
+                    // 특수 효과
                 chipset.specialEffectType = row.Count > 15 ? row[15] : "";
                 chipset.specialEffectValue = row.Count > 16 ? SafeParseFloat(row[16]) : 0f;
-                
-                chipsets.Add(chipset);
+                    
+                    chipsets.Add(chipset);
             }
             
             Debug.Log($"방어구 칩셋 데이터 로드 완료: {chipsets.Count}개");
@@ -839,20 +839,20 @@ public class GoogleSheetsManager : MonoBehaviour
                     Debug.LogWarning($"플레이어 칩셋 데이터 행 {i + 1}의 컬럼 수가 부족합니다. (필요: 23, 실제: {row.Count}) - 기본값으로 처리합니다.");
                 }
                 
-                PlayerChipsetData chipset = new PlayerChipsetData();
-                
+                    PlayerChipsetData chipset = new PlayerChipsetData();
+                    
                 // 기본 정보 (안전한 인덱스 접근)
                 chipset.chipsetId = row.Count > 0 ? row[0] : "";
                 chipset.chipsetName = row.Count > 1 ? row[1] : "";
                 if (row.Count > 2 && System.Enum.TryParse<PlayerChipsetType>(row[2], out PlayerChipsetType chipsetType))
-                    chipset.chipsetType = chipsetType;
-                
+                        chipset.chipsetType = chipsetType;
+                    
                 if (row.Count > 3 && System.Enum.TryParse<ChipsetRarity>(row[3], out ChipsetRarity rarity))
-                    chipset.rarity = rarity;
-                
+                        chipset.rarity = rarity;
+                    
                 chipset.cost = row.Count > 4 ? SafeParseInt(row[4]) : 0;
                 chipset.description = row.Count > 5 ? row[5] : "";
-                
+                    
                 // 플레이어 기본 스탯 효과 (안전한 인덱스 접근)
                 chipset.moveSpeedBonus = row.Count > 6 ? SafeParseFloat(row[6]) : 0f;
                 chipset.jumpForceBonus = row.Count > 7 ? SafeParseFloat(row[7]) : 0f;
@@ -861,7 +861,7 @@ public class GoogleSheetsManager : MonoBehaviour
                 chipset.maxHealthBonus = row.Count > 10 ? SafeParseFloat(row[10]) : 0f;
                 chipset.damageReduction = row.Count > 11 ? SafeParseFloat(row[11]) : 0f;
                 chipset.pickupRangeBonus = row.Count > 12 ? SafeParseFloat(row[12]) : 0f;
-                
+                    
                 // 무기 스탯 효과 (안전한 인덱스 접근)
                 chipset.weaponDamageBonus = row.Count > 13 ? SafeParseFloat(row[13]) : 0f;
                 chipset.weaponFireRateBonus = row.Count > 14 ? SafeParseFloat(row[14]) : 0f;
@@ -871,12 +871,12 @@ public class GoogleSheetsManager : MonoBehaviour
                 chipset.weaponAmmoCapacityBonus = row.Count > 18 ? SafeParseInt(row[18]) : 0;
                 chipset.weaponCriticalChanceBonus = row.Count > 19 ? SafeParseFloat(row[19]) : 0f;
                 chipset.weaponCriticalMultiplierBonus = row.Count > 20 ? SafeParseFloat(row[20]) : 0f;
-                
-                // 특수 효과
+                    
+                    // 특수 효과
                 chipset.specialEffectType = row.Count > 21 ? row[21] : "";
                 chipset.specialEffectValue = row.Count > 22 ? SafeParseFloat(row[22]) : 0f;
-                
-                chipsets.Add(chipset);
+                    
+                    chipsets.Add(chipset);
             }
             
             Debug.Log($"플레이어 칩셋 데이터 로드 완료: {chipsets.Count}개");

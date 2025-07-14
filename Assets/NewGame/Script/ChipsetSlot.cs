@@ -317,29 +317,53 @@ public class ChipsetSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IP
     // 드래그 앤 드롭 이벤트
     public void OnDrop(PointerEventData eventData)
     {
-        // 드래그된 칩셋 아이템 처리
-        var draggedChipset = eventData.pointerDrag?.GetComponent<ChipsetItem>();
-        if (draggedChipset != null)
+        // 1. 인벤토리 슬롯에서 드래그된 칩셋 처리
+        if (InventorySlot.CurrentlyDraggedChipset != null)
         {
-            // 칩셋 타입 검증
+            object draggedChipset = InventorySlot.CurrentlyDraggedChipset;
             bool isValidDrop = false;
-            
-            if (draggedChipset.weaponChipset != null && ownerType == ChipsetOwnerType.Weapon)
+            if (draggedChipset is WeaponChipsetData weaponChipset && ownerType == ChipsetOwnerType.Weapon)
             {
-                EquipWeaponChipset(draggedChipset.weaponChipset);
+                EquipWeaponChipset(weaponChipset);
                 isValidDrop = true;
             }
-            else if (draggedChipset.armorChipset != null && ownerType == ChipsetOwnerType.Armor)
+            else if (draggedChipset is ArmorChipsetData armorChipset && ownerType == ChipsetOwnerType.Armor)
             {
-                EquipArmorChipset(draggedChipset.armorChipset);
+                EquipArmorChipset(armorChipset);
                 isValidDrop = true;
             }
-            else if (draggedChipset.playerChipset != null && ownerType == ChipsetOwnerType.Player)
+            else if (draggedChipset is PlayerChipsetData playerChipset && ownerType == ChipsetOwnerType.Player)
             {
-                EquipPlayerChipset(draggedChipset.playerChipset);
+                EquipPlayerChipset(playerChipset);
                 isValidDrop = true;
             }
-            
+            if (!isValidDrop)
+            {
+                Debug.LogWarning($"[ChipsetSlot] 잘못된 칩셋 타입입니다. 슬롯 타입: {ownerType}");
+            }
+            InventorySlot.CurrentlyDraggedChipset = null;
+            return;
+        }
+        // 2. 기존 ChipsetItem 방식(예비)
+        var draggedChipsetItem = eventData.pointerDrag?.GetComponent<ChipsetItem>();
+        if (draggedChipsetItem != null)
+        {
+            bool isValidDrop = false;
+            if (draggedChipsetItem.weaponChipset != null && ownerType == ChipsetOwnerType.Weapon)
+            {
+                EquipWeaponChipset(draggedChipsetItem.weaponChipset);
+                isValidDrop = true;
+            }
+            else if (draggedChipsetItem.armorChipset != null && ownerType == ChipsetOwnerType.Armor)
+            {
+                EquipArmorChipset(draggedChipsetItem.armorChipset);
+                isValidDrop = true;
+            }
+            else if (draggedChipsetItem.playerChipset != null && ownerType == ChipsetOwnerType.Player)
+            {
+                EquipPlayerChipset(draggedChipsetItem.playerChipset);
+                isValidDrop = true;
+            }
             if (!isValidDrop)
             {
                 Debug.LogWarning($"[ChipsetSlot] 잘못된 칩셋 타입입니다. 슬롯 타입: {ownerType}");

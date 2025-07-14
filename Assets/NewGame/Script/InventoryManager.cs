@@ -198,6 +198,8 @@ public class InventoryManager : MonoBehaviour
     public System.Action<object> OnChipsetAdded;
     public System.Action<object> OnChipsetRemoved;
     
+    public InventoryTab CurrentTab => currentTab;
+    
     void Awake()
     {
         playerInventory = FindFirstObjectByType<PlayerInventory>();
@@ -853,7 +855,7 @@ public class InventoryManager : MonoBehaviour
         }
 
         int targetSlotCount = Mathf.Min(itemsToShow.Count + minEmptySlots, maxInventorySlots);
-        EnsureEnoughSlots();
+        EnsureEnoughSlots(targetSlotCount);
 
         for (int i = 0; i < inventorySlots.Count; i++)
         {
@@ -878,9 +880,16 @@ public class InventoryManager : MonoBehaviour
             }
             else
             {
-                // **여기서 반드시 초기화!**
                 inventorySlots[i].ClearSlot();
             }
+        }
+    }
+
+    void EnsureEnoughSlots(int requiredSlots)
+    {
+        while (inventorySlots.Count < requiredSlots)
+        {
+            CreateSingleSlot(inventorySlots.Count);
         }
     }
     

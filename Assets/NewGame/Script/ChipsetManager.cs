@@ -369,12 +369,12 @@ public class ChipsetManager : MonoBehaviour
         // 모든 패널을 상시 활성화로 변경
         ShowAllChipsetPanels();
     }
-    
+        
     /// <summary>
     /// 카테고리 변경
     /// </summary>
     public void ChangeCategory(ChipsetTab newCategory)
-    {
+        {
         if (currentTab != newCategory)
         {
             currentTab = newCategory;
@@ -878,8 +878,8 @@ public class ChipsetManager : MonoBehaviour
                 else
                 {
                     Debug.LogWarning($"[ChipsetManager] 무기 칩셋을 찾을 수 없습니다: {chipsetId}");
-                }
             }
+        }
         }
         
         // 코스트 표시 업데이트
@@ -922,8 +922,8 @@ public class ChipsetManager : MonoBehaviour
                 else
                 {
                     Debug.LogWarning($"[ChipsetManager] 방어구 칩셋을 찾을 수 없습니다: {chipsetId}");
-                }
             }
+        }
         }
         
         // 코스트 표시 업데이트
@@ -973,8 +973,8 @@ public class ChipsetManager : MonoBehaviour
     public void ShowInventoryPanel()
     {
         if (inventoryPanel != null)
-        {
-            inventoryPanel.SetActive(true);
+    {
+        inventoryPanel.SetActive(true);
             
             // 인벤토리 새로고침
             LoadChipsetInventory();
@@ -993,8 +993,8 @@ public class ChipsetManager : MonoBehaviour
     public void HideInventoryPanel()
     {
         if (inventoryPanel != null)
-        {
-            inventoryPanel.SetActive(false);
+    {
+        inventoryPanel.SetActive(false);
             Debug.Log("[ChipsetManager] 칩셋 인벤토리 패널 숨김");
         }
     }
