@@ -1408,36 +1408,30 @@ public class ChipsetManager : MonoBehaviour
     {
         if (chipset is WeaponChipsetData weaponChipset)
         {
-            if (!playerWeaponChipsetInventory.Contains(weaponChipset.chipsetId))
-            {
-                playerWeaponChipsetInventory.Add(weaponChipset.chipsetId);
-                SaveChipsetInventoryData();
-                LoadChipsetInventory(); // 항상 인벤토리 새로고침
-                UpdateChipsetInfo(); // 개수 정보 업데이트
-                Debug.Log($"[ChipsetManager] 무기 칩셋 추가: {weaponChipset.chipsetName}");
-            }
+            // 중복 체크 제거 - 모든 칩셋을 인벤토리에 추가
+            playerWeaponChipsetInventory.Add(weaponChipset.chipsetId);
+            SaveChipsetInventoryData();
+            LoadChipsetInventory(); // 항상 인벤토리 새로고침
+            UpdateChipsetInfo(); // 개수 정보 업데이트
+            Debug.Log($"[ChipsetManager] 무기 칩셋 추가: {weaponChipset.chipsetName}");
         }
         else if (chipset is ArmorChipsetData armorChipset)
         {
-            if (!playerArmorChipsetInventory.Contains(armorChipset.chipsetId))
-            {
-                playerArmorChipsetInventory.Add(armorChipset.chipsetId);
-                SaveChipsetInventoryData();
-                LoadChipsetInventory(); // 항상 인벤토리 새로고침
-                UpdateChipsetInfo(); // 개수 정보 업데이트
-                Debug.Log($"[ChipsetManager] 방어구 칩셋 추가: {armorChipset.chipsetName}");
-            }
+            // 중복 체크 제거 - 모든 칩셋을 인벤토리에 추가
+            playerArmorChipsetInventory.Add(armorChipset.chipsetId);
+            SaveChipsetInventoryData();
+            LoadChipsetInventory(); // 항상 인벤토리 새로고침
+            UpdateChipsetInfo(); // 개수 정보 업데이트
+            Debug.Log($"[ChipsetManager] 방어구 칩셋 추가: {armorChipset.chipsetName}");
         }
         else if (chipset is PlayerChipsetData playerChipset)
         {
-            if (!playerPlayerChipsetInventory.Contains(playerChipset.chipsetId))
-            {
-                playerPlayerChipsetInventory.Add(playerChipset.chipsetId);
-                SaveChipsetInventoryData();
-                LoadChipsetInventory(); // 항상 인벤토리 새로고침
-                UpdateChipsetInfo(); // 개수 정보 업데이트
-                Debug.Log($"[ChipsetManager] 플레이어 칩셋 추가: {playerChipset.chipsetName}");
-            }
+            // 중복 체크 제거 - 모든 칩셋을 인벤토리에 추가
+            playerPlayerChipsetInventory.Add(playerChipset.chipsetId);
+            SaveChipsetInventoryData();
+            LoadChipsetInventory(); // 항상 인벤토리 새로고침
+            UpdateChipsetInfo(); // 개수 정보 업데이트
+            Debug.Log($"[ChipsetManager] 플레이어 칩셋 추가: {playerChipset.chipsetName}");
         }
     }
     

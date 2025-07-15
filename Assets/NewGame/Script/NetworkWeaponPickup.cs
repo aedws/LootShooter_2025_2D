@@ -30,8 +30,16 @@ public class NetworkWeaponPickup : MonoBehaviour, IItemPickup
     [Tooltip("디버그 모드 활성화")]
     public bool debugMode = false;
     
+    [Header("픽업 설정")]
+    [SerializeField] private float pickupRange = 2f;
+    [SerializeField] private GameObject pickupPrompt; // E키 픽업 프롬프트
+    
     // 동적으로 설정될 무기 데이터
     private WeaponData weaponData;
+    
+    // 픽업 상태
+    private bool isPlayerInRange = false;
+    private bool hasBeenPickedUp = false;
     
     void Start()
     {
@@ -48,6 +56,21 @@ public class NetworkWeaponPickup : MonoBehaviour, IItemPickup
         
         // GoogleSheets에서 로드된 무기 데이터를 찾아서 설정
         SetupWeaponData();
+    }
+    
+    private void Update()
+    {
+        // 이미 픽업되었다면 처리하지 않음
+        if (hasBeenPickedUp) return;
+        
+        // 플레이어 접근 감지
+        CheckPlayerProximity();
+        
+        // E키 입력 감지
+        if (isPlayerInRange && Input.GetKeyDown(KeyCode.E))
+        {
+            PickupWeapon();
+        }
     }
     
     /// <summary>
@@ -123,6 +146,12 @@ public class NetworkWeaponPickup : MonoBehaviour, IItemPickup
         
         // 🆕 추가 보안: 플레이어 태그를 가진 오브젝트와의 충돌 무시
         StartCoroutine(IgnorePlayerCollisions());
+        
+        // 픽업 프롬프트 초기화
+        if (pickupPrompt != null)
+        {
+            pickupPrompt.SetActive(false);
+        }
     }
     
     /// <summary>
@@ -150,6 +179,52 @@ public class NetworkWeaponPickup : MonoBehaviour, IItemPickup
                     }
                 }
             }
+        }
+    }
+    
+    /// <summary>
+    /// 플레이어 접근 감지
+    /// </summary>
+    private void CheckPlayerProximity()
+    {
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            float distance = Vector3.Distance(transform.position, player.transform.position);
+            bool wasInRange = isPlayerInRange;
+            isPlayerInRange = distance <= pickupRange;
+            
+            // 범위 진입/탈출 시 UI 업데이트
+            if (wasInRange != isPlayerInRange)
+            {
+                UpdatePickupPrompt();
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 픽업 프롬프트 UI 업데이트
+    /// </summary>
+    private void UpdatePickupPrompt()
+    {
+        if (pickupPrompt != null)
+        {
+            pickupPrompt.SetActive(isPlayerInRange);
+        }
+    }
+    
+    /// <summary>
+    /// 무기 픽업
+    /// </summary>
+    private void PickupWeapon()
+    {
+        if (hasBeenPickedUp) return;
+        
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            hasBeenPickedUp = true;
+            OnPickup(player);
         }
     }
     
@@ -416,6 +491,12 @@ public class NetworkWeaponPickup : MonoBehaviour, IItemPickup
         {
             // 🆕 무기 장착 전 물리 컴포넌트들 제거
             RemovePhysicsComponents();
+            
+            // 픽업 프롬프트 숨기기
+            if (pickupPrompt != null)
+            {
+                pickupPrompt.SetActive(false);
+            }
             
             inventory.AddWeapon(weaponData);
             Destroy(gameObject);

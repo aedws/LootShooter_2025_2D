@@ -632,8 +632,9 @@ public class InventoryManager : MonoBehaviour
     
     public void AddWeapon(WeaponData weapon)
     {
-        if (weapon != null && !weapons.Contains(weapon))
+        if (weapon != null)
         {
+            // 중복 체크 제거 - 모든 무기를 인벤토리에 추가
             weapons.Add(weapon);
             
             // 동적으로 슬롯 생성 (필요한 경우)
@@ -1198,21 +1199,15 @@ public class InventoryManager : MonoBehaviour
             return;
         }
         
-        if (!armors.Contains(armor))
-        {
-            armors.Add(armor);
-            OnArmorAdded?.Invoke(armor);
-            Debug.Log($"🛡️ 방어구 추가: {armor.armorName} (총 {armors.Count}개 보유)");
-            
-            // 🆕 방어구 추가 후 인벤토리 리프레시
-            Debug.Log($"🔄 [InventoryManager] 방어구 추가 후 인벤토리 리프레시 시작");
-            RefreshInventory();
-            Debug.Log($"✅ [InventoryManager] 방어구 추가 후 인벤토리 리프레시 완료");
-        }
-        else
-        {
-            Debug.LogWarning($"⚠️ [InventoryManager] 이미 보유한 방어구입니다: {armor.armorName}");
-        }
+        // 중복 체크 제거 - 모든 방어구를 인벤토리에 추가
+        armors.Add(armor);
+        OnArmorAdded?.Invoke(armor);
+        Debug.Log($"🛡️ 방어구 추가: {armor.armorName} (총 {armors.Count}개 보유)");
+        
+        // 🆕 방어구 추가 후 인벤토리 리프레시
+        Debug.Log($"🔄 [InventoryManager] 방어구 추가 후 인벤토리 리프레시 시작");
+        RefreshInventory();
+        Debug.Log($"✅ [InventoryManager] 방어구 추가 후 인벤토리 리프레시 완료");
     }
     
     public void RemoveArmor(ArmorData armor, bool shouldRefresh = true)
@@ -1283,29 +1278,12 @@ public class InventoryManager : MonoBehaviour
             return;
         }
         
-        // 🆕 ID 기반으로 중복 체크
-        string chipsetId = GetChipsetId(chipset);
-        if (string.IsNullOrEmpty(chipsetId))
-        {
-            Debug.LogError($"❌ [InventoryManager] 칩셋 ID를 가져올 수 없습니다: {GetChipsetName(chipset)}");
-            return;
-        }
+        // 중복 체크 제거 - 모든 칩셋을 인벤토리에 추가
+        chipsets.Add(chipset);
+        OnChipsetAdded?.Invoke(chipset);
+        Debug.Log($"🔧 칩셋 추가: {GetChipsetName(chipset)} (총 {chipsets.Count}개 보유)");
         
-        // 이미 같은 ID의 칩셋이 있는지 확인
-        bool alreadyExists = chipsets.Any(existingChipset => GetChipsetId(existingChipset) == chipsetId);
-        
-        if (!alreadyExists)
-        {
-            chipsets.Add(chipset);
-            OnChipsetAdded?.Invoke(chipset);
-            Debug.Log($"🔧 칩셋 추가: {GetChipsetName(chipset)} (ID: {chipsetId}, 총 {chipsets.Count}개 보유)");
-            
-            RefreshInventory();
-        }
-        else
-        {
-            Debug.LogWarning($"⚠️ [InventoryManager] 이미 보유한 칩셋입니다: {GetChipsetName(chipset)} (ID: {chipsetId})");
-        }
+        RefreshInventory();
     }
     
     public void RemoveChipset(object chipset, bool shouldRefresh = true)
