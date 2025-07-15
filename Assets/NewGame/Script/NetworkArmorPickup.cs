@@ -37,8 +37,8 @@ public class NetworkArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
     [Tooltip("픽업 범위")]
     public float pickupRange = 1.5f;
     
-    [Tooltip("자동 픽업 여부")]
-    public bool autoPickup = false;
+    [Tooltip("자동 픽업 여부 (false = E키 픽업)")]
+    public bool autoPickup = false; // 기본값을 false로 유지하여 E키 픽업 활성화
     
     [Header("디버그")]
     [Tooltip("디버그 모드 활성화")]

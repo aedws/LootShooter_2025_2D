@@ -108,14 +108,11 @@ public class PlayerInventory : MonoBehaviour
     {
         if (weapon == null) return;
         
-        // 새로운 인벤토리 매니저 사용
+        // 새로운 인벤토리 매니저 사용 (중복 체크 제거)
         if (inventoryManager != null)
         {
-            if (!inventoryManager.HasWeapon(weapon))
-            {
-                inventoryManager.AddWeapon(weapon);
-                // Debug.Log($"[PlayerInventory] 무기 추가: {weapon.weaponName}");
-            }
+            inventoryManager.AddWeapon(weapon);
+            // Debug.Log($"[PlayerInventory] 무기 추가: {weapon.weaponName}");
         }
         
         // 레거시 호환성

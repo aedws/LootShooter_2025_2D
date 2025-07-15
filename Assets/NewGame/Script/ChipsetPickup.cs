@@ -3,7 +3,7 @@ using TMPro;
 
 /// <summary>
 /// 필드에 떨어져 있는 칩셋 픽업 오브젝트
-/// 플레이어가 접근하면 인벤토리에 추가됨
+/// 플레이어가 E키를 누르면 인벤토리에 추가됨
 /// </summary>
 public class ChipsetPickup : MonoBehaviour
 {
@@ -12,6 +12,7 @@ public class ChipsetPickup : MonoBehaviour
     [SerializeField] private TextMeshPro chipsetRarityText;
     [SerializeField] private SpriteRenderer chipsetIcon;
     [SerializeField] private GameObject pickupEffect;
+    [SerializeField] private GameObject pickupPrompt; // E키 픽업 프롬프트
     
     [Header("Pickup Settings")]
     [SerializeField] private float pickupRange = 2f;
@@ -27,6 +28,10 @@ public class ChipsetPickup : MonoBehaviour
     // 애니메이션 관련
     private Vector3 startPosition;
     private float bobTime;
+    
+    // 픽업 상태
+    private bool isPlayerInRange = false;
+    private bool hasBeenPickedUp = false;
     
     // 이벤트
     public System.Action<object> OnChipsetPickedUp;
@@ -54,10 +59,19 @@ public class ChipsetPickup : MonoBehaviour
         {
             chipsetIcon.color = GetChipsetRarityColor();
         }
+        
+        // 픽업 프롬프트 초기화
+        if (pickupPrompt != null)
+        {
+            pickupPrompt.SetActive(false);
+        }
     }
     
     private void Update()
     {
+        // 이미 픽업되었다면 처리하지 않음
+        if (hasBeenPickedUp) return;
+        
         // 회전 애니메이션
         transform.Rotate(0, rotationSpeed * Time.deltaTime, 0);
         
@@ -68,6 +82,12 @@ public class ChipsetPickup : MonoBehaviour
         
         // 플레이어 접근 감지
         CheckPlayerProximity();
+        
+        // E키 입력 감지
+        if (isPlayerInRange && Input.GetKeyDown(KeyCode.E))
+        {
+            PickupChipset();
+        }
     }
     
     /// <summary>
@@ -104,10 +124,25 @@ public class ChipsetPickup : MonoBehaviour
         if (player != null)
         {
             float distance = Vector3.Distance(transform.position, player.transform.position);
-            if (distance <= pickupRange)
+            bool wasInRange = isPlayerInRange;
+            isPlayerInRange = distance <= pickupRange;
+            
+            // 범위 진입/탈출 시 UI 업데이트
+            if (wasInRange != isPlayerInRange)
             {
-                PickupChipset();
+                UpdatePickupPrompt();
             }
+        }
+    }
+    
+    /// <summary>
+    /// 픽업 프롬프트 UI 업데이트
+    /// </summary>
+    private void UpdatePickupPrompt()
+    {
+        if (pickupPrompt != null)
+        {
+            pickupPrompt.SetActive(isPlayerInRange);
         }
     }
     
@@ -116,9 +151,13 @@ public class ChipsetPickup : MonoBehaviour
     /// </summary>
     private void PickupChipset()
     {
+        if (hasBeenPickedUp) return;
+        
         var chipsetManager = FindAnyObjectByType<ChipsetManager>();
         if (chipsetManager != null)
         {
+            hasBeenPickedUp = true;
+            
             // 칩셋을 인벤토리에 추가
             chipsetManager.AddChipsetToInventory(GetCurrentChipset());
             
@@ -129,6 +168,12 @@ public class ChipsetPickup : MonoBehaviour
             if (pickupEffect != null)
             {
                 Instantiate(pickupEffect, transform.position, Quaternion.identity);
+            }
+            
+            // 픽업 프롬프트 숨기기
+            if (pickupPrompt != null)
+            {
+                pickupPrompt.SetActive(false);
             }
             
             // 오브젝트 제거
