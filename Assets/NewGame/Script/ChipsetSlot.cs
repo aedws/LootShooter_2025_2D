@@ -164,6 +164,16 @@ public class ChipsetSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IP
         }
     }
     
+    // UI에만 칩셋을 표시 (데이터/이벤트/인벤토리 건드리지 않음)
+    public void DisplayPlayerChipset(PlayerChipsetData chipset)
+    {
+        playerChipset = chipset;
+        weaponChipset = null;
+        armorChipset = null;
+        isEquipped = chipset != null;
+        UpdateVisualState();
+    }
+    
     public void UnequipChipset()
     {
         var removedChipset = GetCurrentChipset();

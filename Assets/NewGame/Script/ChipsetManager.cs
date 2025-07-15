@@ -67,10 +67,10 @@ public class ChipsetManager : MonoBehaviour
     
     [Header("🔧 칩셋 해제 옵션")]
     [Tooltip("칩셋 해제 시 인벤토리로 반환할지 여부")]
-    public bool returnToInventoryOnUnequip = true;
+    public bool returnToInventoryOnUnequip = true; // 항상 반환형으로 고정
     
-    [Tooltip("칩셋 해제 옵션 토글 버튼 (선택사항)")]
-    public Toggle returnToInventoryToggle;
+    // [Tooltip("칩셋 해제 옵션 토글 버튼 (선택사항)")]
+    // public Toggle returnToInventoryToggle; // 토글 UI 비활성화
     
     // 현재 선택된 무기/방어구
     private WeaponData currentWeapon;
@@ -105,8 +105,10 @@ public class ChipsetManager : MonoBehaviour
             
         if (inventoryManager == null)
             inventoryManager = FindAnyObjectByType<InventoryManager>();
-            
+        
         // 🆕 ChipsetSlotUI는 인벤토리 열 때 찾도록 변경
+        // 칩셋 해제 옵션 토글 UI/이벤트 제거
+        returnToInventoryOnUnequip = true; // 항상 반환형
     }
     
     private void Start()
@@ -131,8 +133,8 @@ public class ChipsetManager : MonoBehaviour
         // 카테고리 버튼 설정
         SetupCategoryButtons();
         
-        // 🆕 칩셋 해제 옵션 토글 설정
-        SetupChipsetReturnToggle();
+        // 🆕 칩셋 해제 옵션 토글 설정 제거
+        // SetupChipsetReturnToggle();
         
         // 모든 칩셋 패널 상시 활성화
         ShowAllChipsetPanels();
@@ -161,26 +163,9 @@ public class ChipsetManager : MonoBehaviour
             playerChipsetTabButton.onClick.AddListener(OnPlayerChipsetTabButtonClicked);
     }
     
-    /// <summary>
-    /// 칩셋 해제 옵션 토글 설정
-    /// </summary>
-    private void SetupChipsetReturnToggle()
-    {
-        if (returnToInventoryToggle != null)
-        {
-            returnToInventoryToggle.isOn = returnToInventoryOnUnequip;
-            returnToInventoryToggle.onValueChanged.AddListener(OnChipsetReturnToggleChanged);
-        }
-    }
-    
-    /// <summary>
-    /// 칩셋 해제 옵션 토글 변경 이벤트
-    /// </summary>
-    private void OnChipsetReturnToggleChanged(bool value)
-    {
-        returnToInventoryOnUnequip = value;
-        Debug.Log($"🔧 [ChipsetManager] 칩셋 해제 옵션 변경: {(value ? "인벤토리 반환" : "소멸")}");
-    }
+    // 칩셋 해제 옵션 토글 관련 메서드 제거 또는 주석 처리
+    // private void SetupChipsetReturnToggle() { ... }
+    // private void OnChipsetReturnToggleChanged(bool value) { ... }
     
     private void Update()
     {
@@ -199,11 +184,11 @@ public class ChipsetManager : MonoBehaviour
             GameDataRepository.Instance.OnAllDataLoaded -= OnDataLoaded;
         }
         
-        // 🆕 토글 이벤트 구독 해제
-        if (returnToInventoryToggle != null)
-        {
-            returnToInventoryToggle.onValueChanged.RemoveListener(OnChipsetReturnToggleChanged);
-        }
+        // 🆕 토글 이벤트 구독 해제 제거
+        // if (returnToInventoryToggle != null)
+        // {
+        //     returnToInventoryToggle.onValueChanged.RemoveListener(OnChipsetReturnToggleChanged);
+        // }
     }
     
     private void OnDataLoaded()
@@ -796,12 +781,12 @@ public class ChipsetManager : MonoBehaviour
     {
         Debug.Log($"🔧 [ChipsetManager] 플레이어 칩셋 장착 시작 - Slot: {slot.GetSlotIndex()}, Chipset: {chipset}");
         
-        // 🆕 ChipsetSlotUI를 플레이어 칩셋 모드로 설정
-        if (chipsetSlotUI != null)
-        {
-            chipsetSlotUI.SetPlayerChipsets(playerChipsetIds);
-            Debug.Log($"🔧 [ChipsetManager] ChipsetSlotUI를 플레이어 칩셋 모드로 설정");
-        }
+        // 칩셋 슬롯 UI 강제 갱신 제거 (SetPlayerChipsets 호출 X)
+        // if (chipsetSlotUI != null)
+        // {
+        //     chipsetSlotUI.SetPlayerChipsets(playerChipsetIds);
+        //     Debug.Log($"🔧 [ChipsetManager] ChipsetSlotUI를 플레이어 칩셋 모드로 설정");
+        // }
         
         UpdatePlayerCostDisplay();
         CheckPlayerCostOver();
@@ -824,12 +809,12 @@ public class ChipsetManager : MonoBehaviour
             // 🆕 즉시 저장
             SavePlayerChipsetsImmediately();
             
-            // 🆕 ChipsetSlotUI에 업데이트된 플레이어 칩셋 설정
-            if (chipsetSlotUI != null)
-            {
-                chipsetSlotUI.SetPlayerChipsets(playerChipsetIds);
-                Debug.Log($"🔧 [ChipsetManager] ChipsetSlotUI에 업데이트된 플레이어 칩셋 설정");
-            }
+            // 칩셋 슬롯 UI 강제 갱신 제거 (SetPlayerChipsets 호출 X)
+            // if (chipsetSlotUI != null)
+            // {
+            //     chipsetSlotUI.SetPlayerChipsets(playerChipsetIds);
+            //     Debug.Log($"🔧 [ChipsetManager] ChipsetSlotUI에 업데이트된 플레이어 칩셋 설정");
+            // }
             
             // 효과 적용
             if (effectManager != null)
@@ -851,12 +836,12 @@ public class ChipsetManager : MonoBehaviour
     {
         Debug.Log($"🔧 [ChipsetManager] 플레이어 칩셋 해제 시작 - Slot: {slot.GetSlotIndex()}, Chipset: {chipset}");
         
-        // 🆕 ChipsetSlotUI를 플레이어 칩셋 모드로 설정
-        if (chipsetSlotUI != null)
-        {
-            chipsetSlotUI.SetPlayerChipsets(playerChipsetIds);
-            Debug.Log($"🔧 [ChipsetManager] ChipsetSlotUI를 플레이어 칩셋 모드로 설정");
-        }
+        // 칩셋 슬롯 UI 강제 갱신 제거 (SetPlayerChipsets 호출 X)
+        // if (chipsetSlotUI != null)
+        // {
+        //     chipsetSlotUI.SetPlayerChipsets(playerChipsetIds);
+        //     Debug.Log($"🔧 [ChipsetManager] ChipsetSlotUI를 플레이어 칩셋 모드로 설정");
+        // }
         
         UpdatePlayerCostDisplay();
         CheckPlayerCostOver();
@@ -874,12 +859,12 @@ public class ChipsetManager : MonoBehaviour
         // 🆕 즉시 저장
         SavePlayerChipsetsImmediately();
         
-        // 🆕 ChipsetSlotUI에 업데이트된 플레이어 칩셋 설정
-        if (chipsetSlotUI != null)
-        {
-            chipsetSlotUI.SetPlayerChipsets(playerChipsetIds);
-            Debug.Log($"🔧 [ChipsetManager] ChipsetSlotUI에 업데이트된 플레이어 칩셋 설정");
-        }
+        // 칩셋 슬롯 UI 강제 갱신 제거 (SetPlayerChipsets 호출 X)
+        // if (chipsetSlotUI != null)
+        // {
+        //     chipsetSlotUI.SetPlayerChipsets(playerChipsetIds);
+        //     Debug.Log($"🔧 [ChipsetManager] ChipsetSlotUI에 업데이트된 플레이어 칩셋 설정");
+        // }
         
         // 효과 적용
         if (effectManager != null)
@@ -1281,8 +1266,8 @@ public class ChipsetManager : MonoBehaviour
         string equippedPlayerChipsets = string.Join(",", playerChipsetIds);
         PlayerPrefs.SetString("PlayerEquippedChipsets", equippedPlayerChipsets);
         
-        // 🆕 칩셋 해제 옵션 저장
-        PlayerPrefs.SetInt("ChipsetReturnToInventory", returnToInventoryOnUnequip ? 1 : 0);
+        // 🆕 칩셋 해제 옵션 저장 제거
+        // PlayerPrefs.SetInt("ChipsetReturnToInventory", returnToInventoryOnUnequip ? 1 : 0);
         
         PlayerPrefs.Save();
         Debug.Log("[ChipsetManager] 칩셋 인벤토리 저장 완료");
@@ -1364,11 +1349,10 @@ public class ChipsetManager : MonoBehaviour
             playerChipsetIds = new string[0];
         }
         
-        // 🆕 칩셋 해제 옵션 로드
-        returnToInventoryOnUnequip = PlayerPrefs.GetInt("ChipsetReturnToInventory", 0) == 1;
-        
+        // 🆕 칩셋 해제 옵션 로드 제거
+        returnToInventoryOnUnequip = true; // 항상 반환형
         Debug.Log($"[ChipsetManager] 칩셋 인벤토리 로드 완료 - 무기: {playerWeaponChipsetInventory.Count}개, 방어구: {playerArmorChipsetInventory.Count}개, 플레이어: {playerPlayerChipsetInventory.Count}개");
-        Debug.Log($"[ChipsetManager] 칩셋 해제 옵션: {(returnToInventoryOnUnequip ? "인벤토리 반환" : "소멸")}");
+        Debug.Log($"[ChipsetManager] 칩셋 해제 옵션: 인벤토리 반환 (고정)");
     }
     
     /// <summary>
@@ -1388,7 +1372,7 @@ public class ChipsetManager : MonoBehaviour
         PlayerPrefs.DeleteKey("PlayerArmorChipsetInventory");
         PlayerPrefs.DeleteKey("PlayerPlayerChipsetInventory");
         PlayerPrefs.DeleteKey("PlayerEquippedChipsets");
-        PlayerPrefs.DeleteKey("ChipsetReturnToInventory");
+        // PlayerPrefs.DeleteKey("ChipsetReturnToInventory"); // 토글 옵션 제거
         PlayerPrefs.Save();
         
         // InventoryManager에서도 초기화

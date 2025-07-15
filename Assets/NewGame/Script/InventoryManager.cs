@@ -634,7 +634,12 @@ public class InventoryManager : MonoBehaviour
     {
         if (weapon != null)
         {
-            // 중복 체크 제거 - 모든 무기를 인벤토리에 추가
+            // 중복 체크: 이미 인벤토리에 있으면 추가하지 않음
+            if (weapons.Contains(weapon))
+            {
+                Debug.LogWarning($"[InventoryManager] 이미 인벤토리에 존재하는 무기: {weapon.weaponName}");
+                return;
+            }
             weapons.Add(weapon);
             
             // 동적으로 슬롯 생성 (필요한 경우)
@@ -1198,16 +1203,16 @@ public class InventoryManager : MonoBehaviour
             Debug.LogError("❌ [InventoryManager] 방어구 데이터가 null입니다!");
             return;
         }
-        
-        // 중복 체크 제거 - 모든 방어구를 인벤토리에 추가
+        // 중복 체크: 이미 인벤토리에 있으면 추가하지 않음
+        if (armors.Contains(armor))
+        {
+            Debug.LogWarning($"[InventoryManager] 이미 인벤토리에 존재하는 방어구: {armor.armorName}");
+            return;
+        }
         armors.Add(armor);
         OnArmorAdded?.Invoke(armor);
         Debug.Log($"🛡️ 방어구 추가: {armor.armorName} (총 {armors.Count}개 보유)");
-        
-        // 🆕 방어구 추가 후 인벤토리 리프레시
-        Debug.Log($"🔄 [InventoryManager] 방어구 추가 후 인벤토리 리프레시 시작");
         RefreshInventory();
-        Debug.Log($"✅ [InventoryManager] 방어구 추가 후 인벤토리 리프레시 완료");
     }
     
     public void RemoveArmor(ArmorData armor, bool shouldRefresh = true)

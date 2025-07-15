@@ -381,14 +381,15 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
         // 새 무기 장착
         weaponData = newWeaponData;
         
-        // 플레이어 인벤토리에 장착 무기 설정
-        if (playerInventory != null)
+        // PlayerInventory의 현재 무기와 다를 때만 실제 오브젝트 변경
+        if (playerInventory != null && playerInventory.GetEquippedWeapon() != weaponData)
             playerInventory.SetEquippedWeapon(weaponData);
         
-        // 🔧 인벤토리에서 장착된 무기 제거 (RefreshInventory 호출 안함)
+        // 🔧 인벤토리에서 장착된 무기 제거
         if (weaponData != null && inventoryManager != null)
         {
             inventoryManager.RemoveWeapon(weaponData, false); // 새로고침 없이 제거만
+            inventoryManager.RefreshInventory(); // 무기 장착 시 인벤토리 자동 리프레시
         }
         
         // 🏃‍♂️ 플레이어 이동속도 업데이트
@@ -408,8 +409,8 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
         // 무기 해제
         weaponData = null;
         
-        // 플레이어 인벤토리에서 장착 무기 해제
-        if (playerInventory != null)
+        // PlayerInventory의 현재 무기와 일치할 때만 해제
+        if (playerInventory != null && playerInventory.GetEquippedWeapon() == oldWeapon)
             playerInventory.SetEquippedWeapon(null);
         
         // 🏃‍♂️ 플레이어 이동속도 복원 (무기 없음)
@@ -430,11 +431,11 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
             ReturnWeaponToInventory(weaponData);
         }
         
-        weaponData = null;
-        
-        // 플레이어 인벤토리에서 장착 무기 해제
-        if (playerInventory != null)
+        // PlayerInventory의 현재 무기와 일치할 때만 해제
+        if (playerInventory != null && playerInventory.GetEquippedWeapon() == weaponData)
             playerInventory.SetEquippedWeapon(null);
+        
+        weaponData = null;
         
         OnWeaponChanged?.Invoke(weaponData);
         UpdateVisuals();

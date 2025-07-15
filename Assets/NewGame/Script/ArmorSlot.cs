@@ -344,7 +344,7 @@ public class ArmorSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
         if (inventoryManager != null)
         {
             inventoryManager.AddArmor(oldArmor);
-            inventoryManager.ForceShowArmorsTabAndRefresh();
+            inventoryManager.RefreshInventory(); // 방어구 해제 시 인벤토리 자동 리프레시
         }
         
         UpdateVisuals();
@@ -528,6 +528,11 @@ public class ArmorSlot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandl
     {
         armorData = newArmorData;
         UpdateVisuals();
+        // 슬롯이 비워질 때 인벤토리 자동 리프레시
+        if (armorData == null && inventoryManager != null)
+        {
+            inventoryManager.RefreshInventory();
+        }
     }
     
     public void ForceUpdateVisuals()

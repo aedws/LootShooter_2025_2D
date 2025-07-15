@@ -175,7 +175,7 @@ public class ChipsetSlotUI : MonoBehaviour
                     chipset = GameDataRepository.Instance.GetArmorChipsetById(equippedChipsets[i]);
                 else if (currentType == ItemType.Player)
                     chipset = GameDataRepository.Instance.GetPlayerChipsetById(equippedChipsets[i]);
-                    
+                
                 if (chipset != null)
                 {
                     if (currentType == ItemType.Weapon)
@@ -183,7 +183,7 @@ public class ChipsetSlotUI : MonoBehaviour
                     else if (currentType == ItemType.Armor)
                         chipsetSlots[i].EquipArmorChipset((ArmorChipsetData)chipset);
                     else if (currentType == ItemType.Player)
-                        chipsetSlots[i].EquipPlayerChipset((PlayerChipsetData)chipset);
+                        chipsetSlots[i].DisplayPlayerChipset((PlayerChipsetData)chipset); // UI에만 표시
                 }
                 else
                 {
