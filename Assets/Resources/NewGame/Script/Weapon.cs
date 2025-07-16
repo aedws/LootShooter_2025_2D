@@ -55,6 +55,9 @@ public class Weapon : MonoBehaviour
     private float playerCriticalChanceBonus = 0f;
     private float playerCriticalMultiplierBonus = 0f;
 
+    private AudioSource audioSource;
+    private AudioClip fireSound;
+
     void Start()
     {
         if (weaponData != null)
@@ -66,6 +69,14 @@ public class Weapon : MonoBehaviour
         var sr = GetComponent<SpriteRenderer>();
         if (sr != null && weaponData != null)
             sr.color = weaponData.GetRarityColor();
+        // 오디오 자동 할당
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
+        string soundPath = weaponData != null ? $"NewGame/Audio/GunFire_{weaponData.weaponType}" : "NewGame/Audio/GunFire_Default";
+        fireSound = Resources.Load<AudioClip>(soundPath);
+        if (fireSound == null)
+            fireSound = Resources.Load<AudioClip>("NewGame/Audio/GunFire_Default");
     }
 
     void Update()
@@ -259,6 +270,9 @@ public class Weapon : MonoBehaviour
                 StopCoroutine(autoReloadCoroutine);
             autoReloadCoroutine = StartCoroutine(AutoReloadAfterDelay(0.3f));
         }
+        // 발사음 재생
+        if (fireSound != null && audioSource != null)
+            audioSource.PlayOneShot(fireSound, 0.25f);
     }
 
     private void FireShotgun(Vector2 direction, Vector3 spawnPosition)
@@ -300,6 +314,9 @@ public class Weapon : MonoBehaviour
                 StopCoroutine(autoReloadCoroutine);
             autoReloadCoroutine = StartCoroutine(AutoReloadAfterDelay(0.3f));
         }
+        // 발사음 재생
+        if (fireSound != null && audioSource != null)
+            audioSource.PlayOneShot(fireSound, 0.25f);
     }
 
     private void ApplySpecialEffects(Projectile projectile, bool isCritical)
