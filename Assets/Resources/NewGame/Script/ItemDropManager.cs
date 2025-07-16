@@ -363,7 +363,8 @@ public class ItemDropManager : MonoBehaviour
                     string prefabPath = $"Assets/Resources/NewGame/Prefab/Network/WeaponPickup_{weaponData.weaponType}.prefab";
                     GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
 #else
-                    GameObject prefab = Resources.Load<GameObject>($"NewGame/Prefab/Network/WeaponPickup_{weaponData.weaponType}");
+                    string prefabPath = $"NewGame/Prefab/Network/WeaponPickup_{weaponData.weaponType}";
+                    GameObject prefab = Resources.Load<GameObject>(prefabPath);
 #endif
                     
                     if (prefab != null)
@@ -392,7 +393,8 @@ public class ItemDropManager : MonoBehaviour
                     string prefabPath = $"Assets/Resources/NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}.prefab";
                     GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
 #else
-                    GameObject prefab = Resources.Load<GameObject>($"NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}");
+                    string prefabPath = $"NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}";
+                    GameObject prefab = Resources.Load<GameObject>(prefabPath);
 #endif
                     
                     if (prefab != null)
@@ -422,7 +424,8 @@ public class ItemDropManager : MonoBehaviour
                     string prefabPath = $"Assets/Resources/NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}.prefab";
                     GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
 #else
-                    GameObject prefab = Resources.Load<GameObject>($"NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}");
+                    string prefabPath = $"NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}";
+                    GameObject prefab = Resources.Load<GameObject>(prefabPath);
 #endif
                     
                     if (prefab != null)

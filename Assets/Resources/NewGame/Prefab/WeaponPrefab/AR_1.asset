@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93ef8ad5183c09843a7c8be4e7f2bfee, type: 3}
   m_Name: AR_1
   m_EditorClassIdentifier: 
-  weaponName: AR_1
+  weaponName: AR-15
   icon: {fileID: 21300000, guid: b7cad2917d053294aa83873fbd3d047a, type: 3}
   weaponType: 0
-  flavorText: "\uC774 \uBB34\uAE30\uC5D0 \uB300\uD55C \uC124\uBA85\uC774 \uC5EC\uAE30\uC5D0
-    \uD45C\uC2DC\uB429\uB2C8\uB2E4."
+  flavorText: "\uD2B9\uBCC4\uD55C \uAC83 \uC5C6\uB294 \uC18C\uCD1D, \uBB34\uB09C\uD558\uAC8C
+    \uC0AC\uC6A9\uD558\uAE30 \uC88B\uB2E4."
   fireRate: 0.1
   damage: 30
   projectilePrefab: {fileID: 7743249404533171330, guid: c3e51900e9c29304cbda351dec9db181, type: 3}
