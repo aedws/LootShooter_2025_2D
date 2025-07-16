@@ -707,4 +707,48 @@ public class PlayerInventory : MonoBehaviour
             if (leftSprite != null) leftSprite.flipX = true;
         }
     }
+
+    // 무기 전체 제거
+    public void ClearWeapons()
+    {
+        // InventoryManager에 ClearWeapons가 없으므로 직접 구현
+        if (weaponSlotManager != null)
+        {
+            for (int i = 0; i < weaponSlotManager.GetSlotCount(); i++)
+            {
+                weaponSlotManager.UnequipWeaponFromSlot(i);
+            }
+        }
+        if (equippedWeapon != null)
+            equippedWeapon = null;
+        // 필요시 무기 리스트도 직접 비우기 (예: inventoryManager 내부 리스트)
+    }
+
+    // 방어구 전체 제거
+    public void ClearArmors()
+    {
+        // ArmorSlotManager에 ClearAllArmors가 없으므로 직접 구현
+        if (armorSlotManager != null)
+        {
+            for (int i = 0; i < armorSlotManager.armorSlots.Length; i++)
+            {
+                armorSlotManager.UnequipArmorFromSlot(i);
+            }
+        }
+        if (equippedArmors != null)
+            equippedArmors.Clear();
+    }
+
+    // 방어구 추가
+    public void AddArmor(ArmorData armor)
+    {
+        if (armor == null) return;
+        // InventoryManager에 AddArmor가 있으므로 호출
+        if (inventoryManager != null)
+            inventoryManager.AddArmor(armor);
+        // 직접 장착하려면 아래 코드 사용
+        // if (armorSlotManager != null)
+        //     armorSlotManager.EquipArmorToSlot(armor, 원하는슬롯인덱스);
+        // equippedArmors[armor.armorType] = armor;
+    }
 } 

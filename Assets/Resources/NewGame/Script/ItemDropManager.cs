@@ -362,10 +362,10 @@ public class ItemDropManager : MonoBehaviour
                     #if UNITY_EDITOR
                     string prefabPath = $"Assets/Resources/NewGame/Prefab/Network/WeaponPickup_{weaponData.weaponType}.prefab";
                     GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-#else
+                    #else
                     string prefabPath = $"NewGame/Prefab/Network/WeaponPickup_{weaponData.weaponType}";
                     GameObject prefab = Resources.Load<GameObject>(prefabPath);
-#endif
+                    #endif
                     
                     if (prefab != null)
                     {
@@ -392,10 +392,10 @@ public class ItemDropManager : MonoBehaviour
                     #if UNITY_EDITOR
                     string prefabPath = $"Assets/Resources/NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}.prefab";
                     GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-#else
+                    #else
                     string prefabPath = $"NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}";
                     GameObject prefab = Resources.Load<GameObject>(prefabPath);
-#endif
+                    #endif
                     
                     if (prefab != null)
                     {
@@ -423,10 +423,10 @@ public class ItemDropManager : MonoBehaviour
                     #if UNITY_EDITOR
                     string prefabPath = $"Assets/Resources/NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}.prefab";
                     GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-#else
+                    #else
                     string prefabPath = $"NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}";
                     GameObject prefab = Resources.Load<GameObject>(prefabPath);
-#endif
+                    #endif
                     
                     if (prefab != null)
                     {
@@ -478,9 +478,9 @@ public class ItemDropManager : MonoBehaviour
                         
                         #if UNITY_EDITOR
                         GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-#else
+                        #else
                         GameObject prefab = Resources.Load<GameObject>("NewGame/Prefab/ChipsetPickup");
-#endif
+                        #endif
                         
                         if (prefab != null)
                         {
@@ -520,9 +520,9 @@ public class ItemDropManager : MonoBehaviour
                         
                         #if UNITY_EDITOR
                         GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-#else
+                        #else
                         GameObject prefab = Resources.Load<GameObject>("NewGame/Prefab/ChipsetPickup");
-#endif
+                        #endif
                         
                         if (prefab != null)
                         {
@@ -562,9 +562,9 @@ public class ItemDropManager : MonoBehaviour
                         
                         #if UNITY_EDITOR
                         GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-#else
+                        #else
                         GameObject prefab = Resources.Load<GameObject>("NewGame/Prefab/ChipsetPickup");
-#endif
+                        #endif
                         
                         if (prefab != null)
                         {
