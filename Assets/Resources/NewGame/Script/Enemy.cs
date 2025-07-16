@@ -38,6 +38,19 @@ public class Enemy : MonoBehaviour
     public bool useGoogleSheetsData = true; // 구글 시트 데이터 사용 여부
     public bool debugMode = false; // 디버그 모드
     
+    // 웨이브 이동 관련 변수
+    private float targetX;
+    private float fixedY = 5f;
+    private bool leftToRight;
+    private bool reached = false;
+    public void SetMoveTarget(float x, bool leftToRight)
+    {
+        this.targetX = x;
+        this.leftToRight = leftToRight;
+        this.fixedY = 5f;
+        reached = false;
+    }
+    
     void Awake()
     {
         // 컴포넌트 찾기
@@ -209,7 +222,21 @@ public class Enemy : MonoBehaviour
     
     void Update()
     {
-        if (isDead || player == null) return;
+        if (isDead) return;
+        // 웨이브 이동 패턴: 목표 X까지 직선 이동, 도달 시 정지
+        if (!reached && targetX != 0f)
+        {
+            float step = moveSpeed * Time.deltaTime;
+            float nextX = Mathf.MoveTowards(transform.position.x, targetX, step);
+            transform.position = new Vector3(nextX, fixedY, transform.position.z);
+            if (Mathf.Abs(transform.position.x - targetX) < 0.1f)
+            {
+                reached = true;
+            }
+            return;
+        }
+        
+        if (player == null) return;
         
         float distanceToPlayer = Vector2.Distance(transform.position, player.position);
         
@@ -452,6 +479,44 @@ public class Enemy : MonoBehaviour
         {
             Gizmos.color = Color.green;
             Gizmos.DrawLine(transform.position, player.position);
+        }
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (isDead) return;
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            Health playerHealth = collision.gameObject.GetComponent<Health>();
+            if (playerHealth != null)
+            {
+                playerHealth.TakeDamage(damage);
+                // 넉백 효과(옵션)
+                Rigidbody2D playerRb = collision.gameObject.GetComponent<Rigidbody2D>();
+                if (playerRb != null)
+                {
+                    float dir = (playerRb.transform.position.x < transform.position.x) ? -1f : 1f;
+                    playerRb.AddForce(new Vector2(dir * 10f, 5f), ForceMode2D.Impulse);
+                }
+            }
+        }
+    }
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (isDead) return;
+        if (other.CompareTag("Player"))
+        {
+            Health playerHealth = other.GetComponent<Health>();
+            if (playerHealth != null)
+            {
+                playerHealth.TakeDamage(damage);
+                Rigidbody2D playerRb = other.GetComponent<Rigidbody2D>();
+                if (playerRb != null)
+                {
+                    float dir = (playerRb.transform.position.x < transform.position.x) ? -1f : 1f;
+                    playerRb.AddForce(new Vector2(dir * 10f, 5f), ForceMode2D.Impulse);
+                }
+            }
         }
     }
 } 

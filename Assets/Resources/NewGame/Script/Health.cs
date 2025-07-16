@@ -129,9 +129,15 @@ public class Health : MonoBehaviour
     void Die()
     {
         if (isDead) return;
-        
         isDead = true;
         // Debug.Log($"[Health] {gameObject.name}이(가) 죽었습니다.");
         OnDeath?.Invoke();
+        // 플레이어라면 게임 오버 UI 호출
+        if (gameObject.CompareTag("Player"))
+        {
+            var gameOverUI = FindFirstObjectByType<GameOverUI>();
+            if (gameOverUI != null)
+                gameOverUI.ShowGameOver();
+        }
     }
 } 

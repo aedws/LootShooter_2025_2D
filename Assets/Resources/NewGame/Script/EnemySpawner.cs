@@ -29,6 +29,11 @@ public class EnemySpawner : MonoBehaviour
     private List<GameObject> activeEnemies = new List<GameObject>();
     private Coroutine spawnCoroutine;
     
+    // 웨이브별 스폰 X 위치 계산 변수
+    private float spawnX = 5f;
+    private float spawnStep = 10f; // 웨이브마다 X 증가량
+    private bool spawnRight = true; // true: +방향, false: -방향
+
     void Start()
     {
         // 플레이어 찾기
@@ -53,6 +58,26 @@ public class EnemySpawner : MonoBehaviour
     {
         isSpawning = true;
         currentWave++;
+
+        // 웨이브별 스폰 X 위치 계산
+        if (spawnRight)
+        {
+            spawnX += spawnStep;
+            if (spawnX >= 175f)
+            {
+                spawnX = 175f;
+                spawnRight = false;
+            }
+        }
+        else
+        {
+            spawnX -= spawnStep;
+            if (spawnX <= 5f)
+            {
+                spawnX = 5f;
+                spawnRight = true;
+            }
+        }
         
         int enemiesToSpawn = Mathf.RoundToInt(enemiesPerWave * Mathf.Pow(waveMultiplier, currentWave - 1));
         // Debug.Log($"[EnemySpawner] Wave {currentWave} 시작! 적 {enemiesToSpawn}마리 스폰 예정");
@@ -125,21 +150,25 @@ public class EnemySpawner : MonoBehaviour
         // 랜덤 적 선택
         GameObject enemyPrefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Length)];
         
-        // 스폰 위치 결정
-        Vector3 spawnPosition = GetSpawnPosition();
+        // 웨이브 홀짝에 따라 방향/스폰 위치 결정
+        // bool leftToRight = (currentWave % 2 == 1); // 이 부분은 더 이상 사용되지 않음
+        // float startX = leftToRight ? 5f : 175f; // 이 부분은 더 이상 사용되지 않음
+        // float targetX = leftToRight ? 175f : 5f; // 이 부분은 더 이상 사용되지 않음
+        float y = 5f;
+        Vector3 spawnPosition = new Vector3(spawnX, y, 0f);
         
+        // EnemyMovePath 관련 코드 완전 제거
         // 적 생성
         GameObject enemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
-        
-        // Health 컴포넌트가 있으면 죽음 이벤트 연결
         Health enemyHealth = enemy.GetComponent<Health>();
         if (enemyHealth != null)
         {
+            float healthMultiplier = 1f + (currentWave - 1) * 0.2f;
+            enemyHealth.maxHealth = Mathf.RoundToInt(enemyHealth.maxHealth * healthMultiplier);
+            enemyHealth.currentHealth = enemyHealth.maxHealth;
             enemyHealth.OnDeath += () => OnEnemyDeath(enemy);
         }
-        
         activeEnemies.Add(enemy);
-        
         if (useWaveSystem)
             enemiesRemaining--;
         
