@@ -246,7 +246,7 @@ public class Weapon : MonoBehaviour
             }
             
             // 투사체 초기화 (관통, 폭발 등 특수 효과 포함)
-            projectile.Init(finalDirection.normalized, finalDamage, GetCurrentProjectileSpeed());
+            projectile.Init(finalDirection.normalized, finalDamage, GetCurrentProjectileSpeed(), weaponData);
             
             // 특수 효과 적용
             ApplySpecialEffects(projectile, isCritical);
@@ -289,7 +289,7 @@ public class Weapon : MonoBehaviour
                     finalDamage = Mathf.RoundToInt(finalDamage * totalCriticalMultiplier);
                 }
                 
-                projectile.Init(spreadDirection.normalized, finalDamage, GetCurrentProjectileSpeed());
+                projectile.Init(spreadDirection.normalized, finalDamage, GetCurrentProjectileSpeed(), weaponData);
                 ApplySpecialEffects(projectile, isCritical);
             }
         }

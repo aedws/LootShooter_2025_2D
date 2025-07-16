@@ -45,5 +45,5 @@ MonoBehaviour:
   pierceDamageReduction: 0.1
   hasTracerRounds: 0
   hasMuzzleFlash: 1
-  hasExplosiveKills: 0
-  explosionRadius: 2
+  hasExplosiveKills: 1
+  explosionRadius: 3

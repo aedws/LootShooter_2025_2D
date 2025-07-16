@@ -23,8 +23,11 @@ public class Projectile : MonoBehaviour
     
     [Header("폭발 시각 효과")]
     public GameObject explosionEffectPrefab; // 폭발 이펙트 프리팹
-    public Color explosionColor = new Color(1f, 0.5f, 0f, 1f); // 폭발 색상 (주황색)
-    public float explosionDuration = 0.5f; // 폭발 지속 시간
+    public Color explosionColor = new Color(1f, 0.6f, 0.1f, 1f); // 폭발 색상 (화려한 주황색)
+    public float explosionSize = 3.5f; // 폭발 이펙트 최대 크기
+    
+    // 폭발 이펙트 지속시간 (공통 적용)
+    private const float EXPLOSION_DURATION = 0.4f;
     
     private Vector2 moveDir;
     private bool isInitialized = false;
@@ -32,6 +35,9 @@ public class Projectile : MonoBehaviour
     // 시각적 효과용 컴포넌트들
     private TrailRenderer trailRenderer;
     private SpriteRenderer spriteRenderer;
+    
+    // 무기 데이터 참조
+    private WeaponData weaponData;
 
     void Awake()
     {
@@ -40,11 +46,12 @@ public class Projectile : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-    public void Init(Vector2 direction, int dmg, float projectileSpeed = -1f)
+    public void Init(Vector2 direction, int dmg, float projectileSpeed = -1f, WeaponData weapon = null)
     {
         moveDir = direction.normalized;
         damage = dmg;
         currentDamage = dmg; // 관통용 현재 데미지
+        weaponData = weapon; // 무기 데이터 저장
         
         // projectileSpeed가 지정되면 사용, 아니면 기본값 사용
         if (projectileSpeed > 0f)
@@ -107,7 +114,7 @@ public class Projectile : MonoBehaviour
         isExplosive = true;
         explosionRadius = radius;
         onExplosionCallback = explosionCallback;
-        // Debug.Log($"💥 [PROJECTILE] 폭발 효과 설정: 반경 {radius}");
+        Debug.Log($"💥 [PROJECTILE] 폭발 효과 설정: 반경 {radius}");
     }
 
     // 예광탄 효과 설정
@@ -341,8 +348,8 @@ public class Projectile : MonoBehaviour
             
             // Debug.Log($"⚔️ [PROJECTILE] 적 {enemy.enemyName}에게 {finalDamage} 데미지! {(isCritical ? "(크리티컬!)" : "")}");
             
-            // 폭발 효과 처리 (적 사망 시)
-            if (isExplosive && !enemy.IsAlive())
+            // 폭발 효과 처리 (적 피격 시)
+            if (isExplosive)
             {
                 TriggerExplosion(transform.position);
             }
@@ -376,7 +383,7 @@ public class Projectile : MonoBehaviour
     {
         if (!isExplosive || explosionRadius <= 0f) return;
         
-        // Debug.Log($"💥 [PROJECTILE] 폭발 발생! 위치: {explosionCenter}, 반경: {explosionRadius}");
+        Debug.Log($"💥 [PROJECTILE] 폭발 발생! 위치: {explosionCenter}, 반경: {explosionRadius}");
         
         // 폭발 시각 효과 생성
         CreateExplosionVisualEffect(explosionCenter);
@@ -394,21 +401,26 @@ public class Projectile : MonoBehaviour
             {
                 int explosionDamage = Mathf.RoundToInt(currentDamage * 0.5f); // 폭발 데미지는 50%
                 enemy.TakeDamage(explosionDamage);
-                // Debug.Log($"💥 [EXPLOSION] 폭발 데미지 {explosionDamage}를 {enemy.enemyName}에게!");
+                Debug.Log($"💥 [EXPLOSION] 폭발 데미지 {explosionDamage}를 {enemy.enemyName}에게!");
             }
         }
     }
     
     private void CreateExplosionVisualEffect(Vector3 position)
     {
+        Debug.Log($"💥 [EXPLOSION] 폭발 시각 효과 생성 시작: {position}");
+        
         // 프리팹이 있으면 프리팹 사용
         if (explosionEffectPrefab != null)
         {
+            Debug.Log($"💥 [EXPLOSION] 프리팹 사용");
             GameObject explosion = Instantiate(explosionEffectPrefab, position, Quaternion.identity);
-            Destroy(explosion, explosionDuration);
+            // 프리팹도 동일한 지속시간으로 제거
+            Destroy(explosion, EXPLOSION_DURATION);
         }
         else
         {
+            Debug.Log($"💥 [EXPLOSION] 동적 생성 사용");
             // 프리팹이 없으면 동적으로 생성
             CreateDynamicExplosionEffect(position);
         }
@@ -416,23 +428,39 @@ public class Projectile : MonoBehaviour
     
     private void CreateDynamicExplosionEffect(Vector3 position)
     {
+        Debug.Log($"💥 [EXPLOSION] 동적 폭발 효과 생성: {position}");
+        
         // 폭발 게임오브젝트 생성
         GameObject explosion = new GameObject("ExplosionEffect");
         explosion.transform.position = position;
         
+        // 카메라 앞쪽에 위치시켜 확실히 보이게 함
+        explosion.transform.position = new Vector3(position.x, position.y, -5f);
+        
         // 스프라이트 렌더러 추가
         SpriteRenderer spriteRenderer = explosion.AddComponent<SpriteRenderer>();
-        spriteRenderer.sprite = CreateExplosionSprite();
-        spriteRenderer.color = explosionColor;
-        spriteRenderer.sortingOrder = 10; // 다른 오브젝트 위에 표시
         
-        // 폭발 애니메이션 코루틴 시작
-        StartCoroutine(ExplosionAnimation(explosion, spriteRenderer));
+        // 화염 스프라이트 생성 (더 화려한 외곽선)
+        spriteRenderer.sprite = CreateFlameSprite();
+        
+        // WeaponData에서 폭발 색상과 크기 가져오기
+        Color finalExplosionColor = weaponData != null ? weaponData.explosionColor : explosionColor;
+        // 폭발 반경을 폭발 이펙트 크기로 사용
+        float finalExplosionSize = weaponData != null ? weaponData.explosionRadius : explosionSize;
+        
+        spriteRenderer.color = finalExplosionColor;
+        spriteRenderer.sortingOrder = 9999; // 매우 높은 순서로 설정
+        spriteRenderer.sortingLayerName = "UI"; // UI 레이어에 배치
+        
+        Debug.Log($"💥 [EXPLOSION] 화염 폭발 오브젝트 생성 완료: {explosion.name}, 위치: {explosion.transform.position}, 크기: {finalExplosionSize}");
+        
+        // 폭발 이펙트 자체에서 애니메이션 시작 (지속시간은 공통값 사용)
+        explosion.AddComponent<ExplosionEffect>().StartAnimation(finalExplosionColor, EXPLOSION_DURATION, finalExplosionSize);
     }
     
-    private Sprite CreateExplosionSprite()
+    private Sprite CreateCircleSprite()
     {
-        int size = 64;
+        int size = 256; // 256x256 해상도로 증가
         Texture2D texture = new Texture2D(size, size);
         Color[] pixels = new Color[size * size];
         
@@ -444,25 +472,27 @@ public class Projectile : MonoBehaviour
             for (int y = 0; y < size; y++)
             {
                 float distance = Vector2.Distance(new Vector2(x, y), center);
-                float alpha = 0f;
+                float normalizedDistance = distance / radius;
                 
-                if (distance <= radius)
+                if (normalizedDistance <= 1f)
                 {
-                    // 중심에서 멀어질수록 투명해짐
-                    alpha = 1f - (distance / radius);
+                    // 중심에서 멀어질수록 투명도 증가 (부드러운 가장자리)
+                    float alpha = 1f - normalizedDistance;
                     
-                    // 가장자리 부드럽게
-                    if (distance > radius - 4f)
-                    {
-                        alpha = Mathf.Lerp(1f, 0f, (distance - (radius - 4f)) / 4f);
-                    }
+                    // 중심부는 밝게, 가장자리는 어둡게
+                    float brightness = 1f - (normalizedDistance * 0.3f);
                     
-                    // 폭발 패턴 (불규칙한 모양)
-                    float noise = Mathf.PerlinNoise(x * 0.1f, y * 0.1f);
-                    alpha *= noise;
+                    // 약간의 노이즈 추가로 자연스러운 느낌
+                    float noise = Mathf.PerlinNoise(x * 0.1f, y * 0.1f) * 0.2f;
+                    brightness += noise;
+                    brightness = Mathf.Clamp01(brightness);
+                    
+                    pixels[y * size + x] = new Color(brightness, brightness, brightness, alpha);
                 }
-                
-                pixels[y * size + x] = new Color(1f, 1f, 1f, alpha);
+                else
+                {
+                    pixels[y * size + x] = Color.clear;
+                }
             }
         }
         
@@ -472,30 +502,73 @@ public class Projectile : MonoBehaviour
         return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
     }
     
-    private System.Collections.IEnumerator ExplosionAnimation(GameObject explosion, SpriteRenderer spriteRenderer)
+    private Sprite CreateFlameSprite()
     {
-        Vector3 originalScale = explosion.transform.localScale;
-        float timer = 0f;
+        int size = 256;
+        Texture2D texture = new Texture2D(size, size);
+        Color[] pixels = new Color[size * size];
         
-        while (timer < explosionDuration)
+        Vector2 center = new Vector2(size / 2f, size / 2f);
+        float radius = size / 2f;
+        
+        for (int x = 0; x < size; x++)
         {
-            float normalizedTime = timer / explosionDuration;
-            
-            // 스케일 효과 (점점 커짐)
-            float scale = Mathf.Lerp(0.1f, explosionRadius * 2f, normalizedTime);
-            explosion.transform.localScale = originalScale * scale;
-            
-            // 색상 변화 (점점 밝아졌다가 어두워짐)
-            Color currentColor = Color.Lerp(explosionColor, Color.white, Mathf.Sin(normalizedTime * Mathf.PI));
-            float alpha = Mathf.Lerp(1f, 0f, normalizedTime);
-            spriteRenderer.color = new Color(currentColor.r, currentColor.g, currentColor.b, alpha);
-            
-            timer += Time.deltaTime;
-            yield return null;
+            for (int y = 0; y < size; y++)
+            {
+                float distance = Vector2.Distance(new Vector2(x, y), center);
+                float normalizedDistance = distance / radius;
+                
+                if (normalizedDistance <= 1f)
+                {
+                    // 화염 효과: 중심부는 밝고, 가장자리는 어둡게
+                    float innerRadius = 0.3f; // 내부 밝은 영역
+                    float outerRadius = 0.8f; // 외부 어두운 영역
+                    
+                    float alpha = 0f;
+                    float brightness = 0f;
+                    
+                    if (normalizedDistance <= innerRadius)
+                    {
+                        // 중심부: 매우 밝고 선명
+                        alpha = 1f;
+                        brightness = 1f;
+                    }
+                    else if (normalizedDistance <= outerRadius)
+                    {
+                        // 중간 영역: 점진적으로 어두워짐
+                        float t = (normalizedDistance - innerRadius) / (outerRadius - innerRadius);
+                        alpha = 1f - t * 0.5f;
+                        brightness = 1f - t * 0.7f;
+                    }
+                    else
+                    {
+                        // 외곽 영역: 매우 어둡고 선명한 외곽선
+                        float t = (normalizedDistance - outerRadius) / (1f - outerRadius);
+                        alpha = 0.5f * (1f - t);
+                        brightness = 0.3f * (1f - t);
+                    }
+                    
+                    // 화염 노이즈 추가
+                    float flameNoise = Mathf.PerlinNoise(x * 0.05f, y * 0.05f) * 0.3f;
+                    brightness += flameNoise;
+                    brightness = Mathf.Clamp01(brightness);
+                    
+                    pixels[y * size + x] = new Color(brightness, brightness, brightness, alpha);
+                }
+                else
+                {
+                    pixels[y * size + x] = Color.clear;
+                }
+            }
         }
         
-        Destroy(explosion);
+        texture.SetPixels(pixels);
+        texture.Apply();
+        
+        return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
     }
+    
+
 
     private void DestroyProjectile()
     {
@@ -524,4 +597,16 @@ public class Projectile : MonoBehaviour
             Gizmos.DrawWireSphere(transform.position, explosionRadius);
         }
     }
+    
+    void OnDrawGizmos()
+    {
+        // 런타임에서도 폭발 반경 시각화 (디버그용)
+        if (isExplosive && explosionRadius > 0f)
+        {
+            Gizmos.color = new Color(1f, 0f, 0f, 0.3f);
+            Gizmos.DrawWireSphere(transform.position, explosionRadius);
+        }
+    }
+    
+
 } 

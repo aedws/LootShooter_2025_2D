@@ -440,7 +440,7 @@ public class GoogleSheetsManager : MonoBehaviour
             for (int i = 3; i < response.values.Count; i++)
             {
                 var row = response.values[i];
-                if (row.Count >= 33) // 모든 필드가 있는지 확인 (기본 필드 + SMG 대시 효과)
+                if (row.Count >= 33) // 모든 필드가 있는지 확인 (기본 필드 + 폭발 이펙트 + SMG 대시 효과)
                 {
                     WeaponData weapon = ScriptableObject.CreateInstance<WeaponData>();
                     
@@ -895,4 +895,4 @@ public class GoogleSheetsResponse
     public string range;
     public string majorDimension;
     public List<List<string>> values;
-} 
+}
