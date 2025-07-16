@@ -37,6 +37,7 @@ public class ItemTypeDropRate
     public float WeaponDropRate;
     public float ArmorDropRate;
     public float AccessoryDropRate;
+    public float ModuleDropRate;
 }
 
 [System.Serializable]

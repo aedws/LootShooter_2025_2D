@@ -366,17 +366,22 @@ public class GoogleSheetsManager : MonoBehaviour
             for (int i = 3; i < response.values.Count; i++)
             {
                 var row = response.values[i];
-                if (row.Count >= 4)
+                if (row.Count >= 5) // ModuleDropRate 추가로 최소 5개 컬럼 필요
                 {
                     ItemTypeDropRate dropRate = new ItemTypeDropRate
                     {
                         MonsterID = row[0],
                         WeaponDropRate = SafeParseFloat(row[1]),
                         ArmorDropRate = SafeParseFloat(row[2]),
-                        AccessoryDropRate = SafeParseFloat(row[3])
+                        AccessoryDropRate = SafeParseFloat(row[3]),
+                        ModuleDropRate = SafeParseFloat(row[4])
                     };
                     
                     dropTableData.ItemTypeDropRates.Add(dropRate);
+                }
+                else
+                {
+                    Debug.LogWarning($"[GoogleSheetsManager] ItemTypeDropRates 행 {i + 1}의 컬럼 수가 부족합니다. (필요: 5개 이상, 실제: {row.Count})");
                 }
             }
         }
