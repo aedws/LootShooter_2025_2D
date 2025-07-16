@@ -15,8 +15,10 @@ MonoBehaviour:
   weaponName: AR_1
   icon: {fileID: 21300000, guid: b7cad2917d053294aa83873fbd3d047a, type: 3}
   weaponType: 0
+  flavorText: "\uC774 \uBB34\uAE30\uC5D0 \uB300\uD55C \uC124\uBA85\uC774 \uC5EC\uAE30\uC5D0
+    \uD45C\uC2DC\uB429\uB2C8\uB2E4."
   fireRate: 0.1
-  damage: 10
+  damage: 30
   projectilePrefab: {fileID: 7743249404533171330, guid: c3e51900e9c29304cbda351dec9db181, type: 3}
   weaponPrefab: {fileID: 4222227150521754757, guid: 1ec5de235df409c4b85287e3bf8c022d, type: 3}
   projectileSpeed: 10
@@ -34,7 +36,13 @@ MonoBehaviour:
   maxWarmupFireRate: 0
   singleFireOnly: 0
   aimingRange: 15
+  isDualPistol: 0
+  dualPistolFireInterval: 0.1
+  dualPistolOffset: 0.3
+  dualPistolSpreadDifference: 2
   movementSpeedMultiplier: 0.85
+  smgDashSpeedBonus: 2
+  smgDashSpeedDuration: 3
   recoilForce: 1
   recoilDirection: {x: 0, y: 1}
   recoilDuration: 0.1
@@ -45,5 +53,10 @@ MonoBehaviour:
   pierceDamageReduction: 0.1
   hasTracerRounds: 0
   hasMuzzleFlash: 1
-  hasExplosiveKills: 1
-  explosionRadius: 3
+  hasExplosiveKills: 0
+  explosionRadius: 0
+  explosionEffectPrefab: {fileID: 0}
+  explosionColor: {r: 1, g: 0.5, b: 0, a: 1}
+  rarity: 1
+  maxChipsetCost: 25
+  equippedChipsets: 

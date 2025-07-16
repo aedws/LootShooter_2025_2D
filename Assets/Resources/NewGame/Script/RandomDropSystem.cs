@@ -489,16 +489,16 @@ public class RandomDropSystem : MonoBehaviour
         GameObject player = GameObject.FindWithTag("Player");
         if (player == null) return;
 
-        if (Input.GetKeyDown(KeyCode.F2))
-        {
-            CreateWeaponDrop(player.transform.position);
-            Debug.Log("[RandomDropSystem] F2: 무기 드롭 생성");
-        }
-        if (Input.GetKeyDown(KeyCode.F3))
-        {
-            CreateArmorDrop(player.transform.position);
-            Debug.Log("[RandomDropSystem] F3: 방어구 드롭 생성");
-        }
+        // if (Input.GetKeyDown(KeyCode.F2))
+        // {
+        //     CreateWeaponDrop(player.transform.position);
+        //     Debug.Log("[RandomDropSystem] F2: 무기 드롭 생성");
+        // }
+        // if (Input.GetKeyDown(KeyCode.F3))
+        // {
+        //     CreateArmorDrop(player.transform.position);
+        //     Debug.Log("[RandomDropSystem] F3: 방어구 드롭 생성");
+        // }
     }
 }
 

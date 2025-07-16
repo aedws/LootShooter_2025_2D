@@ -170,10 +170,10 @@ public class ChipsetManager : MonoBehaviour
     private void Update()
     {
         // F4키로 칩셋 소환
-        if (Input.GetKeyDown(KeyCode.F4))
-        {
-            SpawnRandomChipset();
-        }
+        // if (Input.GetKeyDown(KeyCode.F4))
+        // {
+        //     SpawnRandomChipset();
+        // }
     }
     
     private void OnDestroy()
