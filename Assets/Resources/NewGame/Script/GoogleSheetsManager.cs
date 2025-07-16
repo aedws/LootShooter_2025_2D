@@ -579,24 +579,22 @@ public class GoogleSheetsManager : MonoBehaviour
         weapon.icon = null;
 
 #if UNITY_EDITOR
-        // 무기 프리팹 자동 할당
-        string assetPath = $"Assets/NewGame/Prefab/Network/WeaponPickup_{weapon.weaponType}.prefab";
+        string assetPath = $"Assets/Resources/NewGame/Prefab/Network/WeaponPickup_{weapon.weaponType}.prefab";
         weapon.weaponPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
         if (weapon.weaponPrefab == null)
         {
             // 프리팹을 찾을 수 없는 경우 조용히 처리
         }
 
-        // 투사체 프리팹 자동 할당
-        string projectilePath = $"Assets/NewGame/Prefab/Network/Projectile_{weapon.weaponType}.prefab";
+        string projectilePath = $"Assets/Resources/NewGame/Prefab/Network/Projectile_{weapon.weaponType}.prefab";
         weapon.projectilePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(projectilePath);
         if (weapon.projectilePrefab == null)
         {
             // 프리팹을 찾을 수 없는 경우 조용히 처리
         }
 #else
-        weapon.weaponPrefab = null;
-        weapon.projectilePrefab = null;
+        weapon.weaponPrefab = Resources.Load<GameObject>($"NewGame/Prefab/Network/WeaponPickup_{weapon.weaponType}");
+        weapon.projectilePrefab = Resources.Load<GameObject>($"NewGame/Prefab/Network/Projectile_{weapon.weaponType}");
 #endif
     }
     

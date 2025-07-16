@@ -359,13 +359,12 @@ public class ItemDropManager : MonoBehaviour
                 if (weaponData.rarity.ToString() == rarity)
                 {
                     // Network 폴더의 무기 픽업 프리팹 사용
-                    string prefabPath = $"Assets/NewGame/Prefab/Network/WeaponPickup_{weaponData.weaponType}.prefab";
-                    
                     #if UNITY_EDITOR
+                    string prefabPath = $"Assets/Resources/NewGame/Prefab/Network/WeaponPickup_{weaponData.weaponType}.prefab";
                     GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                    #else
-                    GameObject prefab = Resources.Load<GameObject>(prefabPath);
-                    #endif
+#else
+                    GameObject prefab = Resources.Load<GameObject>($"NewGame/Prefab/Network/WeaponPickup_{weaponData.weaponType}");
+#endif
                     
                     if (prefab != null)
                     {
@@ -389,13 +388,12 @@ public class ItemDropManager : MonoBehaviour
                 if (armorData.rarity.ToString() == rarity)
                 {
                     // Network 폴더의 방어구 픽업 프리팹 사용
-                    string prefabPath = $"Assets/NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}.prefab";
-                    
                     #if UNITY_EDITOR
+                    string prefabPath = $"Assets/Resources/NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}.prefab";
                     GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                    #else
-                    GameObject prefab = Resources.Load<GameObject>(prefabPath);
-                    #endif
+#else
+                    GameObject prefab = Resources.Load<GameObject>($"NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}");
+#endif
                     
                     if (prefab != null)
                     {
@@ -420,13 +418,12 @@ public class ItemDropManager : MonoBehaviour
                     (armorData.armorType == ArmorType.Accessory || armorData.armorType == ArmorType.Shoulder))
                 {
                     // Network 폴더의 장신구 픽업 프리팹 사용
-                    string prefabPath = $"Assets/NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}.prefab";
-                    
                     #if UNITY_EDITOR
+                    string prefabPath = $"Assets/Resources/NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}.prefab";
                     GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                    #else
-                    GameObject prefab = Resources.Load<GameObject>(prefabPath);
-                    #endif
+#else
+                    GameObject prefab = Resources.Load<GameObject>($"NewGame/Prefab/Network/ArmorPickup_{armorData.armorType}");
+#endif
                     
                     if (prefab != null)
                     {
@@ -471,16 +468,16 @@ public class ItemDropManager : MonoBehaviour
                     {
                         var randomWeaponChipset = weaponChipsets[Random.Range(0, weaponChipsets.Count)];
                         selectedChipsetData = randomWeaponChipset;
-                        string prefabPath = $"Assets/NewGame/Prefab/ChipsetPickup.prefab";
+                        string prefabPath = $"Assets/Resources/NewGame/Prefab/ChipsetPickup.prefab";
                         
                         if (debugMode)
                             Debug.Log($"[ItemDropManager] 무기 칩셋 프리팹 경로: {prefabPath}");
                         
                         #if UNITY_EDITOR
                         GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                        #else
-                        GameObject prefab = Resources.Load<GameObject>(prefabPath);
-                        #endif
+#else
+                        GameObject prefab = Resources.Load<GameObject>("NewGame/Prefab/ChipsetPickup");
+#endif
                         
                         if (prefab != null)
                         {
@@ -513,16 +510,16 @@ public class ItemDropManager : MonoBehaviour
                     {
                         var randomArmorChipset = armorChipsets[Random.Range(0, armorChipsets.Count)];
                         selectedChipsetData = randomArmorChipset;
-                        string prefabPath = $"Assets/NewGame/Prefab/ChipsetPickup.prefab";
+                        string prefabPath = $"Assets/Resources/NewGame/Prefab/ChipsetPickup.prefab";
                         
                         if (debugMode)
                             Debug.Log($"[ItemDropManager] 방어구 칩셋 프리팹 경로: {prefabPath}");
                         
                         #if UNITY_EDITOR
                         GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                        #else
-                        GameObject prefab = Resources.Load<GameObject>(prefabPath);
-                        #endif
+#else
+                        GameObject prefab = Resources.Load<GameObject>("NewGame/Prefab/ChipsetPickup");
+#endif
                         
                         if (prefab != null)
                         {
@@ -555,16 +552,16 @@ public class ItemDropManager : MonoBehaviour
                     {
                         var randomPlayerChipset = playerChipsets[Random.Range(0, playerChipsets.Count)];
                         selectedChipsetData = randomPlayerChipset;
-                        string prefabPath = $"Assets/NewGame/Prefab/ChipsetPickup.prefab";
+                        string prefabPath = $"Assets/Resources/NewGame/Prefab/ChipsetPickup.prefab";
                         
                         if (debugMode)
                             Debug.Log($"[ItemDropManager] 플레이어 칩셋 프리팹 경로: {prefabPath}");
                         
                         #if UNITY_EDITOR
                         GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                        #else
-                        GameObject prefab = Resources.Load<GameObject>(prefabPath);
-                        #endif
+#else
+                        GameObject prefab = Resources.Load<GameObject>("NewGame/Prefab/ChipsetPickup");
+#endif
                         
                         if (prefab != null)
                         {
