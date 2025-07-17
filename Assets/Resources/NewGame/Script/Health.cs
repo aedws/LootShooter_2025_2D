@@ -106,8 +106,29 @@ public class Health : MonoBehaviour
     
     public void SetMaxHealth(int newMaxHealth)
     {
+        if (newMaxHealth <= 0) return;
+        
+        int oldMaxHealth = maxHealth;
         maxHealth = newMaxHealth;
-        currentHealth = maxHealth;
+        
+        // 방어구로 늘어난 절대 체력량을 유지하는 로직
+        if (newMaxHealth < oldMaxHealth)
+        {
+            // 최대 체력이 줄어드는 경우 (방어구 해제)
+            // 현재 체력이 새로운 최대 체력을 초과하지 않도록 조정
+            currentHealth = Mathf.Min(currentHealth, newMaxHealth);
+        }
+        else if (newMaxHealth > oldMaxHealth)
+        {
+            // 최대 체력이 늘어나는 경우 (방어구 장착)
+            // 늘어난 만큼 현재 체력도 증가 (절대 체력량 유지)
+            int healthIncrease = newMaxHealth - oldMaxHealth;
+            currentHealth += healthIncrease;
+        }
+        
+        // 최소 1의 체력은 보장
+        currentHealth = Mathf.Max(1, currentHealth);
+        
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
     }
     

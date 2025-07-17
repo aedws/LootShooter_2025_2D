@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using System;
+using System.Collections;
 
 /// <summary>
 /// 게임의 모든 데이터를 중앙에서 관리하는 Repository 클래스
@@ -34,6 +35,11 @@ public class GameDataRepository : MonoBehaviour
     [SerializeField] private bool loadDataOnStart = true;
     [SerializeField] private bool useLocalDataAsFallback = true;
 
+    [Header("자동 새로고침 설정")]
+    [SerializeField] private bool enableAutoRefresh = true;
+    [SerializeField] private float refreshInterval = 60f; // 60초마다 새로고침 (API 제한 고려)
+    [SerializeField] private bool showRefreshLogs = true;
+
     [Header("로컬 데이터 (폴백용)")]
     [SerializeField] private List<WeaponData> localWeaponData = new List<WeaponData>();
     [SerializeField] private List<ArmorData> localArmorData = new List<ArmorData>();
@@ -54,6 +60,11 @@ public class GameDataRepository : MonoBehaviour
     private bool _armorChipsetsLoaded = false;
     private bool _playerChipsetsLoaded = false;
 
+    // 자동 새로고침 관련
+    private Coroutine autoRefreshCoroutine;
+    private float lastRefreshTime = 0f;
+    private bool isRefreshing = false; // 중복 호출 방지
+
     // 이벤트
     public event Action OnAllDataLoaded;
     public event Action<List<WeaponData>> OnWeaponsUpdated;
@@ -63,6 +74,7 @@ public class GameDataRepository : MonoBehaviour
     public event Action<List<ArmorChipsetData>> OnArmorChipsetsUpdated;
     public event Action<List<PlayerChipsetData>> OnPlayerChipsetsUpdated;
     public event Action<string> OnDataLoadError;
+    public event Action OnDataRefreshed; // 새로 추가: 데이터 새로고침 완료 이벤트
 
     // 프로퍼티
     public List<WeaponData> Weapons => _weapons;
@@ -80,6 +92,11 @@ public class GameDataRepository : MonoBehaviour
     public bool IsPlayerChipsetsLoaded => _playerChipsetsLoaded;
     public bool IsAllDataLoaded => _weaponsLoaded && _armorsLoaded && _bossPatternsLoaded && 
                                    _weaponChipsetsLoaded && _armorChipsetsLoaded && _playerChipsetsLoaded;
+
+    // 자동 새로고침 관련 프로퍼티
+    public bool IsAutoRefreshEnabled => enableAutoRefresh;
+    public float RefreshInterval => refreshInterval;
+    public float TimeUntilNextRefresh => Mathf.Max(0f, refreshInterval - (Time.time - lastRefreshTime));
 
     private void Awake()
     {
@@ -108,6 +125,90 @@ public class GameDataRepository : MonoBehaviour
         {
             LoadAllData();
         }
+        
+        // 자동 새로고침 시작
+        if (enableAutoRefresh)
+        {
+            StartAutoRefresh();
+        }
+    }
+
+    /// <summary>
+    /// 자동 새로고침을 시작합니다.
+    /// </summary>
+    public void StartAutoRefresh()
+    {
+        if (autoRefreshCoroutine != null)
+        {
+            StopCoroutine(autoRefreshCoroutine);
+        }
+        
+        autoRefreshCoroutine = StartCoroutine(AutoRefreshCoroutine());
+        
+        if (showRefreshLogs)
+        {
+            Debug.Log($"[GameDataRepository] 자동 새로고침 시작 - {refreshInterval}초 간격");
+        }
+    }
+
+    /// <summary>
+    /// 자동 새로고침을 중지합니다.
+    /// </summary>
+    public void StopAutoRefresh()
+    {
+        if (autoRefreshCoroutine != null)
+        {
+            StopCoroutine(autoRefreshCoroutine);
+            autoRefreshCoroutine = null;
+            
+            if (showRefreshLogs)
+            {
+                Debug.Log("[GameDataRepository] 자동 새로고침 중지");
+            }
+        }
+    }
+
+    /// <summary>
+    /// 자동 새로고침 코루틴
+    /// </summary>
+    private IEnumerator AutoRefreshCoroutine()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(refreshInterval);
+            
+            // 중복 호출 방지
+            if (isRefreshing)
+            {
+                if (showRefreshLogs)
+                {
+                    Debug.Log("[GameDataRepository] 이전 새로고침이 진행 중이므로 건너뜀");
+                }
+                continue;
+            }
+            
+            if (showRefreshLogs)
+            {
+                Debug.Log($"[GameDataRepository] 자동 새로고침 실행 - {refreshInterval}초 경과");
+            }
+            
+            lastRefreshTime = Time.time;
+            LoadAllData();
+        }
+    }
+
+    /// <summary>
+    /// 수동으로 데이터를 새로고침합니다.
+    /// </summary>
+    public void RefreshData()
+    {
+        if (showRefreshLogs)
+        {
+            Debug.Log("[GameDataRepository] 수동 새로고침 실행");
+        }
+        
+        lastRefreshTime = Time.time;
+        LoadAllData();
     }
 
     /// <summary>
@@ -115,6 +216,18 @@ public class GameDataRepository : MonoBehaviour
     /// </summary>
     public void LoadAllData()
     {
+        // 중복 호출 방지
+        if (isRefreshing)
+        {
+            if (showRefreshLogs)
+            {
+                Debug.Log("[GameDataRepository] 이미 새로고침이 진행 중입니다.");
+            }
+            return;
+        }
+        
+        isRefreshing = true;
+        
         // 모든 데이터 로드 시작
         
         // Google Sheets에서 데이터 로드
@@ -276,6 +389,17 @@ public class GameDataRepository : MonoBehaviour
         {
             // 모든 데이터 로드 완료
             OnAllDataLoaded?.Invoke();
+            
+            // 자동 새로고침 완료 이벤트 발생
+            OnDataRefreshed?.Invoke();
+            
+            // 새로고침 상태 해제
+            isRefreshing = false;
+            
+            if (showRefreshLogs)
+            {
+                Debug.Log("[GameDataRepository] 모든 데이터 로드 완료 - 새로고침 완료");
+            }
         }
     }
 

@@ -77,15 +77,15 @@ public class ChipsetManager : MonoBehaviour
     private ArmorData currentArmor;
     
     // 플레이어 칩셋 ID 배열
-    private string[] playerChipsetIds = new string[0];
+    public string[] playerChipsetIds = new string[0];
     
     // 현재 선택된 탭
     private ChipsetTab currentTab = ChipsetTab.Weapon;
     
     // 칩셋 인벤토리 저장 데이터
-    private List<string> playerWeaponChipsetInventory = new List<string>();
-    private List<string> playerArmorChipsetInventory = new List<string>();
-    private List<string> playerPlayerChipsetInventory = new List<string>();
+    public List<string> playerWeaponChipsetInventory = new List<string>();
+    public List<string> playerArmorChipsetInventory = new List<string>();
+    public List<string> playerPlayerChipsetInventory = new List<string>();
     
     // 칩셋 탭 enum
     public enum ChipsetTab
@@ -145,6 +145,9 @@ public class ChipsetManager : MonoBehaviour
         // 탭 UI 업데이트
         UpdateCategoryUI();
         
+        // 🆕 칩셋 패널의 슬라이더들을 조작 불가능하게 설정
+        DisableChipsetSliders();
+        
         Debug.Log("[ChipsetManager] 시작 완료");
     }
     
@@ -161,6 +164,33 @@ public class ChipsetManager : MonoBehaviour
         
         if (playerChipsetTabButton != null)
             playerChipsetTabButton.onClick.AddListener(OnPlayerChipsetTabButtonClicked);
+    }
+
+    /// <summary>
+    /// 칩셋 패널의 슬라이더들을 조작 불가능하게 설정
+    /// </summary>
+    private void DisableChipsetSliders()
+    {
+        // 무기 칩셋 슬라이더 비활성화
+        if (weaponCostSlider != null)
+        {
+            weaponCostSlider.interactable = false;
+            Debug.Log("[ChipsetManager] 무기 칩셋 슬라이더 비활성화 완료");
+        }
+        
+        // 방어구 칩셋 슬라이더 비활성화
+        if (armorCostSlider != null)
+        {
+            armorCostSlider.interactable = false;
+            Debug.Log("[ChipsetManager] 방어구 칩셋 슬라이더 비활성화 완료");
+        }
+        
+        // 플레이어 칩셋 슬라이더 비활성화
+        if (playerCostSlider != null)
+        {
+            playerCostSlider.interactable = false;
+            Debug.Log("[ChipsetManager] 플레이어 칩셋 슬라이더 비활성화 완료");
+        }
     }
     
     // 칩셋 해제 옵션 토글 관련 메서드 제거 또는 주석 처리
@@ -1584,5 +1614,85 @@ public class ChipsetManager : MonoBehaviour
             }
         }
         return count;
+    }
+
+    // 🆕 GameSaveManager용 메서드들
+    
+    /// <summary>
+    /// 무기 칩셋 슬롯 배열 반환
+    /// </summary>
+    public ChipsetSlot[] GetWeaponSlots()
+    {
+        return weaponSlots;
+    }
+    
+    /// <summary>
+    /// 방어구 칩셋 슬롯 배열 반환
+    /// </summary>
+    public ChipsetSlot[] GetArmorSlots()
+    {
+        return armorSlots;
+    }
+    
+    /// <summary>
+    /// 플레이어 칩셋 슬롯 배열 반환
+    /// </summary>
+    public ChipsetSlot[] GetPlayerSlots()
+    {
+        return playerSlots;
+    }
+    
+    /// <summary>
+    /// 칩셋 인벤토리 데이터를 외부에서 설정 (GameSaveManager용)
+    /// </summary>
+    public void SetChipsetInventoryData(List<string> weaponChipsets, List<string> armorChipsets, List<string> playerChipsets)
+    {
+        playerWeaponChipsetInventory = new List<string>(weaponChipsets);
+        playerArmorChipsetInventory = new List<string>(armorChipsets);
+        playerPlayerChipsetInventory = new List<string>(playerChipsets);
+        
+        // 인벤토리 새로고침
+        LoadChipsetInventory();
+        UpdateChipsetInfo();
+    }
+    
+    /// <summary>
+    /// 플레이어 칩셋 ID 배열 설정 (GameSaveManager용)
+    /// </summary>
+    public void SetPlayerChipsetIds(string[] chipsetIds)
+    {
+        playerChipsetIds = chipsetIds;
+        
+        // 플레이어 슬롯에 적용
+        if (playerSlots != null)
+        {
+            // 기존 장착 해제
+            foreach (var slot in playerSlots)
+            {
+                if (slot != null && slot.IsEquipped())
+                {
+                    slot.UnequipChipset();
+                }
+            }
+            
+            // 새로운 칩셋 장착
+            for (int i = 0; i < chipsetIds.Length && i < playerSlots.Length; i++)
+            {
+                if (!string.IsNullOrEmpty(chipsetIds[i]))
+                {
+                    var chipset = GameDataRepository.Instance.GetPlayerChipsetById(chipsetIds[i]);
+                    if (chipset != null)
+                    {
+                        playerSlots[i].EquipChipset(chipset);
+                    }
+                }
+            }
+        }
+        
+        // 효과 업데이트
+        if (effectManager != null)
+        {
+            effectManager.UpdatePlayerEffects();
+        }
     }
 } 

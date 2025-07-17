@@ -588,26 +588,40 @@ public class ChipsetEffectManager : MonoBehaviour
     /// </summary>
     public string GetEffectsSummary()
     {
-        var summary = "=== 칩셋 효과 요약 ===\n";
+        string summary = "=== 칩셋 효과 요약 ===\n";
         
-        summary += "\n[무기 효과]\n";
+        // 무기 효과
+        summary += "무기 효과:\n";
         foreach (var effect in weaponEffects)
         {
-            summary += $"{effect.Key}: +{effect.Value:F2}\n";
+            summary += $"  {effect.Key}: {effect.Value}\n";
         }
         
-        summary += "\n[방어구 효과]\n";
+        // 방어구 효과
+        summary += "방어구 효과:\n";
         foreach (var effect in armorEffects)
         {
-            summary += $"{effect.Key}: +{effect.Value:F2}\n";
+            summary += $"  {effect.Key}: {effect.Value}\n";
         }
         
-        summary += "\n[플레이어 효과]\n";
+        // 플레이어 효과
+        summary += "플레이어 효과:\n";
         foreach (var effect in playerEffects)
         {
-            summary += $"{effect.Key}: +{effect.Value:F2}\n";
+            summary += $"  {effect.Key}: {effect.Value}\n";
         }
         
         return summary;
+    }
+
+    /// <summary>
+    /// 플레이어 칩셋 효과 업데이트 (GameSaveManager용)
+    /// </summary>
+    public void UpdatePlayerEffects()
+    {
+        if (chipsetManager != null)
+        {
+            CalculatePlayerEffects(chipsetManager.playerChipsetIds);
+        }
     }
 } 

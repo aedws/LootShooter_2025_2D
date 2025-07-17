@@ -373,6 +373,36 @@ public class ChipsetSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IP
     {
         return isEquipped;
     }
+
+    /// <summary>
+    /// 장착된 칩셋 반환 (GameSaveManager용)
+    /// </summary>
+    public object GetEquippedChipset()
+    {
+        if (weaponChipset != null) return weaponChipset;
+        if (armorChipset != null) return armorChipset;
+        if (playerChipset != null) return playerChipset;
+        return null;
+    }
+
+    /// <summary>
+    /// 칩셋 장착 (GameSaveManager용)
+    /// </summary>
+    public void EquipChipset(object chipset)
+    {
+        if (chipset is WeaponChipsetData weaponChipsetData)
+        {
+            EquipWeaponChipset(weaponChipsetData);
+        }
+        else if (chipset is ArmorChipsetData armorChipsetData)
+        {
+            EquipArmorChipset(armorChipsetData);
+        }
+        else if (chipset is PlayerChipsetData playerChipsetData)
+        {
+            EquipPlayerChipset(playerChipsetData);
+        }
+    }
     
     /// <summary>
     /// 코스트가 초과되었는지 확인
