@@ -50,8 +50,18 @@ public class NetworkArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
     private SpriteRenderer spriteRenderer;
     private bool isPickedUp = false;
     
-    void Start()
+    private Vector3 startPosition;
+    private float bobTime;
+    [SerializeField] private float rotationSpeed = 50f;
+    [SerializeField] private float bobSpeed = 2f;
+    [SerializeField] private float bobHeight = 0.5f;
+
+    private void Start()
     {
+        startPosition = transform.position;
+        bobTime = Random.Range(0f, 2f * Mathf.PI);
+        var rb = GetComponent<Rigidbody2D>();
+        if (rb != null) rb.gravityScale = 0f;
         // 컴포넌트 초기화
         audioSource = GetComponent<AudioSource>();
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -88,6 +98,37 @@ public class NetworkArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
         //     collider.isTrigger = true;
         //     collider.radius = pickupRange;
         // }
+    }
+
+    private void Update()
+    {
+        if (isPickedUp) return;
+        // 칩셋처럼 회전
+        transform.Rotate(0, rotationSpeed * Time.deltaTime, 0);
+        // 칩셋처럼 둥둥 떠다님
+        bobTime += bobSpeed * Time.deltaTime;
+        float newY = startPosition.y + Mathf.Sin(bobTime) * bobHeight;
+        transform.position = new Vector3(transform.position.x, newY, transform.position.z);
+        // 자동 픽업이 활성화되어 있다면 플레이어 감지
+        if (autoPickup)
+        {
+            CheckForPlayerPickup();
+        }
+        // E키 픽업이 활성화되어 있다면 E키 입력 감지
+        else
+        {
+            CheckForEKeyPickup();
+        }
+    }
+    
+    private void PickupArmor()
+    {
+        // 기존 OnPickup(player) 로직을 그대로 호출
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            OnPickup(player);
+        }
     }
     
     /// <summary>
@@ -421,20 +462,6 @@ public class NetworkArmorPickup : MonoBehaviour, IItemPickup, IArmorPickup
         
         // 폴백
         return armors[armors.Count - 1];
-    }
-    
-    void Update()
-    {
-        // 자동 픽업이 활성화되어 있다면 플레이어 감지
-        if (autoPickup && !isPickedUp)
-        {
-            CheckForPlayerPickup();
-        }
-        // E키 픽업이 활성화되어 있다면 E키 입력 감지
-        else if (!autoPickup && !isPickedUp)
-        {
-            CheckForEKeyPickup();
-        }
     }
     
     void CheckForEKeyPickup()

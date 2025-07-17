@@ -40,9 +40,20 @@ public class NetworkWeaponPickup : MonoBehaviour, IItemPickup
     // 픽업 상태
     private bool isPlayerInRange = false;
     private bool hasBeenPickedUp = false;
-    
-    void Start()
+
+    private Vector3 startPosition;
+    private float bobTime;
+    [SerializeField] private float rotationSpeed = 50f;
+    [SerializeField] private float bobSpeed = 2f;
+    [SerializeField] private float bobHeight = 0.5f;
+
+    private void Start()
     {
+        startPosition = transform.position;
+        bobTime = Random.Range(0f, 2f * Mathf.PI);
+        var rb = GetComponent<Rigidbody2D>();
+        if (rb != null) rb.gravityScale = 0f;
+        
         // 런타임에 랜덤 등급 설정
         if (useRandomTier)
         {
@@ -57,16 +68,18 @@ public class NetworkWeaponPickup : MonoBehaviour, IItemPickup
         // GoogleSheets에서 로드된 무기 데이터를 찾아서 설정
         SetupWeaponData();
     }
-    
+
     private void Update()
     {
-        // 이미 픽업되었다면 처리하지 않음
         if (hasBeenPickedUp) return;
-        
-        // 플레이어 접근 감지
+        // 칩셋처럼 회전
+        transform.Rotate(0, rotationSpeed * Time.deltaTime, 0);
+        // 칩셋처럼 둥둥 떠다님
+        bobTime += bobSpeed * Time.deltaTime;
+        float newY = startPosition.y + Mathf.Sin(bobTime) * bobHeight;
+        transform.position = new Vector3(transform.position.x, newY, transform.position.z);
+        // 기존 코드(플레이어 접근, E키 입력 등)
         CheckPlayerProximity();
-        
-        // E키 입력 감지
         if (isPlayerInRange && Input.GetKeyDown(KeyCode.E))
         {
             PickupWeapon();
