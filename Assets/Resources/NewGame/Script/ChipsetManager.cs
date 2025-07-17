@@ -1695,4 +1695,31 @@ public class ChipsetManager : MonoBehaviour
             effectManager.UpdatePlayerEffects();
         }
     }
+
+    /// <summary>
+    /// 칩셋 인벤토리 새로고침 (GameSaveManager용)
+    /// </summary>
+    public void RefreshChipsetInventory()
+    {
+        LoadChipsetInventory();
+    }
+
+    /// <summary>
+    /// 현재 무기 설정 (GameSaveManager용)
+    /// </summary>
+    public void SetCurrentWeaponForSave(WeaponData weapon)
+    {
+        currentWeapon = weapon;
+    }
+
+    /// <summary>
+    /// 현재 방어구 설정 (GameSaveManager용)
+    /// </summary>
+    public void SetCurrentArmorForSave(ArmorData armor)
+    {
+        currentArmor = armor;
+    }
+
+    public WeaponData GetCurrentWeapon() => currentWeapon;
+    public ArmorData GetCurrentArmor() => currentArmor;
 } 

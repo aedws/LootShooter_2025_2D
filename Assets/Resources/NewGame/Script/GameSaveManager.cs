@@ -384,16 +384,49 @@ public class GameSaveManager : MonoBehaviour
             var inventory = player.GetComponent<PlayerInventory>();
             if (inventory != null)
             {
-                // 무기 데이터
-                var weapons = inventory.GetWeapons();
-                inventoryData.weaponNames = weapons.Select(w => w.weaponName).ToList();
+                // 무기 데이터 수집 (인벤토리 + 슬롯에 장착된 무기들)
+                var allWeapons = new List<WeaponData>();
+                
+                // 1. 인벤토리에 있는 무기들
+                var inventoryWeapons = inventory.GetWeapons();
+                allWeapons.AddRange(inventoryWeapons);
+                
+                // 2. 슬롯에 장착된 무기들 (중복 제거)
+                var equippedWeapons = inventory.GetAllEquippedWeapons();
+                foreach (var equippedWeapon in equippedWeapons)
+                {
+                    if (equippedWeapon != null && !allWeapons.Contains(equippedWeapon))
+                    {
+                        allWeapons.Add(equippedWeapon);
+                    }
+                }
+                
+                inventoryData.weaponNames = allWeapons.Select(w => w.weaponName).ToList();
                 inventoryData.equippedWeaponName = inventory.GetEquippedWeapon()?.weaponName;
 
-                // 방어구 데이터
-                var armors = inventory.GetAllEquippedArmors();
-                inventoryData.armorNames = armors.Values.Where(a => a != null).Select(a => a.armorName).ToList();
-                inventoryData.equippedArmors = armors.Where(kv => kv.Value != null)
-                                                    .ToDictionary(kv => kv.Key.ToString(), kv => kv.Value.armorName);
+                // 방어구 데이터 수집 (인벤토리 + 장착된 방어구들)
+                var allArmors = new List<ArmorData>();
+                
+                // 1. 인벤토리에 있는 방어구들
+                if (inventory.inventoryManager != null)
+                {
+                    var inventoryArmors = inventory.inventoryManager.GetAllArmors();
+                    allArmors.AddRange(inventoryArmors);
+                }
+                
+                // 2. 장착된 방어구들 (중복 제거)
+                var equippedArmors = inventory.GetAllEquippedArmors();
+                foreach (var kv in equippedArmors)
+                {
+                    if (kv.Value != null && !allArmors.Contains(kv.Value))
+                    {
+                        allArmors.Add(kv.Value);
+                    }
+                }
+                
+                inventoryData.armorNames = allArmors.Select(a => a.armorName).ToList();
+                inventoryData.equippedArmors = equippedArmors.Where(kv => kv.Value != null)
+                                                            .ToDictionary(kv => kv.Key.ToString(), kv => kv.Value.armorName);
             }
         }
     }
@@ -420,48 +453,114 @@ public class GameSaveManager : MonoBehaviour
                 chipsetData.equippedChipsets["Player"] = new List<string>(chipsetManager.playerChipsetIds);
             }
             
-            // 무기/방어구 칩셋 장착 상태는 각 슬롯에서 수집
-            var weaponSlots = chipsetManager.GetWeaponSlots();
-            var armorSlots = chipsetManager.GetArmorSlots();
+            // 모든 무기의 칩셋 장착 상태 수집
+            CollectAllWeaponChipsets(chipsetData);
             
-            if (weaponSlots != null)
+            // 모든 방어구의 칩셋 장착 상태 수집
+            CollectAllArmorChipsets(chipsetData);
+        }
+    }
+
+    /// <summary>
+    /// 모든 무기의 칩셋 장착 상태 수집
+    /// </summary>
+    private void CollectAllWeaponChipsets(ChipsetSaveData chipsetData)
+    {
+        var player = FindFirstObjectByType<PlayerController>();
+        if (player == null) return;
+        
+        var inventory = player.GetComponent<PlayerInventory>();
+        if (inventory == null) return;
+        
+        // 모든 무기 수집 (인벤토리 + 슬롯에 장착된 무기들)
+        var allWeapons = new List<WeaponData>();
+        
+        // 1. 인벤토리에 있는 무기들
+        var inventoryWeapons = inventory.GetWeapons();
+        allWeapons.AddRange(inventoryWeapons);
+        
+        // 2. 슬롯에 장착된 무기들 (중복 제거)
+        var equippedWeapons = inventory.GetAllEquippedWeapons();
+        foreach (var equippedWeapon in equippedWeapons)
+        {
+            if (equippedWeapon != null && !allWeapons.Contains(equippedWeapon))
             {
-                var equippedWeaponChipsets = new List<string>();
-                foreach (var slot in weaponSlots)
-                {
-                    if (slot != null && slot.IsEquipped())
-                    {
-                        var chipset = slot.GetEquippedChipset();
-                        if (chipset != null)
-                        {
-                            string chipsetId = GetChipsetId(chipset);
-                            if (!string.IsNullOrEmpty(chipsetId))
-                                equippedWeaponChipsets.Add(chipsetId);
-                        }
-                    }
-                }
-                chipsetData.equippedChipsets["Weapon"] = equippedWeaponChipsets;
-            }
-            
-            if (armorSlots != null)
-            {
-                var equippedArmorChipsets = new List<string>();
-                foreach (var slot in armorSlots)
-                {
-                    if (slot != null && slot.IsEquipped())
-                    {
-                        var chipset = slot.GetEquippedChipset();
-                        if (chipset != null)
-                        {
-                            string chipsetId = GetChipsetId(chipset);
-                            if (!string.IsNullOrEmpty(chipsetId))
-                                equippedArmorChipsets.Add(chipsetId);
-                        }
-                    }
-                }
-                chipsetData.equippedChipsets["Armor"] = equippedArmorChipsets;
+                allWeapons.Add(equippedWeapon);
             }
         }
+        
+        var allWeaponChipsets = new List<string>();
+        
+        foreach (var weapon in allWeapons)
+        {
+            var equippedIds = weapon.GetEquippedChipsetIds();
+            if (equippedIds != null)
+            {
+                foreach (var chipsetId in equippedIds)
+                {
+                    if (!string.IsNullOrEmpty(chipsetId))
+                    {
+                        allWeaponChipsets.Add(chipsetId);
+                    }
+                }
+            }
+        }
+        
+        chipsetData.equippedChipsets["Weapon"] = allWeaponChipsets;
+    }
+
+    /// <summary>
+    /// 모든 방어구의 칩셋 장착 상태 수집
+    /// </summary>
+    private void CollectAllArmorChipsets(ChipsetSaveData chipsetData)
+    {
+        var player = FindFirstObjectByType<PlayerController>();
+        if (player == null) return;
+        
+        var inventory = player.GetComponent<PlayerInventory>();
+        if (inventory == null) return;
+        
+        // 모든 방어구 수집 (인벤토리 + 장착된 방어구들)
+        var allArmors = new List<ArmorData>();
+        
+        // 1. 인벤토리에 있는 방어구들
+        if (inventory.inventoryManager != null)
+        {
+            var inventoryArmors = inventory.inventoryManager.GetAllArmors();
+            allArmors.AddRange(inventoryArmors);
+        }
+        
+        // 2. 장착된 방어구들 (중복 제거)
+        var equippedArmors = inventory.GetAllEquippedArmors();
+        foreach (var kv in equippedArmors)
+        {
+            if (kv.Value != null && !allArmors.Contains(kv.Value))
+            {
+                allArmors.Add(kv.Value);
+            }
+        }
+        
+        var allArmorChipsets = new List<string>();
+        
+        foreach (var armor in allArmors)
+        {
+            if (armor != null)
+            {
+                var equippedIds = armor.GetEquippedChipsetIds();
+                if (equippedIds != null)
+                {
+                    foreach (var chipsetId in equippedIds)
+                    {
+                        if (!string.IsNullOrEmpty(chipsetId))
+                        {
+                            allArmorChipsets.Add(chipsetId);
+                        }
+                    }
+                }
+            }
+        }
+        
+        chipsetData.equippedChipsets["Armor"] = allArmorChipsets;
     }
 
     /// <summary>
@@ -541,7 +640,7 @@ public class GameSaveManager : MonoBehaviour
             var inventory = player.GetComponent<PlayerInventory>();
             if (inventory != null)
             {
-                // 무기 복원
+                // 무기 복원 (모든 무기를 인벤토리로)
                 inventory.ClearWeapons();
                 foreach (var weaponName in inventoryData.weaponNames)
                 {
@@ -550,14 +649,17 @@ public class GameSaveManager : MonoBehaviour
                         inventory.AddWeapon(weaponData);
                 }
                 
+                // 현재 활성 무기 설정
                 if (!string.IsNullOrEmpty(inventoryData.equippedWeaponName))
                 {
                     var weaponData = GameDataRepository.Instance.GetWeaponByName(inventoryData.equippedWeaponName);
                     if (weaponData != null)
+                    {
                         inventory.SetEquippedWeapon(weaponData);
+                    }
                 }
 
-                // 방어구 복원
+                // 방어구 복원 (모든 방어구를 인벤토리로)
                 inventory.ClearArmors();
                 foreach (var armorName in inventoryData.armorNames)
                 {
@@ -566,12 +668,77 @@ public class GameSaveManager : MonoBehaviour
                         inventory.AddArmor(armorData);
                 }
                 
+                // 장착된 방어구 정보 복원 (PlayerInventory의 equippedArmors 딕셔너리)
                 foreach (var kv in inventoryData.equippedArmors)
                 {
                     var armorData = GameDataRepository.Instance.GetArmorByName(kv.Value);
                     if (armorData != null)
+                    {
                         inventory.SetEquippedArmor(armorData, (ArmorType)System.Enum.Parse(typeof(ArmorType), kv.Key));
+                    }
                 }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 무기를 UI 슬롯에 적용
+    /// </summary>
+    private void ApplyWeaponToUISlots(WeaponData weaponData)
+    {
+        // WeaponSlotManager 찾기
+        var weaponSlotManager = FindFirstObjectByType<WeaponSlotManager>();
+        if (weaponSlotManager != null)
+        {
+            // 빈 슬롯 찾아서 장착
+            int emptySlot = weaponSlotManager.GetEmptySlotIndex();
+            if (emptySlot != -1)
+            {
+                weaponSlotManager.EquipWeaponToSlot(weaponData, emptySlot);
+            }
+        }
+        
+        // 개별 WeaponSlot들도 찾아서 업데이트
+        var weaponSlots = FindObjectsByType<WeaponSlot>(FindObjectsSortMode.None);
+        foreach (var slot in weaponSlots)
+        {
+            if (slot != null && slot.weaponData == null)
+            {
+                slot.EquipWeapon(weaponData);
+                break; // 첫 번째 빈 슬롯에만 장착
+            }
+        }
+    }
+
+    /// <summary>
+    /// 방어구를 UI 슬롯에 적용
+    /// </summary>
+    private void ApplyArmorToUISlots(ArmorData armorData, ArmorType armorType)
+    {
+        // ArmorSlotManager 찾기
+        var armorSlotManager = FindFirstObjectByType<ArmorSlotManager>();
+        if (armorSlotManager != null)
+        {
+            // 해당 타입의 슬롯에 장착 (슬롯 인덱스 찾기)
+            for (int i = 0; i < armorSlotManager.armorSlots.Length; i++)
+            {
+                if (armorSlotManager.armorSlots[i] != null && 
+                    armorSlotManager.armorSlots[i].allowedArmorType == armorType)
+                {
+                    armorSlotManager.EquipArmorToSlot(armorData, i);
+                    break;
+                }
+            }
+        }
+        
+        // 개별 ArmorSlot들도 찾아서 업데이트
+        var armorSlots = FindObjectsByType<ArmorSlot>(FindObjectsSortMode.None);
+        foreach (var slot in armorSlots)
+        {
+            if (slot != null && slot.allowedArmorType == armorType && slot.GetArmorData() == null)
+            {
+                slot.EquipArmor(armorData);
+                break; // 해당 타입의 첫 번째 빈 슬롯에만 장착
             }
         }
     }
@@ -600,7 +767,43 @@ public class GameSaveManager : MonoBehaviour
             // 무기/방어구 칩셋 장착 상태 적용
             ApplyWeaponChipsets(chipsetManager, chipsetData);
             ApplyArmorChipsets(chipsetManager, chipsetData);
+            
+            // ChipsetManager의 현재 무기/방어구 업데이트
+            UpdateChipsetManagerCurrentItems(chipsetManager);
         }
+    }
+
+    /// <summary>
+    /// ChipsetManager의 현재 무기/방어구 업데이트
+    /// </summary>
+    private void UpdateChipsetManagerCurrentItems(ChipsetManager chipsetManager)
+    {
+        var player = FindFirstObjectByType<PlayerController>();
+        if (player == null) return;
+        
+        var inventory = player.GetComponent<PlayerInventory>();
+        if (inventory == null) return;
+        
+        // 현재 장착된 무기 설정
+        var equippedWeapon = inventory.GetEquippedWeapon();
+        if (equippedWeapon != null)
+        {
+            chipsetManager.SetCurrentWeaponForSave(equippedWeapon);
+        }
+        
+        // 현재 장착된 방어구들 설정
+        var equippedArmors = inventory.GetAllEquippedArmors();
+        foreach (var kv in equippedArmors)
+        {
+            if (kv.Value != null)
+            {
+                chipsetManager.SetCurrentArmorForSave(kv.Value);
+                break; // 첫 번째 방어구만 설정 (ChipsetManager가 단일 방어구만 지원하는 경우)
+            }
+        }
+        
+        // ChipsetManager UI 새로고침
+        chipsetManager.RefreshChipsetInventory();
     }
 
     /// <summary>
@@ -610,29 +813,84 @@ public class GameSaveManager : MonoBehaviour
     {
         if (!chipsetData.equippedChipsets.ContainsKey("Weapon")) return;
         
-        var weaponSlots = chipsetManager.GetWeaponSlots();
-        if (weaponSlots == null) return;
+        var player = FindFirstObjectByType<PlayerController>();
+        if (player == null) return;
         
-        var equippedWeaponChipsets = chipsetData.equippedChipsets["Weapon"];
+        var inventory = player.GetComponent<PlayerInventory>();
+        if (inventory == null) return;
         
-        // 기존 장착 해제
-        foreach (var slot in weaponSlots)
+        // 모든 무기 수집 (인벤토리 + 슬롯에 장착된 무기들)
+        var allWeapons = new List<WeaponData>();
+        
+        // 1. 인벤토리에 있는 무기들
+        var inventoryWeapons = inventory.GetWeapons();
+        allWeapons.AddRange(inventoryWeapons);
+        
+        // 2. 슬롯에 장착된 무기들 (중복 제거)
+        var equippedWeapons = inventory.GetAllEquippedWeapons();
+        foreach (var equippedWeapon in equippedWeapons)
         {
-            if (slot != null && slot.IsEquipped())
+            if (equippedWeapon != null && !allWeapons.Contains(equippedWeapon))
             {
-                slot.UnequipChipset();
+                allWeapons.Add(equippedWeapon);
             }
         }
         
-        // 새로운 칩셋 장착
-        for (int i = 0; i < equippedWeaponChipsets.Count && i < weaponSlots.Length; i++)
+        var equippedWeaponChipsets = chipsetData.equippedChipsets["Weapon"];
+        
+        // 모든 무기에 칩셋 적용
+        foreach (var weapon in allWeapons)
         {
-            if (!string.IsNullOrEmpty(equippedWeaponChipsets[i]))
+            var equippedIds = weapon.GetEquippedChipsetIds();
+            if (equippedIds != null)
             {
-                var chipset = GameDataRepository.Instance.GetWeaponChipsetById(equippedWeaponChipsets[i]);
-                if (chipset != null)
+                // 기존 칩셋 제거
+                for (int i = 0; i < equippedIds.Length; i++)
                 {
-                    weaponSlots[i].EquipChipset(chipset);
+                    equippedIds[i] = null;
+                }
+                
+                // 새로운 칩셋 적용 (무기별로 적절히 분배)
+                int chipsetIndex = 0;
+                for (int i = 0; i < equippedIds.Length && chipsetIndex < equippedWeaponChipsets.Count; i++)
+                {
+                    equippedIds[i] = equippedWeaponChipsets[chipsetIndex];
+                    chipsetIndex++;
+                }
+                
+                weapon.SetEquippedChipsetIds(equippedIds);
+            }
+        }
+        
+        // 현재 선택된 무기의 슬롯 UI 업데이트
+        var weaponSlots = chipsetManager.GetWeaponSlots();
+        var currentWeapon = chipsetManager.GetCurrentWeapon();
+        if (weaponSlots != null && currentWeapon != null)
+        {
+            var currentWeaponIds = currentWeapon.GetEquippedChipsetIds();
+            
+            // 기존 장착 해제
+            foreach (var slot in weaponSlots)
+            {
+                if (slot != null && slot.IsEquipped())
+                {
+                    slot.UnequipChipset();
+                }
+            }
+            
+            // 현재 무기의 칩셋을 슬롯에 장착
+            if (currentWeaponIds != null)
+            {
+                for (int i = 0; i < currentWeaponIds.Length && i < weaponSlots.Length; i++)
+                {
+                    if (!string.IsNullOrEmpty(currentWeaponIds[i]))
+                    {
+                        var chipset = GameDataRepository.Instance.GetWeaponChipsetById(currentWeaponIds[i]);
+                        if (chipset != null)
+                        {
+                            weaponSlots[i].EquipChipset(chipset);
+                        }
+                    }
                 }
             }
         }
@@ -645,29 +903,90 @@ public class GameSaveManager : MonoBehaviour
     {
         if (!chipsetData.equippedChipsets.ContainsKey("Armor")) return;
         
-        var armorSlots = chipsetManager.GetArmorSlots();
-        if (armorSlots == null) return;
+        var player = FindFirstObjectByType<PlayerController>();
+        if (player == null) return;
         
-        var equippedArmorChipsets = chipsetData.equippedChipsets["Armor"];
+        var inventory = player.GetComponent<PlayerInventory>();
+        if (inventory == null) return;
         
-        // 기존 장착 해제
-        foreach (var slot in armorSlots)
+        // 모든 방어구 수집 (인벤토리 + 장착된 방어구들)
+        var allArmors = new List<ArmorData>();
+        
+        // 1. 인벤토리에 있는 방어구들
+        if (inventory.inventoryManager != null)
         {
-            if (slot != null && slot.IsEquipped())
+            var inventoryArmors = inventory.inventoryManager.GetAllArmors();
+            allArmors.AddRange(inventoryArmors);
+        }
+        
+        // 2. 장착된 방어구들 (중복 제거)
+        var equippedArmors = inventory.GetAllEquippedArmors();
+        foreach (var kv in equippedArmors)
+        {
+            if (kv.Value != null && !allArmors.Contains(kv.Value))
             {
-                slot.UnequipChipset();
+                allArmors.Add(kv.Value);
             }
         }
         
-        // 새로운 칩셋 장착
-        for (int i = 0; i < equippedArmorChipsets.Count && i < armorSlots.Length; i++)
+        var equippedArmorChipsets = chipsetData.equippedChipsets["Armor"];
+        
+        // 모든 방어구에 칩셋 적용
+        foreach (var armor in allArmors)
         {
-            if (!string.IsNullOrEmpty(equippedArmorChipsets[i]))
+            if (armor != null)
             {
-                var chipset = GameDataRepository.Instance.GetArmorChipsetById(equippedArmorChipsets[i]);
-                if (chipset != null)
+                var equippedIds = armor.GetEquippedChipsetIds();
+                if (equippedIds != null)
                 {
-                    armorSlots[i].EquipChipset(chipset);
+                    // 기존 칩셋 제거
+                    for (int i = 0; i < equippedIds.Length; i++)
+                    {
+                        equippedIds[i] = null;
+                    }
+                    
+                    // 새로운 칩셋 적용 (방어구별로 적절히 분배)
+                    int chipsetIndex = 0;
+                    for (int i = 0; i < equippedIds.Length && chipsetIndex < equippedArmorChipsets.Count; i++)
+                    {
+                        equippedIds[i] = equippedArmorChipsets[chipsetIndex];
+                        chipsetIndex++;
+                    }
+                    
+                    armor.SetEquippedChipsetIds(equippedIds);
+                }
+            }
+        }
+        
+        // 현재 선택된 방어구의 슬롯 UI 업데이트
+        var armorSlots = chipsetManager.GetArmorSlots();
+        var currentArmor = chipsetManager.GetCurrentArmor();
+        if (armorSlots != null && currentArmor != null)
+        {
+            var currentArmorIds = currentArmor.GetEquippedChipsetIds();
+            
+            // 기존 장착 해제
+            foreach (var slot in armorSlots)
+            {
+                if (slot != null && slot.IsEquipped())
+                {
+                    slot.UnequipChipset();
+                }
+            }
+            
+            // 현재 방어구의 칩셋을 슬롯에 장착
+            if (currentArmorIds != null)
+            {
+                for (int i = 0; i < currentArmorIds.Length && i < armorSlots.Length; i++)
+                {
+                    if (!string.IsNullOrEmpty(currentArmorIds[i]))
+                    {
+                        var chipset = GameDataRepository.Instance.GetArmorChipsetById(currentArmorIds[i]);
+                        if (chipset != null)
+                        {
+                            armorSlots[i].EquipChipset(chipset);
+                        }
+                    }
                 }
             }
         }

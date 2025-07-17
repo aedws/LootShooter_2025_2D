@@ -71,18 +71,18 @@ public class ChipsetPickup : MonoBehaviour
     {
         // 이미 픽업되었다면 처리하지 않음
         if (hasBeenPickedUp) return;
-        
+
         // 회전 애니메이션
         transform.Rotate(0, rotationSpeed * Time.deltaTime, 0);
-        
+
         // 위아래 움직임 애니메이션
         bobTime += bobSpeed * Time.deltaTime;
         float newY = startPosition.y + Mathf.Sin(bobTime) * bobHeight;
         transform.position = new Vector3(transform.position.x, newY, transform.position.z);
-        
+
         // 플레이어 접근 감지
         CheckPlayerProximity();
-        
+
         // E키 입력 감지
         if (isPlayerInRange && Input.GetKeyDown(KeyCode.E))
         {
@@ -126,8 +126,6 @@ public class ChipsetPickup : MonoBehaviour
             float distance = Vector3.Distance(transform.position, player.transform.position);
             bool wasInRange = isPlayerInRange;
             isPlayerInRange = distance <= pickupRange;
-            
-            // 범위 진입/탈출 시 UI 업데이트
             if (wasInRange != isPlayerInRange)
             {
                 UpdatePickupPrompt();
@@ -152,33 +150,22 @@ public class ChipsetPickup : MonoBehaviour
     private void PickupChipset()
     {
         if (hasBeenPickedUp) return;
-        
         var chipsetManager = FindAnyObjectByType<ChipsetManager>();
-        if (chipsetManager != null)
+        if (chipsetManager == null) return;
+        var chipset = GetCurrentChipset();
+        if (chipset == null) return;
+        hasBeenPickedUp = true;
+        chipsetManager.AddChipsetToInventory(chipset);
+        OnChipsetPickedUp?.Invoke(chipset);
+        if (pickupEffect != null)
         {
-            hasBeenPickedUp = true;
-            
-            // 칩셋을 인벤토리에 추가
-            chipsetManager.AddChipsetToInventory(GetCurrentChipset());
-            
-            // 이벤트 발생
-            OnChipsetPickedUp?.Invoke(GetCurrentChipset());
-            
-            // 픽업 효과 생성
-            if (pickupEffect != null)
-            {
-                Instantiate(pickupEffect, transform.position, Quaternion.identity);
-            }
-            
-            // 픽업 프롬프트 숨기기
-            if (pickupPrompt != null)
-            {
-                pickupPrompt.SetActive(false);
-            }
-            
-            // 오브젝트 제거
-            Destroy(gameObject);
+            Instantiate(pickupEffect, transform.position, Quaternion.identity);
         }
+        if (pickupPrompt != null)
+        {
+            pickupPrompt.SetActive(false);
+        }
+        Destroy(gameObject);
     }
     
     /// <summary>

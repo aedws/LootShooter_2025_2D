@@ -41,6 +41,8 @@ public class ArmorChipsetData
     {
         switch (rarity)
         {
+            case ChipsetRarity.Primordial:
+                return new Color(0f, 1f, 1f); // 청록색
             case ChipsetRarity.Common:
                 return Color.white;
             case ChipsetRarity.Rare:
@@ -61,6 +63,8 @@ public class ArmorChipsetData
     {
         switch (rarity)
         {
+            case ChipsetRarity.Primordial:
+                return "태초";
             case ChipsetRarity.Common:
                 return "일반";
             case ChipsetRarity.Rare:

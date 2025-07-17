@@ -323,7 +323,7 @@ public class WeaponSlotManager : MonoBehaviour
 
         return true;
     }
-
+    
     public bool UnequipWeaponFromSlot(int slotIndex)
     {
         if (slotIndex < 0 || slotIndex >= weaponSlots.Length)

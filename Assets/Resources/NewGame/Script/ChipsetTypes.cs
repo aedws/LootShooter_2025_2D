@@ -7,6 +7,7 @@ using System;
 [Serializable]
 public enum ChipsetRarity
 {
+    Primordial, // 태초(청록)
     Common,     // 일반
     Rare,       // 희귀
     Epic,       // 영웅

@@ -504,6 +504,18 @@ public class ChipsetSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IP
     // 드래그 앤 드롭 이벤트
     public void OnDrop(PointerEventData eventData)
     {
+        // 무기 칩셋 슬롯인데 무기가 없으면 드롭 불가
+        if (ownerType == ChipsetOwnerType.Weapon && (parentSlotUI == null || parentSlotUI.currentWeapon == null))
+        {
+            Debug.LogWarning("[ChipsetSlot] 무기가 없으므로 칩셋을 장착할 수 없습니다!");
+            return;
+        }
+        // 방어구 칩셋 슬롯인데 방어구가 없으면 드롭 불가
+        if (ownerType == ChipsetOwnerType.Armor && (parentSlotUI == null || parentSlotUI.currentArmor == null))
+        {
+            Debug.LogWarning("[ChipsetSlot] 방어구가 없으므로 칩셋을 장착할 수 없습니다!");
+            return;
+        }
         // 1. 인벤토리 슬롯에서 드래그된 칩셋 처리
         if (InventorySlot.CurrentlyDraggedChipset != null)
         {

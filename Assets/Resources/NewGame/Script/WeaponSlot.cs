@@ -473,6 +473,12 @@ public class WeaponSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPo
         UpdateVisuals();
     }
     
+    // 🆕 무기가 장착되어 있는지 확인하는 메서드
+    public bool IsEquipped()
+    {
+        return weaponData != null;
+    }
+    
     void UpdateVisuals()
     {
         // 🧪 컴포넌트 상태 진단 (필요시에만)
